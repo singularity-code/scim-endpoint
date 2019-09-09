@@ -1,0 +1,238 @@
+{
+	"variables": [],
+	"info": {
+		"name": "scim",
+		"_postman_id": "d54abaf7-a82f-61c5-adbc-99b7a1f6b15b",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "user create",
+			"request": {
+				"url": "http://localhost:9029/scim/v2/Users",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"description": "",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"schemas\":[\"urn:ietf:params:scim:schemas:core:2.0:User\"],\n\t\"name\":{\n\t\t\"familyName\":\"van der beken\",\n\t\t\"givenName\":\"wouter\"\n\t},\n\t\"userName\":\"vanderbw\",\n\t\"password\":\"chamgeit\",\n\t\"externalId\" : \"vanderbekenw\",\n\t\"emails\":[\n\t\t{\n\t\t\t\"value\":\"wouter@mogo.be\",\n\t\t\t\"type\":\"other\"\n\t\t}\n\t]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "group create",
+			"request": {
+				"url": "http://localhost:9029/scim/v2/Groups",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"description": "",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"schemas\": [\"urn:ietf:params:scim:schemas:core:2.0:Group\"],\n  \"displayName\": \"Scim Implementators\",\n  \"members\":[\n    {\n      \"value\": \"570f6a4c-e2b7-4618-83c6-59a4e65fc1cd\",\n      \"$ref\": \"http://localhost:9029/scim/v2/Users/570f6a4c-e2b7-4618-83c6-59a4e65fc1cd\",\n      \"display\": \"Wouter Van der Beken\"\n    }\n  ]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "user get",
+			"request": {
+				"url": "http://localhost:9029/scim/v2/Users/570f6a4c-e2b7-4618-83c6-59a4e65fc1cd",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "user delete",
+			"request": {
+				"url": "http://localhost:9029/scim/v2/Users/b04f30f0-a045-4d4a-90af-fc0e15ccf2ed",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "group get",
+			"request": {
+				"url": "http://localhost:9029/scim/v2/Groups/bfd8c9a3-2c97-487a-ba32-b3857aed2b8d",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "group delete",
+			"request": {
+				"url": "http://localhost:9029/scim/v2/Groups/bfd8c9a3-2c97-487a-ba32-b3857aed2b8d",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Discovery : ServiceProviderConfig",
+			"request": {
+				"url": "http://localhost:9029/scim/v2/ServiceProviderConfig",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Discovery : ResourceTypes",
+			"request": {
+				"url": "http://localhost:9029/scim/v2/ResourceTypes",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Discovery : Schemas",
+			"request": {
+				"url": "http://localhost:9029/scim/v2/Schemas",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE log4j:configuration SYSTEM 
+      "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd">
+<Configuration status="warn" name="mogo-scim-server" packages="">
+  <Appenders>
+  	<RollingFile name="RollingFile" fileName="mogo-scim-server.log"
+                 filePattern="mogo-scim-server-%d{MM-dd-yyyy}-%i.log.gz">
+      <PatternLayout>
+        <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+      </PatternLayout>
+      <Policies>
+        <TimeBasedTriggeringPolicy />
+        <SizeBasedTriggeringPolicy size="50 MB"/>
+      </Policies>
+      <DefaultRolloverStrategy max="10"/>
+    </RollingFile>
+  </Appenders>
+  <Loggers>
+    <Root level="info">
+      <AppenderRef ref="RollingFile"/>
+    </Root>
+    <Logger name="org.apache.http" level="info" additivity="false">
+         <AppenderRef ref="RollingFile" />
+    </Logger>
+    <Logger name="be.mogo" level="info" additivity="false">
+         <AppenderRef ref="RollingFile" />
+    </Logger>
+    <!--  spring -->
+    <Logger name="org.springframework" level="error" additivity="false">
+         <AppenderRef ref="RollingFile" />
+    </Logger>
+    <Logger name="org.springframework.scheduling" level="error" additivity="false">
+         <AppenderRef ref="RollingFile" />
+    </Logger>
+    <Logger name="org.springframework.web.client" level="error" additivity="false">
+         <AppenderRef ref="RollingFile" />
+    </Logger>
+    <Logger name="org.springframework.boot" level="error" additivity="false">
+         <AppenderRef ref="RollingFile" />
+    </Logger>
+    <Logger name="org.springframework.beans" level="error" additivity="false">
+         <AppenderRef ref="RollingFile" />
+    </Logger>
+    <Logger name="org.springframework.data" level="error" additivity="false">
+         <AppenderRef ref="RollingFile" />
+    </Logger>
+  </Loggers>
+</Configuration>
