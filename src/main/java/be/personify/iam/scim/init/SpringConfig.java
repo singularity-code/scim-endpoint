@@ -13,22 +13,13 @@ import be.personify.iam.scim.util.BasicAuthenticationFilter;
 @EnableAsync
 public class SpringConfig{
 
-    
-
 	
 	@Bean
 	public FilterRegistrationBean<BasicAuthenticationFilter> authenticationFilters(){
-	    FilterRegistrationBean<BasicAuthenticationFilter> registrationBean 
-	      = new FilterRegistrationBean<>();
-	         
+	    FilterRegistrationBean<BasicAuthenticationFilter> registrationBean = new FilterRegistrationBean<>();     
 	    registrationBean.setFilter(new BasicAuthenticationFilter());
-	    registrationBean.addUrlPatterns("/scim/v2/Users/*");
-	    registrationBean.addUrlPatterns("/scim/v2/Groups/*");
-	         
 	    return registrationBean;    
 	}
     
     
-    
-
 }

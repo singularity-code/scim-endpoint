@@ -1,9 +1,9 @@
 <!DOCTYPE log4j:configuration SYSTEM 
       "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd">
-<Configuration status="warn" name="mogo-scim-server" packages="">
+<Configuration status="warn" name="personify-scim-server" packages="">
   <Appenders>
-  	<RollingFile name="RollingFile" fileName="mogo-scim-server.log"
-                 filePattern="mogo-scim-server-%d{MM-dd-yyyy}-%i.log.gz">
+  	<RollingFile name="RollingFile" fileName="personify-scim-server.log"
+                 filePattern="personify-scim-server-%d{MM-dd-yyyy}-%i.log.gz">
       <PatternLayout>
         <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
       </PatternLayout>
@@ -21,7 +21,7 @@
     <Logger name="org.apache.http" level="info" additivity="false">
          <AppenderRef ref="RollingFile" />
     </Logger>
-    <Logger name="be.mogo" level="info" additivity="false">
+    <Logger name="be.personify.iam" level="info" additivity="false">
          <AppenderRef ref="RollingFile" />
     </Logger>
     <!--  spring -->

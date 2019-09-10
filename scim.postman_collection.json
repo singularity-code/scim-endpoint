@@ -10,18 +10,26 @@
 		{
 			"name": "user create",
 			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "scim-user",
+						"password": "changeit",
+						"saveHelperData": true,
+						"showPassword": false
+					}
+				},
 				"url": "http://localhost:9029/scim/v2/Users",
 				"method": "POST",
 				"header": [
 					{
-						"key": "Authorization",
-						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
-						"description": "",
-						"disabled": true
-					},
-					{
 						"key": "Content-Type",
 						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
 						"description": ""
 					}
 				],
@@ -36,14 +44,22 @@
 		{
 			"name": "user update",
 			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "scim-user",
+						"password": "changeit",
+						"saveHelperData": true,
+						"showPassword": false
+					}
+				},
 				"url": "http://localhost:9029/scim/v2/Users/44487996-465d-4aa9-8c30-2a088a84efbc",
 				"method": "PUT",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
-						"description": "",
-						"disabled": true
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
+						"description": ""
 					},
 					{
 						"key": "Content-Type",
@@ -53,7 +69,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"schemas\": [\n        \"urn:ietf:params:scim:schemas:core:2.0:User\"\n    ],\n    \"name\": {\n        \"familyName\": \"van der beken\",\n        \"givenName\": \"vindula\"\n    },\n    \"userName\": \"vindula\",\n    \"password\": \"vindula\",\n    \"externalId\": \"josdenos\",\n    \"emails\": [\n        {\n            \"value\": \"vindula@work.com\",\n            \"type\": \"work\"\n        }\n    ],\n    \"id\": \"44487996-465d-4aa9-8c30-2a088a84efbc\",\n    \"meta\": {\n        \"created\": \"2019-09-07T01:56:55.377Z\",\n        \"location\": \"http://localhost:9029/scim/v2/Users/44487996-465d-4aa9-8c30-2a088a84efbc\",\n        \"lastModified\": \"2019-09-07T01:56:55.377Z\",\n        \"version\": \"1567814215377\",\n        \"resourceType\": \"User\"\n    }\n}"
+					"raw": "{\n    \"schemas\": [\n        \"urn:ietf:params:scim:schemas:core:2.0:User\"\n    ],\n    \"name\": {\n        \"familyName\": \"van der beken\",\n        \"givenName\": \"wouter\"\n    },\n    \"userName\": \"vindula\",\n    \"password\": \"vindula\",\n    \"externalId\": \"josdenos\",\n    \"emails\": [\n        {\n            \"value\": \"vindula@work.com\",\n            \"type\": \"work\"\n        }\n    ],\n    \"id\": \"44487996-465d-4aa9-8c30-2a088a84efbc\",\n    \"meta\": {\n        \"created\": \"2019-09-07T01:56:55.377Z\",\n        \"location\": \"http://localhost:9029/scim/v2/Users/44487996-465d-4aa9-8c30-2a088a84efbc\",\n        \"lastModified\": \"2019-09-07T01:56:55.377Z\",\n        \"version\": \"1567814215377\",\n        \"resourceType\": \"User\"\n    }\n}"
 				},
 				"description": "create a user according to the scim schema"
 			},
@@ -62,14 +78,22 @@
 		{
 			"name": "group create",
 			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "scim-user",
+						"password": "changeit",
+						"saveHelperData": true,
+						"showPassword": false
+					}
+				},
 				"url": "http://localhost:9029/scim/v2/Groups",
 				"method": "POST",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
-						"description": "",
-						"disabled": true
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
+						"description": ""
 					},
 					{
 						"key": "Content-Type",
@@ -81,19 +105,28 @@
 					"mode": "raw",
 					"raw": "{\n  \"schemas\": [\"urn:ietf:params:scim:schemas:core:2.0:Group\"],\n  \"displayName\": \"Scim Implementators\",\n  \"members\":[\n    {\n      \"value\": \"570f6a4c-e2b7-4618-83c6-59a4e65fc1cd\",\n      \"$ref\": \"http://localhost:9029/scim/v2/Users/570f6a4c-e2b7-4618-83c6-59a4e65fc1cd\",\n      \"type\": \"User\"\n    }\n  ]\n}"
 				},
-				"description": ""
+				"description": null
 			},
 			"response": []
 		},
 		{
 			"name": "user get",
 			"request": {
-				"url": "http://localhost:9029/scim/v2/Users/570f6a4c-e2b7-4618-83c6-59a4e65fc1cd",
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "scim-user",
+						"password": "changeit",
+						"saveHelperData": true,
+						"showPassword": false
+					}
+				},
+				"url": "http://localhost:9029/scim/v2/Users/44487996-465d-4aa9-8c30-2a088a84efbc",
 				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
 						"description": ""
 					},
 					{
@@ -113,6 +146,15 @@
 		{
 			"name": "user search",
 			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "scim-user",
+						"password": "changeit",
+						"saveHelperData": true,
+						"showPassword": false
+					}
+				},
 				"url": {
 					"raw": "http://localhost:9029/scim/v2/Users?startIndex=1&count=10",
 					"protocol": "http",
@@ -145,7 +187,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
 						"description": ""
 					},
 					{
@@ -165,12 +207,21 @@
 		{
 			"name": "user delete",
 			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "scim-user",
+						"password": "changeit",
+						"saveHelperData": true,
+						"showPassword": false
+					}
+				},
 				"url": "http://localhost:9029/scim/v2/Users/b04f30f0-a045-4d4a-90af-fc0e15ccf2ed",
 				"method": "DELETE",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
 						"description": ""
 					},
 					{
@@ -190,12 +241,21 @@
 		{
 			"name": "group get",
 			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "scim-user",
+						"password": "changeit",
+						"saveHelperData": true,
+						"showPassword": false
+					}
+				},
 				"url": "http://localhost:9029/scim/v2/Groups/bfd8c9a3-2c97-487a-ba32-b3857aed2b8d",
 				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
 						"description": ""
 					},
 					{
@@ -215,12 +275,21 @@
 		{
 			"name": "group delete",
 			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "scim-user",
+						"password": "changeit",
+						"saveHelperData": true,
+						"showPassword": false
+					}
+				},
 				"url": "http://localhost:9029/scim/v2/Groups/bfd8c9a3-2c97-487a-ba32-b3857aed2b8d",
 				"method": "DELETE",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
 						"description": ""
 					},
 					{
@@ -240,17 +309,26 @@
 		{
 			"name": "Discovery : ServiceProviderConfig",
 			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "scim-user",
+						"password": "changeit",
+						"saveHelperData": true,
+						"showPassword": false
+					}
+				},
 				"url": "http://localhost:9029/scim/v2/ServiceProviderConfig",
 				"method": "GET",
 				"header": [
 					{
-						"key": "Authorization",
-						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"key": "Content-Type",
+						"value": "application/json",
 						"description": ""
 					},
 					{
-						"key": "Content-Type",
-						"value": "application/json",
+						"key": "Authorization",
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
 						"description": ""
 					}
 				],
@@ -265,12 +343,21 @@
 		{
 			"name": "Discovery : ResourceTypes",
 			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "scim-user",
+						"password": "changeit",
+						"saveHelperData": true,
+						"showPassword": false
+					}
+				},
 				"url": "http://localhost:9029/scim/v2/ResourceTypes",
 				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
 						"description": ""
 					},
 					{
@@ -290,12 +377,21 @@
 		{
 			"name": "Discovery : Schemas",
 			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "scim-user",
+						"password": "changeit",
+						"saveHelperData": true,
+						"showPassword": false
+					}
+				},
 				"url": "http://localhost:9029/scim/v2/Schemas",
 				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
 						"description": ""
 					},
 					{

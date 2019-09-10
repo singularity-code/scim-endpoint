@@ -43,7 +43,13 @@ public class UserMapping extends Mapping {
 	private StorageImplementationFactory storageImplementationFactory;
 	
 	
-	
+	/**
+	 * POST a user
+	 * @param user
+	 * @param request
+	 * @param response
+	 * @return
+	 */
 	@PostMapping(path="/scim/v2/Users", produces = "application/scim+json")
 	public ResponseEntity<Map<String, Object>> post(@RequestBody Map<String,Object> user, HttpServletRequest request, HttpServletResponse response ) {
 		long start = System.currentTimeMillis();
@@ -83,6 +89,14 @@ public class UserMapping extends Mapping {
 	
 	
 	
+	/**
+	 * PUT a user
+	 * @param id
+	 * @param user
+	 * @param request
+	 * @param response
+	 * @return
+	 */
 	@PutMapping(path="/scim/v2/Users/{id}", produces = "application/scim+json")
 	public ResponseEntity<Map<String, Object>> put(@PathVariable String id , @RequestBody Map<String,Object> user, HttpServletRequest request, HttpServletResponse response ) {
 		long start = System.currentTimeMillis();
@@ -135,7 +149,13 @@ public class UserMapping extends Mapping {
 
 	
 
-
+	/**
+	 * GET a user
+	 * @param id
+	 * @param request
+	 * @param response
+	 * @return
+	 */
 	@GetMapping(path="/scim/v2/Users/{id}", produces = "application/scim+json")
 	public ResponseEntity<Map<String,Object>> get(@PathVariable String id , HttpServletRequest request, HttpServletResponse response ) {
 		
@@ -158,7 +178,14 @@ public class UserMapping extends Mapping {
 	}
 	
 	
-	
+	/**
+	 * SEARCH users
+	 * @param startIndex
+	 * @param count
+	 * @param request
+	 * @param response
+	 * @return
+	 */
 	@GetMapping(path="/scim/v2/Users", produces = "application/scim+json")
 	public ResponseEntity<Map<String,Object>> search(
 			@RequestParam(required = false, name = "startIndex", defaultValue = "1") Integer startIndex, 
@@ -176,16 +203,12 @@ public class UserMapping extends Mapping {
 		responseObject.put("startIndex", startIndex);
 		responseObject.put("itemsPerPage", count);
 		
-//		if ( startIndex < m.size() +1 ) {
-//			
-//			m.subList(startIndex, toIndex)
-//		}
+		List<Map<String,Object>> sublist = m.subList(startIndex -1, count);
 		
 		responseObject.put("totalResults", m.size());
-		responseObject.put("Resources", m);
+		responseObject.put("Resources", sublist);
 		
 		result = new ResponseEntity<Map<String,Object>>(responseObject, HttpStatus.OK);
-		//response.addHeader(Constants.HEADER_LOCATION, UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString());
 		
 		logger.info("users fetched in {} ms", ( System.currentTimeMillis() -start));
 		

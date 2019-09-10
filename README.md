@@ -4,20 +4,19 @@ Spring Boot SCIM server implementation with pluggable persistence layer
 
 ## intro
 
-for testing clients, this basic server implementation can be used.
-with a little bit of tuning and extra development, it can become production ready.
+basic server implementation.
 
-currently implemented :
+**currently implemented :**
 
 - create, get, put, delete, search
 - discovery
 - basic authentication
 - schema validation
+- paging
 
-on the list :
+**on the list :**
 
 - bulk
-- filtering
 - paging
 
 
@@ -30,7 +29,8 @@ For spinning up a scim server from the [downloaded binary](https://bitbucket.org
 
 > java -jar personify-scim-server-1.0.0-SNAPSHOT.jar
 
-After cloning the project, you can build the application from source.
+When you have cloned the project, you can build the binary from source.
+
 Requirements to build are installation of a Java JDK 1.8+ and Maven.
 
 For running the maven project :
@@ -38,9 +38,12 @@ For running the maven project :
 > mvn spring-boot:run
 
 
-
-
-
-use the integrated postman collection to test.
+use the integrated [postman collection](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json) to test.
 
 a storage implementation is included, tune or implement other storages
+
+
+## configuration
+
+pimp the application.properties file included
+
