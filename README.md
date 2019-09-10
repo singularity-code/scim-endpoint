@@ -26,7 +26,7 @@ on the list :
 
 You can either choose to download the binaries or clone the project.
 
-For running the <a href="https://bitbucket.org/wouter29/personify-scim-server/downloads/">downloaded artefact</a> : 
+For spinning up a scim server from the [downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/) : 
 
 > java -jar personify-scim-server-1.0.0-SNAPSHOT.jar
 

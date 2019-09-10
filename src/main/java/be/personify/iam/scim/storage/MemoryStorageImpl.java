@@ -24,7 +24,7 @@ public class MemoryStorageImpl implements Storage {
 	
 	private static final Logger logger = LogManager.getLogger(MemoryStorageImpl.class);
 
-	private Map<String,Map<String,Object>> storage = new HashMap<String,Map<String,Object>>();
+	private Map<String,Map<String,Object>> storage = null;
 	
 	
 	
@@ -85,7 +85,11 @@ public class MemoryStorageImpl implements Storage {
 			} 
 			catch (IOException e) {
 				logger.error("can not read file {}", f.getAbsolutePath(), e);
+				storage = null;
 			}
+		}
+		else {
+			storage = new HashMap<String, Map<String,Object>>();
 		}
 	}
 
@@ -100,7 +104,9 @@ public class MemoryStorageImpl implements Storage {
 			logger.debug("saving to file {}", f.getAbsolutePath());
 			try {
 				long start = System.currentTimeMillis();
-				Constants.objectMapper.writeValue(f, storage);
+				synchronized (storage) {
+					Constants.objectMapper.writeValue(f, storage);
+				}
 				logger.debug("{} saved in {} ms", f.getAbsolutePath(), ( System.currentTimeMillis() - start));
 			} 
 			catch (IOException e) {
