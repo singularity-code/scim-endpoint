@@ -32,7 +32,6 @@ public class BasicAuthenticationFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		
-		logger.info("filtering {}", ((HttpServletRequest)request).getRequestURL());
 		HttpServletRequest req = (HttpServletRequest) request;
 		String header = req.getHeader(HttpHeaders.AUTHORIZATION);
 		boolean filtered = false;

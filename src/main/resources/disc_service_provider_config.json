@@ -3,36 +3,27 @@
       ["urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig"],
     "documentationUri": "https://scim.personify.be/public/index.html",
     "patch": {
-      "supported":true
+      "supported":false
     },
     "bulk": {
-      "supported":true,
+      "supported":false,
       "maxOperations":1000,
       "maxPayloadSize":1048576
     },
     "filter": {
-      "supported":true,
+      "supported":false,
       "maxResults": 200
     },
     "changePassword": {
       "supported":true
     },
     "sort": {
-      "supported":true
+      "supported":false
     },
     "etag": {
       "supported":true
     },
     "authenticationSchemes": [
-      {
-        "name": "OAuth Bearer Token",
-        "description":
-          "Authentication scheme using the OAuth Bearer Token Standard",
-        "specUri": "http://www.rfc-editor.org/info/rfc6750",
-        "documentationUri": "https://scim.personify.be/public/oauth.html",
-        "type": "oauthbearertoken",
-        "primary": true
-      },
       {
         "name": "HTTP Basic",
         "description":
