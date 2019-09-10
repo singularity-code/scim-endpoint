@@ -94,18 +94,17 @@ public class MemoryStorageImpl implements Storage {
 	public void flush() {
 		Boolean flush = Boolean.valueOf(PropertyFactory.getInstance().getProperty("scim.storage.memory.flushToFile"));
 		if ( flush ) {
-			logger.info("flushing");
+			logger.debug("flushing");
 			
 			File f = new File(Constants.tempDir,"scim.dump");
-			logger.info("saving to file {}", f.getAbsolutePath());
+			logger.debug("saving to file {}", f.getAbsolutePath());
 			try {
 				long start = System.currentTimeMillis();
 				Constants.objectMapper.writeValue(f, storage);
-				logger.info("{} saved in {} ms", f.getAbsolutePath(), ( System.currentTimeMillis() - start));
+				logger.debug("{} saved in {} ms", f.getAbsolutePath(), ( System.currentTimeMillis() - start));
 			} 
 			catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("can not flush", e);
 			}
 		}
 		else {

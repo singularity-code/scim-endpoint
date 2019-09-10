@@ -44,7 +44,6 @@ public class SchemaReader {
 	private void read() throws Exception {
 		JsonNode root = Constants.objectMapper.readTree(SchemaReader.class.getResourceAsStream("/disc_schemas.json"));
 		if ( root.isArray() ) {
-			logger.info("it's an array");
 			Iterator<JsonNode> iterator = root.elements();
 			Schema schema = null;
 			while ( iterator.hasNext() ) {

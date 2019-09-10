@@ -1,8 +1,12 @@
 package be.personify.iam.scim.init;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import be.personify.iam.scim.util.BasicAuthenticationFilter;
 
 @Configuration
 @EnableScheduling
@@ -10,11 +14,19 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class SpringConfig{
 
     
-    
-//    @Bean
-//    public PingScheduler pingScheduler() {
-//    	return new PingScheduler();
-//    }
+
+	
+	@Bean
+	public FilterRegistrationBean<BasicAuthenticationFilter> authenticationFilters(){
+	    FilterRegistrationBean<BasicAuthenticationFilter> registrationBean 
+	      = new FilterRegistrationBean<>();
+	         
+	    registrationBean.setFilter(new BasicAuthenticationFilter());
+	    registrationBean.addUrlPatterns("/scim/v2/Users/*");
+	    registrationBean.addUrlPatterns("/scim/v2/Groups/*");
+	         
+	    return registrationBean;    
+	}
     
     
     
