@@ -9,9 +9,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import be.mogo.iam.scim.schema.SchemaException;
-import be.mogo.iam.scim.schema.SchemaReader;
-import be.mogo.iam.scim.util.Constants;
+import be.personify.iam.scim.schema.SchemaException;
+import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.util.Constants;
 
 public class SchemaTest {
 	

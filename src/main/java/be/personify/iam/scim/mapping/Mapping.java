@@ -1,4 +1,4 @@
-package be.mogo.iam.scim.mapping;
+package be.personify.iam.scim.mapping;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import be.mogo.iam.scim.util.Constants;
+import be.personify.iam.scim.util.Constants;
 
 /**
  * Mappings

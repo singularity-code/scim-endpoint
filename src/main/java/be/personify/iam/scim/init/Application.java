@@ -1,4 +1,4 @@
-package  be.mogo.iam.scim.init;
+package  be.personify.iam.scim.init;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -12,7 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @SpringBootApplication
-@ComponentScan( basePackages = { "be.mogo"} )
+@ComponentScan( basePackages = { "be.personify.iam"} )
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class Application {
 	

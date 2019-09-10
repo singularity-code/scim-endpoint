@@ -1,4 +1,4 @@
-package be.mogo.iam.scim.util;
+package be.personify.iam.scim.util;
 
 import java.io.FileInputStream;
 import java.util.Properties;

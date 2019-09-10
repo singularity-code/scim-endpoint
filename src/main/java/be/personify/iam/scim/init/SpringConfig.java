@@ -1,4 +1,4 @@
-package be.mogo.iam.scim.init;
+package be.personify.iam.scim.init;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;

@@ -1,4 +1,4 @@
-package be.mogo.iam.scim.schema;
+package be.personify.iam.scim.schema;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import be.mogo.iam.scim.util.Constants;
+import be.personify.iam.scim.util.Constants;
 
 public class SchemaReader {
 	

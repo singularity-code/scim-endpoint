@@ -1,4 +1,4 @@
-package be.mogo.iam.scim.storage;
+package be.personify.iam.scim.storage;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,8 +12,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 
-import be.mogo.iam.scim.util.Constants;
-import be.mogo.iam.scim.util.PropertyFactory;
+import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.PropertyFactory;
 
 /**
  * Sample storage implementation that stores data into a volatile memory store

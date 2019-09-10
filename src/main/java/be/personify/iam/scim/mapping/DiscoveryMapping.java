@@ -1,4 +1,4 @@
-package be.mogo.iam.scim.mapping;
+package be.personify.iam.scim.mapping;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import be.mogo.iam.scim.util.Constants;
+import be.personify.iam.scim.util.Constants;
 
 /**
  * Discovery mappings

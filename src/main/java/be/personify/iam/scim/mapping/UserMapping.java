@@ -1,4 +1,4 @@
-package be.mogo.iam.scim.mapping;
+package be.personify.iam.scim.mapping;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -25,10 +25,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import be.mogo.iam.scim.schema.SchemaException;
-import be.mogo.iam.scim.schema.SchemaReader;
-import be.mogo.iam.scim.storage.StorageImplementationFactory;
-import be.mogo.iam.scim.util.Constants;
+import be.personify.iam.scim.schema.SchemaException;
+import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.storage.StorageImplementationFactory;
+import be.personify.iam.scim.util.Constants;
 
 /**
  * User mappings

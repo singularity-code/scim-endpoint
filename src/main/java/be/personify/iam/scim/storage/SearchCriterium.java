@@ -1,4 +1,4 @@
-package be.mogo.iam.scim.storage;
+package be.personify.iam.scim.storage;
 
 import java.io.Serializable;
 

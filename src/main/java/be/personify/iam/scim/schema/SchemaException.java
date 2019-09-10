@@ -1,4 +1,4 @@
-package be.mogo.iam.scim.schema;
+package be.personify.iam.scim.schema;
 
 public class SchemaException extends Exception {
 
