@@ -18,7 +18,7 @@ public class StorageImplementationFactory {
 	public Storage getStorageImplementation() {
 		if ( storage == null ) {
 			try {
-				Class c = Class.forName(storageImplementation);
+				Class<?> c = Class.forName(storageImplementation);
 				storage = (Storage)c.newInstance();
 				storage.initialize();
 			}
