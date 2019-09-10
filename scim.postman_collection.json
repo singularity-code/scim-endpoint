@@ -3,7 +3,7 @@
 	"info": {
 		"name": "scim",
 		"_postman_id": "d54abaf7-a82f-61c5-adbc-99b7a1f6b15b",
-		"description": "",
+		"description": "core scim implementation postman calls",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
 	"item": [
@@ -29,7 +29,33 @@
 					"mode": "raw",
 					"raw": "{\n\t\"schemas\":[\"urn:ietf:params:scim:schemas:core:2.0:User\"],\n\t\"name\":{\n\t\t\"familyName\":\"van der beken\",\n\t\t\"givenName\":\"wouter\"\n\t},\n\t\"userName\":\"vanderbw\",\n\t\"password\":\"chamgeit\",\n\t\"externalId\" : \"vanderbekenw\",\n\t\"emails\":[\n\t\t{\n\t\t\t\"value\":\"wouter@mogo.be\",\n\t\t\t\"type\":\"other\"\n\t\t}\n\t]\n}"
 				},
-				"description": ""
+				"description": "create a user according to the scim schema"
+			},
+			"response": []
+		},
+		{
+			"name": "user update",
+			"request": {
+				"url": "http://localhost:9029/scim/v2/Users/44487996-465d-4aa9-8c30-2a088a84efbc",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"description": "",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"schemas\": [\n        \"urn:ietf:params:scim:schemas:core:2.0:User\"\n    ],\n    \"name\": {\n        \"familyName\": \"van der beken\",\n        \"givenName\": \"vindula\"\n    },\n    \"userName\": \"vindula\",\n    \"password\": \"vindula\",\n    \"externalId\": \"josdenos\",\n    \"emails\": [\n        {\n            \"value\": \"vindula@work.com\",\n            \"type\": \"work\"\n        }\n    ],\n    \"id\": \"44487996-465d-4aa9-8c30-2a088a84efbc\",\n    \"meta\": {\n        \"created\": \"2019-09-07T01:56:55.377Z\",\n        \"location\": \"http://localhost:9029/scim/v2/Users/44487996-465d-4aa9-8c30-2a088a84efbc\",\n        \"lastModified\": \"2019-09-07T01:56:55.377Z\",\n        \"version\": \"1567814215377\",\n        \"resourceType\": \"User\"\n    }\n}"
+				},
+				"description": "create a user according to the scim schema"
 			},
 			"response": []
 		},
@@ -53,7 +79,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"schemas\": [\"urn:ietf:params:scim:schemas:core:2.0:Group\"],\n  \"displayName\": \"Scim Implementators\",\n  \"members\":[\n    {\n      \"value\": \"570f6a4c-e2b7-4618-83c6-59a4e65fc1cd\",\n      \"$ref\": \"http://localhost:9029/scim/v2/Users/570f6a4c-e2b7-4618-83c6-59a4e65fc1cd\",\n      \"display\": \"Wouter Van der Beken\"\n    }\n  ]\n}"
+					"raw": "{\n  \"schemas\": [\"urn:ietf:params:scim:schemas:core:2.0:Group\"],\n  \"displayName\": \"Scim Implementators\",\n  \"members\":[\n    {\n      \"value\": \"570f6a4c-e2b7-4618-83c6-59a4e65fc1cd\",\n      \"$ref\": \"http://localhost:9029/scim/v2/Users/570f6a4c-e2b7-4618-83c6-59a4e65fc1cd\",\n      \"type\": \"User\"\n    }\n  ]\n}"
 				},
 				"description": ""
 			},
@@ -63,6 +89,58 @@
 			"name": "user get",
 			"request": {
 				"url": "http://localhost:9029/scim/v2/Users/570f6a4c-e2b7-4618-83c6-59a4e65fc1cd",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZXhhbXBsZS1jbGllbnQ6c2VjcmV0",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "user search",
+			"request": {
+				"url": {
+					"raw": "http://localhost:9029/scim/v2/Users?startIndex=1&count=10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9029",
+					"path": [
+						"scim",
+						"v2",
+						"Users"
+					],
+					"query": [
+						{
+							"key": "startIndex",
+							"value": "1",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "count",
+							"value": "10",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
 				"method": "GET",
 				"header": [
 					{
