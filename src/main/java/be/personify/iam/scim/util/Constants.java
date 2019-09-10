@@ -38,6 +38,8 @@ public class Constants {
 	
 	public static final String HEADER_LOCATION = "Location";
 	
+	public static final String tempDir = System.getProperty("java.io.tmpdir");
+	
 	
 
 }

@@ -74,8 +74,7 @@ public class MemoryStorageImpl implements Storage {
 	
 	@Override
 	public void initialize() {
-		String tempDir = System.getProperty("java.io.tmpdir");
-		File f = new File(tempDir,"scim.dump");
+		File f = new File(Constants.tempDir,"scim.dump");
 		logger.info("checking for file {}", f.getAbsolutePath());
 		if ( f.exists()) {
 			logger.info("{} exists, trying to read", f.getAbsolutePath());
@@ -96,8 +95,8 @@ public class MemoryStorageImpl implements Storage {
 		Boolean flush = Boolean.valueOf(PropertyFactory.getInstance().getProperty("scim.storage.memory.flushToFile"));
 		if ( flush ) {
 			logger.info("flushing");
-			String tempDir = System.getProperty("java.io.tmpdir");
-			File f = new File(tempDir,"scim.dump");
+			
+			File f = new File(Constants.tempDir,"scim.dump");
 			logger.info("saving to file {}", f.getAbsolutePath());
 			try {
 				long start = System.currentTimeMillis();
