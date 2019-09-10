@@ -1,6 +1,6 @@
 package be.personify.iam.scim.util;
 
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class PropertyFactory {
@@ -25,10 +25,9 @@ public class PropertyFactory {
 	
 
 	private void initialize() throws Exception {
-		String rootPath = Thread.currentThread().getContextClassLoader().getResource(Constants.EMPTY).getPath();
-		String appConfigPath = rootPath + "application.properties";
+		InputStream is = PropertyFactory.class.getResourceAsStream("/application.properties");
 		properties = new Properties();
-		properties.load(new FileInputStream(appConfigPath));
+		properties.load(is);
 	}
 	
 	
