@@ -28,6 +28,8 @@ public class BasicAuthenticationFilter implements Filter {
 	private static final String BASIC = "Basic";
 	
 	private List<String> basicAuthCredentials = null;
+	
+	private Object lock = new Object();
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -67,12 +69,14 @@ public class BasicAuthenticationFilter implements Filter {
 		if ( basicAuthCredentials == null ) {
 			logger.info("initializing basic auth users");
 			try {
-				basicAuthCredentials = new ArrayList<String>();
-				int count = 1;
-				String user = null;
-				while ( (user = PropertyFactory.getInstance().getProperty("scim.authentication.method.basic.user." + count)) != null) {
-					basicAuthCredentials.add(user);
-					count++;
+				synchronized (lock) {
+					basicAuthCredentials = new ArrayList<String>();
+					int count = 1;
+					String user = null;
+					while ( (user = PropertyFactory.getInstance().getProperty("scim.authentication.method.basic.user." + count)) != null) {
+						basicAuthCredentials.add(user);
+						count++;
+					}
 				}
 				logger.info("initializing basic auth users done : found {} users", basicAuthCredentials.size());
 			}

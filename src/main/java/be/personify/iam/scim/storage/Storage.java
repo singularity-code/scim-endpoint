@@ -8,11 +8,15 @@ public interface Storage {
 	
 	public Map<String,Object> get(String id);
 	
+	public Map<String,Object> get(String id, String version);
+	
+	public List<String> getVersions(String id);
+	
 	public boolean delete(String id);
 	
 	public boolean deleteAll();
 	
-	public void put( String id, Map<String,Object> object);
+	public void put( String id, Map<String,Object> object) throws ConstraintViolationException;
 	
 	public List<Map<String,Object>> getAll();
 	
@@ -20,7 +24,7 @@ public interface Storage {
 	
 	public void flush();
 	
-	public void initialize();
+	public void initialize(String type);
 	
 	
 }

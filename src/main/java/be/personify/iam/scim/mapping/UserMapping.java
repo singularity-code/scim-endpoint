@@ -27,8 +27,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import be.personify.iam.scim.schema.SchemaException;
 import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.storage.ConstraintViolationException;
 import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.ScimErrorType;
 
 /**
  * User mappings
@@ -68,21 +70,25 @@ public class UserMapping extends Mapping {
 			
 				response.addHeader(Constants.HEADER_LOCATION, location);
 				
-				storageImplementationFactory.getStorageImplementation().put(id, user);
+				storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).put(id, user);
 				
 				ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(user, HttpStatus.CREATED);
-				logger.info("user created in {} ms", ( System.currentTimeMillis() -start));
+				logger.info("user with id {} created in {} ms", id, ( System.currentTimeMillis() -start));
 				
 				return result;
 				
 			} 
-			catch (SchemaException e) {
+			catch (SchemaException e) { 
 				logger.error("invalid schema", e);
-				return showError( 400, "schema validation : " + e.getMessage(), null );
+				return showError( 400, "schema validation : " + e.getMessage(), ScimErrorType.invalidSyntax );
+			}
+			catch ( ConstraintViolationException e) {
+				logger.error("constraint violation : {}", e.getMessage());
+				return showError( 409, "schema validation : " + e.getMessage(), ScimErrorType.uniqueness );
 			}
 		}
 		else {
-			return showError( 400, "schemas contains no user schema " + Constants.SCHEMA_USER, null );
+			return showError( 400, "schemas contains no user schema " + Constants.SCHEMA_USER, ScimErrorType.invalidSyntax );
 		}
 		
 	}
@@ -113,7 +119,7 @@ public class UserMapping extends Mapping {
 				String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
 				//create meta	
 				
-				Map<String,Object> existingUser = storageImplementationFactory.getStorageImplementation().get(id);
+				Map<String,Object> existingUser = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).get(id);
 				if ( existingUser != null ) {
 					//TODO check etag version and throw exception if no match
 					user.put(Constants.KEY_META, existingUser.get(Constants.KEY_META));
@@ -127,7 +133,7 @@ public class UserMapping extends Mapping {
 			
 				response.addHeader(Constants.HEADER_LOCATION, location);
 				
-				storageImplementationFactory.getStorageImplementation().put(id, user);
+				storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).put(id, user);
 				
 				ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(user, HttpStatus.OK);
 				logger.info("user updated in {} ms", ( System.currentTimeMillis() -start));
@@ -138,6 +144,10 @@ public class UserMapping extends Mapping {
 			catch (SchemaException e) {
 				logger.error("invalid schema", e);
 				return showError( 400, "schema validation : " + e.getMessage(), null );
+			}
+			catch ( ConstraintViolationException e) {
+				logger.error("constraint violation", e);
+				return showError( 409, "schema validation : " + e.getMessage(), ScimErrorType.uniqueness );
 			}
 		}
 		else {
@@ -161,7 +171,7 @@ public class UserMapping extends Mapping {
 		
 		long start = System.currentTimeMillis();
 		
-		Map<String,Object> m = storageImplementationFactory.getStorageImplementation().get(id);
+		Map<String,Object> m = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).get(id);
 		
 		ResponseEntity<Map<String,Object>> result = null;
 		if ( m != null ) {
@@ -194,19 +204,18 @@ public class UserMapping extends Mapping {
 		
 		long start = System.currentTimeMillis();
 				
-		List<Map<String,Object>> m = storageImplementationFactory.getStorageImplementation().getAll();
+		List<Map<String,Object>> data = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).getAll();
 		
 		ResponseEntity<Map<String,Object>> result = null;
 		
 		Map<String,Object> responseObject = new HashMap<String, Object>();
-		responseObject.put("schemas", new String[] {"urn:ietf:params:scim:api:messages:2.0:ListResponse"});
-		responseObject.put("startIndex", startIndex);
-		responseObject.put("itemsPerPage", count);
+		responseObject.put(Constants.KEY_SCHEMAS, new String[] {Constants.SCHEMA_LISTRESPONSE});
+		responseObject.put(Constants.KEY_STARTINDEX, startIndex);
+		responseObject.put(Constants.KEY_ITEMSPERPAGE, count);
 		
-		List<Map<String,Object>> sublist = m.subList(startIndex -1, count);
-		
-		responseObject.put("totalResults", m.size());
-		responseObject.put("Resources", sublist);
+		List<Map<String,Object>> sublist = data.subList(startIndex -1, count);
+		responseObject.put(Constants.KEY_TOTALRESULTS, data.size());
+		responseObject.put(Constants.KEY_RESOURCES, sublist);
 		
 		result = new ResponseEntity<Map<String,Object>>(responseObject, HttpStatus.OK);
 		
@@ -228,11 +237,11 @@ public class UserMapping extends Mapping {
 	public ResponseEntity<?> delete(@PathVariable String id ) {
 		long start = System.currentTimeMillis();
 		
-		Map<String,Object> m = storageImplementationFactory.getStorageImplementation().get(id);
+		Map<String,Object> m = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).get(id);
 		
 		ResponseEntity<?> result = null;
 		if ( m != null ) {
-			boolean deleted = storageImplementationFactory.getStorageImplementation().delete(id);
+			boolean deleted = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).delete(id);
 			if ( deleted ) {
 				result = new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 			}

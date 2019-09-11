@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.ScimErrorType;
 
 /**
  * Mappings
@@ -39,9 +40,9 @@ public class Mapping {
 
 
 
-	protected ResponseEntity<Map<String, Object>> showError(int status, String detail, String scimType) {
+	protected ResponseEntity<Map<String, Object>> showError(int status, String detail, ScimErrorType scimType) {
 		Map<String,Object> error = new HashMap<String, Object>();
-		error.put("schemas", new String[] {"urn:ietf:params:scim:api:messages:2.0:Error"});
+		error.put(Constants.KEY_SCHEMAS, new String[] {"urn:ietf:params:scim:api:messages:2.0:Error"});
 		if ( scimType != null) {
 			error.put("scimType", scimType);
 		}
