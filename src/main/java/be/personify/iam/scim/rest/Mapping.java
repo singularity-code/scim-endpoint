@@ -1,4 +1,4 @@
-package be.personify.iam.scim.mapping;
+package be.personify.iam.scim.rest;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -50,6 +50,15 @@ public class Mapping {
 		error.put("status", "" + status );
 		return new ResponseEntity<Map<String, Object>>(error, HttpStatus.valueOf(status));
 	}
+	
+	
+	
+
+	protected Map<String, Object> filterResponse(String resourceTypeUser, Map<String, Object> user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	
 	
 	

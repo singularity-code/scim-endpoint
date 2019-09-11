@@ -42,12 +42,12 @@ public class MemoryStorageImpl implements Storage {
 	
 	@Override
 	public Map<String,Object> get(String id, String version) {
-		throw new RuntimeException("verisoning not implemented");
+		throw new RuntimeException("versioning not implemented");
 	}
 	
 	@Override
 	public List<String> getVersions(String id) {
-		throw new RuntimeException("verisoning not implemented");
+		throw new RuntimeException("versioning not implemented");
 	}
 	
 

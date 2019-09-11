@@ -1,6 +1,6 @@
 # personify-scim-server
 
-Spring Boot SCIM server implementation with pluggable persistence layer
+Spring Boot Java SCIM server implementation with pluggable persistence layer
 
 ## intro
 
@@ -13,11 +13,15 @@ basic server implementation.
 - basic authentication
 - schema validation
 - paging
+- uniqueness constraint validation
+
 
 **on the list :**
 
 - bulk
-- paging
+- filtering
+- patch
+- JWT
 
 
 

@@ -1,4 +1,4 @@
-package be.personify.iam.scim.mapping;
+package be.personify.iam.scim.rest;
 
 import java.io.IOException;
 import java.util.List;

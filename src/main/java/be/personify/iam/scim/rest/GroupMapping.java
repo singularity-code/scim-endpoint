@@ -1,4 +1,4 @@
-package be.personify.iam.scim.mapping;
+package be.personify.iam.scim.rest;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -33,12 +33,12 @@ import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.ScimErrorType;
 
 /**
- * User mappings
+ * Group mappings
  */
 @RestController
-public class UserMapping extends Mapping {
+public class GroupMapping extends Mapping {
 
-	private static final Logger logger = LogManager.getLogger(UserMapping.class);
+	private static final Logger logger = LogManager.getLogger(GroupMapping.class);
 	
 	
 	@Autowired
@@ -46,97 +46,34 @@ public class UserMapping extends Mapping {
 	
 	
 	/**
-	 * POST a user
-	 * @param user
+	 * POST a group
+	 * @param group
 	 * @param request
 	 * @param response
 	 * @return
 	 */
-	@PostMapping(path="/scim/v2/Users", produces = "application/scim+json")
-	public ResponseEntity<Map<String, Object>> post(@RequestBody Map<String,Object> user, HttpServletRequest request, HttpServletResponse response ) {
+	@PostMapping(path="/scim/v2/Groups", produces = "application/scim+json")
+	public ResponseEntity<Map<String, Object>> post(@RequestBody Map<String,Object> group, HttpServletRequest request, HttpServletResponse response ) {
 		long start = System.currentTimeMillis();
 		
-		List<String> schemas = (List<String>)user.get(Constants.KEY_SCHEMAS);
-		if ( schemas.contains(Constants.SCHEMA_USER)) {
+		List<String> schemas = (List<String>)group.get(Constants.KEY_SCHEMAS);
+		if ( schemas.contains(Constants.SCHEMA_GROUP)) {
 			try {
 				//validate
-				SchemaReader.getInstance().validate(Constants.SCHEMA_USER, user);
+				SchemaReader.getInstance().validate(Constants.SCHEMA_GROUP, group);
 				//id
 				String id = UUID.randomUUID().toString();
-				user.put(Constants.ID, id);
+				group.put(Constants.ID, id);
 				String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + Constants.SLASH + id;
 				//create meta			
-				createMeta( new Date(), id, user, Constants.RESOURCE_TYPE_USER, location);
+				createMeta( new Date(), id, group, Constants.RESOURCE_TYPE_GROUP, location);
 			
 				response.addHeader(Constants.HEADER_LOCATION, location);
 				
-				storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).put(id, user);
+				storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_GROUP).put(id, group);
 				
-				ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(user, HttpStatus.CREATED);
-				logger.info("user with id {} created in {} ms", id, ( System.currentTimeMillis() -start));
-				
-				return result;
-				
-			} 
-			catch (SchemaException e) { 
-				logger.error("invalid schema", e);
-				return showError( 400, "schema validation : " + e.getMessage(), ScimErrorType.invalidSyntax );
-			}
-			catch ( ConstraintViolationException e) {
-				logger.error("constraint violation : {}", e.getMessage());
-				return showError( 409, "schema validation : " + e.getMessage(), ScimErrorType.uniqueness );
-			}
-		}
-		else {
-			return showError( 400, "schemas contains no user schema " + Constants.SCHEMA_USER, ScimErrorType.invalidSyntax );
-		}
-		
-	}
-	
-	
-	
-	/**
-	 * PUT a user
-	 * @param id
-	 * @param user
-	 * @param request
-	 * @param response
-	 * @return
-	 */
-	@PutMapping(path="/scim/v2/Users/{id}", produces = "application/scim+json")
-	public ResponseEntity<Map<String, Object>> put(@PathVariable String id , @RequestBody Map<String,Object> user, HttpServletRequest request, HttpServletResponse response ) {
-		long start = System.currentTimeMillis();
-		
-		List<String> schemas = (List<String>)user.get(Constants.KEY_SCHEMAS);
-		if ( schemas.contains(Constants.SCHEMA_USER)) {
-			try {
-				//validate
-				SchemaReader.getInstance().validate(Constants.SCHEMA_USER, user);
-				//check id
-				if ( !user.get(Constants.ID).equals(id)){
-					return showError( 400, "invalid id given in the put", null );
-				};
-				String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
-				//create meta	
-				
-				Map<String,Object> existingUser = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).get(id);
-				if ( existingUser != null ) {
-					//TODO check etag version and throw exception if no match
-					user.put(Constants.KEY_META, existingUser.get(Constants.KEY_META));
-					//perform delta
-				}
-				else {
-					return showError( 404, "user with id " + id + " can not be updated", null );
-				}
-				
-				createMeta( new Date(), id, user, Constants.RESOURCE_TYPE_USER, location);
-			
-				response.addHeader(Constants.HEADER_LOCATION, location);
-				
-				storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).put(id, user);
-				
-				ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(user, HttpStatus.OK);
-				logger.info("user updated in {} ms", ( System.currentTimeMillis() -start));
+				ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(group, HttpStatus.CREATED);
+				logger.info("group created in {} ms", ( System.currentTimeMillis() -start));
 				
 				return result;
 				
@@ -151,27 +88,90 @@ public class UserMapping extends Mapping {
 			}
 		}
 		else {
-			return showError( 400, "schemas contains no user schema " + Constants.SCHEMA_USER, null );
+			return showError( 400, "schemas contains no group schema " + Constants.SCHEMA_GROUP, null );
 		}
 		
 	}
 	
-
+	
+	
+	/**
+	 * PUT a group
+	 * @param id
+	 * @param group
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@PutMapping(path="/scim/v2/Groups/{id}", produces = "application/scim+json")
+	public ResponseEntity<Map<String, Object>> put(@PathVariable String id , @RequestBody Map<String,Object> group, HttpServletRequest request, HttpServletResponse response ) {
+		long start = System.currentTimeMillis();
+		
+		List<String> schemas = (List<String>)group.get(Constants.KEY_SCHEMAS);
+		if ( schemas.contains(Constants.SCHEMA_GROUP)) {
+			try {
+				//validate
+				SchemaReader.getInstance().validate(Constants.SCHEMA_GROUP, group);
+				//check id
+				if ( !group.get(Constants.ID).equals(id)){
+					return showError( 400, "invalid id given in the put", null );
+				};
+				String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
+				//create meta	
+				
+				Map<String,Object> existingGroup = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_GROUP).get(id);
+				if ( existingGroup != null ) {
+					//TODO check etag version and throw exception if no match
+					group.put(Constants.KEY_META, existingGroup.get(Constants.KEY_META));
+					//perform delta
+				}
+				else {
+					return showError( 404, "group with id " + id + " can not be updated", null );
+				}
+				
+				createMeta( new Date(), id, group, Constants.RESOURCE_TYPE_GROUP, location);
+			
+				response.addHeader(Constants.HEADER_LOCATION, location);
+				
+				storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_GROUP).put(id, group);
+				
+				ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(group, HttpStatus.OK);
+				logger.info("group with id {} updated in {} ms", id, ( System.currentTimeMillis() -start));
+				
+				return result;
+				
+			} 
+			catch (SchemaException e) {
+				logger.error("invalid schema", e);
+				return showError( 400, "schema validation : " + e.getMessage(), ScimErrorType.invalidSyntax );
+			}
+			catch ( ConstraintViolationException e) {
+				logger.error("constraint violation {}", e.getMessage());
+				return showError( 409, "schema validation : " + e.getMessage(), ScimErrorType.uniqueness );
+			}
+		}
+		else {
+			return showError( 400, "schemas contains no group schema " + Constants.SCHEMA_GROUP, ScimErrorType.invalidSyntax );
+		}
+		
+	}
+	
+	
 	
 
 	/**
-	 * GET a user
+	 * GETs a group
 	 * @param id
 	 * @param request
 	 * @param response
 	 * @return
 	 */
-	@GetMapping(path="/scim/v2/Users/{id}", produces = "application/scim+json")
+	@GetMapping(path="/scim/v2/Groups/{id}", produces = "application/scim+json")
 	public ResponseEntity<Map<String,Object>> get(@PathVariable String id , HttpServletRequest request, HttpServletResponse response ) {
 		
 		long start = System.currentTimeMillis();
 		
-		Map<String,Object> m = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).get(id);
+		Map<String,Object> m = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_GROUP).get(id);
 		
 		ResponseEntity<Map<String,Object>> result = null;
 		if ( m != null ) {
@@ -181,30 +181,30 @@ public class UserMapping extends Mapping {
 		else {
 			result = new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
 		}
-		logger.info("user with id {} fetched in {} ms", id, ( System.currentTimeMillis() -start));
+		logger.info("group with id {} fetched in {} ms", id, ( System.currentTimeMillis() -start));
 		
 		return result;
 		
 	}
 	
 	
+	
 	/**
-	 * SEARCH users
-	 * @param startIndex
-	 * @param count
+	 * Search a group
+	 * @param id
 	 * @param request
 	 * @param response
 	 * @return
 	 */
-	@GetMapping(path="/scim/v2/Users", produces = "application/scim+json")
+	@GetMapping(path="/scim/v2/Groups", produces = "application/scim+json")
 	public ResponseEntity<Map<String,Object>> search(
 			@RequestParam(required = false, name = "startIndex", defaultValue = "1") Integer startIndex, 
 			@RequestParam(required = false, name="count", defaultValue = "200") Integer count, 
 			HttpServletRequest request, HttpServletResponse response ) {
 		
 		long start = System.currentTimeMillis();
-				
-		List<Map<String,Object>> data = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).getAll();
+		
+		List<Map<String,Object>> data = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_GROUP).getAll();
 		
 		ResponseEntity<Map<String,Object>> result = null;
 		
@@ -228,31 +228,33 @@ public class UserMapping extends Mapping {
 	
 	
 	
+	
+	
 	/**
-	 * Deletes the user
+	 * Deletes the group
 	 * @param id
 	 * @return
 	 */
-	@DeleteMapping(path="/scim/v2/Users/{id}")
+	@DeleteMapping(path="/scim/v2/Groups/{id}")
 	public ResponseEntity<?> delete(@PathVariable String id ) {
 		long start = System.currentTimeMillis();
 		
-		Map<String,Object> m = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).get(id);
+		Map<String,Object> m = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_GROUP).get(id);
 		
 		ResponseEntity<?> result = null;
 		if ( m != null ) {
-			boolean deleted = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).delete(id);
+			boolean deleted = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_GROUP).delete(id);
 			if ( deleted ) {
 				result = new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 			}
 			else {
-				return showError( 400, "could not delete user with id " + id, null );
+				return showError( 400, "could not delete group with id " + id, null );
 			}
 		}
 		else {
 			result = new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
 		}
-		logger.info("user with id {} deleted in {} ms", id, ( System.currentTimeMillis() -start));
+		logger.info("group with id {} deleted in {} ms", id, ( System.currentTimeMillis() -start));
 		
 		return result;
 	}

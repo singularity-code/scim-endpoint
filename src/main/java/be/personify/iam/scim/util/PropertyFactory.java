@@ -3,9 +3,14 @@ package be.personify.iam.scim.util;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class PropertyFactory {
 	
 	private static PropertyFactory _instance = null; 
+	
+	private static final Logger logger = LogManager.getLogger(PropertyFactory.class);
 	
 	private Properties properties;
 	
@@ -15,8 +20,7 @@ public class PropertyFactory {
 			try {
 				_instance.initialize();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("can not instanciate property factory", e);
 				_instance = null;
 			}
 		}
