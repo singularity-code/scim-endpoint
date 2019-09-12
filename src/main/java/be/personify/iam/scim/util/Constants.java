@@ -43,7 +43,7 @@ public class Constants {
 	
 	public static final String ID = "id";
 
-	
+	public static final String NEVER = "never";
 	
 	public static final String HEADER_LOCATION = "Location";
 	

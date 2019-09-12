@@ -69,6 +69,17 @@ public class SchemaReader {
 	}
 	
 	
+	public Schema getSchemaByType( String type) {
+		if ( type.equals(Constants.RESOURCE_TYPE_USER)) {
+			return getSchema(Constants.SCHEMA_USER);
+		}
+		else if ( type.equals(Constants.RESOURCE_TYPE_GROUP)) {
+			return getSchema(Constants.SCHEMA_GROUP);
+		}
+		return null;
+	}
+	
+	
 	
 	/**
 	 * Validates the object against the schema

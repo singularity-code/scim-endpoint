@@ -1,5 +1,6 @@
 package be.personify.iam.scim.rest;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +63,7 @@ public class UserMapping extends Mapping {
 				//validate
 				SchemaReader.getInstance().validate(Constants.SCHEMA_USER, user);
 				//id
-				String id = UUID.randomUUID().toString();
+				String id = createId(user);
 				user.put(Constants.ID, id);
 				String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + Constants.SLASH + id;
 				//create meta			
@@ -97,6 +98,10 @@ public class UserMapping extends Mapping {
 	
 	
 	
+	
+
+
+
 
 
 	/**
@@ -139,6 +144,8 @@ public class UserMapping extends Mapping {
 				
 				storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).put(id, user);
 				
+				user = filterResponse(Constants.RESOURCE_TYPE_USER, user);
+				
 				ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(user, HttpStatus.OK);
 				logger.info("user updated in {} ms", ( System.currentTimeMillis() -start));
 				
@@ -175,11 +182,12 @@ public class UserMapping extends Mapping {
 		
 		long start = System.currentTimeMillis();
 		
-		Map<String,Object> m = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).get(id);
+		Map<String,Object> user = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).get(id);
 		
 		ResponseEntity<Map<String,Object>> result = null;
-		if ( m != null ) {
-			result = new ResponseEntity<Map<String,Object>>(m, HttpStatus.OK);
+		if ( user != null ) {
+			user = filterResponse(Constants.RESOURCE_TYPE_USER, user);
+			result = new ResponseEntity<Map<String,Object>>(user, HttpStatus.OK);
 			response.addHeader(Constants.HEADER_LOCATION, UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString());
 		}
 		else {
@@ -208,7 +216,12 @@ public class UserMapping extends Mapping {
 		
 		long start = System.currentTimeMillis();
 				
-		List<Map<String,Object>> data = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).getAll();
+		List<Map<String,Object>> dataFetched = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).getAll();
+		List<Map<String,Object>> data = new ArrayList<Map<String,Object>>();
+		for ( Map<String,Object> entity : dataFetched) {
+			data.add(filterResponse(Constants.RESOURCE_TYPE_USER, entity));
+		}
+		
 		
 		ResponseEntity<Map<String,Object>> result = null;
 		
@@ -217,6 +230,7 @@ public class UserMapping extends Mapping {
 		responseObject.put(Constants.KEY_STARTINDEX, startIndex);
 		responseObject.put(Constants.KEY_ITEMSPERPAGE, count);
 		
+		count = count > data.size() ? data.size() : count;
 		List<Map<String,Object>> sublist = data.subList(startIndex -1, count);
 		responseObject.put(Constants.KEY_TOTALRESULTS, data.size());
 		responseObject.put(Constants.KEY_RESOURCES, sublist);

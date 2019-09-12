@@ -3,10 +3,14 @@ package be.personify.iam.scim.rest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import be.personify.iam.scim.schema.Schema;
+import be.personify.iam.scim.schema.SchemaAttribute;
+import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.ScimErrorType;
 
@@ -54,9 +58,23 @@ public class Mapping {
 	
 	
 
-	protected Map<String, Object> filterResponse(String resourceTypeUser, Map<String, Object> user) {
-		// TODO Auto-generated method stub
-		return null;
+	protected Map<String, Object> filterResponse(String resourceType, Map<String, Object> entity) {
+		Schema schema = SchemaReader.getInstance().getSchemaByType(resourceType);
+		Map<String,Object> copy = new HashMap<String, Object>();
+		copy.putAll(entity);
+		for ( SchemaAttribute attribute : schema.getAttributes()) {
+			if ( attribute.getReturned().equalsIgnoreCase(Constants.NEVER)) {
+				copy.remove(attribute.getName());
+			}
+		}
+		return copy;
+	}
+	
+	
+	
+	protected String createId(Map<String, Object> user) {
+		Object id = user.get(Constants.ID);
+		return id != null ? id.toString() : UUID.randomUUID().toString();
 	}
 
 	

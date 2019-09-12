@@ -62,7 +62,7 @@ public class GroupMapping extends Mapping {
 				//validate
 				SchemaReader.getInstance().validate(Constants.SCHEMA_GROUP, group);
 				//id
-				String id = UUID.randomUUID().toString();
+				String id = createId(group);
 				group.put(Constants.ID, id);
 				String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + Constants.SLASH + id;
 				//create meta			
@@ -213,6 +213,7 @@ public class GroupMapping extends Mapping {
 		responseObject.put(Constants.KEY_STARTINDEX, startIndex);
 		responseObject.put(Constants.KEY_ITEMSPERPAGE, count);
 		
+		count = count > data.size() ? data.size() : count;
 		List<Map<String,Object>> sublist = data.subList(startIndex -1, count);
 		responseObject.put(Constants.KEY_TOTALRESULTS, data.size());
 		responseObject.put(Constants.KEY_RESOURCES, sublist);
