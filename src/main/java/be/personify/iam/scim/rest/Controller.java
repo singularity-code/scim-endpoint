@@ -1,6 +1,7 @@
 package be.personify.iam.scim.rest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -32,35 +33,35 @@ import be.personify.iam.scim.util.ScimErrorType;
  * @author vanderw
  *
  */
-public class Mapping {
+public class Controller {
 	
-	private static final Logger logger = LogManager.getLogger(Mapping.class);
+	private static final Logger logger = LogManager.getLogger(Controller.class);
 	
 	@Autowired
 	private StorageImplementationFactory storageImplementationFactory;
 	
 	
 	
-	protected ResponseEntity<Map<String, Object>> post(Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, String schemaName, String resourceType) {
+	protected ResponseEntity<Map<String, Object>> post(Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema ) {
 		long start = System.currentTimeMillis();
 		try {
 			//validate
-			SchemaReader.getInstance().validate(schemaName, entity, true);
+			SchemaReader.getInstance().validate(schema, entity, true);
 			//id
 			String id = createId(entity);
 			entity.put(Constants.ID, id);
 			String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + Constants.SLASH + id;
 			//create meta
-			createMeta( new Date(), id, entity, resourceType, location);
+			createMeta( new Date(), id, entity, schema.getName(), location);
 		
 			response.addHeader(Constants.HEADER_LOCATION, location);
 			
-			storageImplementationFactory.getStorageImplementation(resourceType).put(id, entity);
+			storageImplementationFactory.getStorageImplementation(schema.getName()).put(id, entity);
 			
-			entity = filterResponse(resourceType, entity);
+			entity = filterResponse(schema, entity);
 			
 			ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(entity, HttpStatus.CREATED);
-			logger.info("resource of type {} with id {} created in {} ms", resourceType, id, ( System.currentTimeMillis() -start));
+			logger.info("resource of type {} with id {} created in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 			
 			return result;
 			
@@ -79,11 +80,11 @@ public class Mapping {
 	
 	
 	
-	protected ResponseEntity<Map<String, Object>> put(String id, Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, String schemaName, String resourceType) {
+	protected ResponseEntity<Map<String, Object>> put(String id, Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema ) {
 		long start = System.currentTimeMillis();
 		try {
 			//validate
-			SchemaReader.getInstance().validate(schemaName, entity, true);
+			SchemaReader.getInstance().validate(schema, entity, true);
 			//check id
 			if ( !entity.get(Constants.ID).equals(id)){
 				return showError( 400, "id [" + entity.get(Constants.ID) + "] given in the data does not match the one in the url [" + id + "]", null );
@@ -91,26 +92,26 @@ public class Mapping {
 			String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
 			//create meta	
 			
-			Map<String,Object> existingUser = storageImplementationFactory.getStorageImplementation(resourceType).get(id);
+			Map<String,Object> existingUser = storageImplementationFactory.getStorageImplementation(schema.getName()).get(id);
 			if ( existingUser != null ) {
 				//TODO check etag version and throw exception if no match
 				entity.put(Constants.KEY_META, existingUser.get(Constants.KEY_META));
 				//perform delta
 			}
 			else {
-				return showError( 404, "resource of type " + resourceType + " with id " + id + " can not be updated", null );
+				return showError( 404, "resource of type " + schema.getName() + " with id " + id + " can not be updated", null );
 			}
 			
-			createMeta( new Date(), id, entity, resourceType, location);
+			createMeta( new Date(), id, entity, schema.getName(), location);
 		
 			response.addHeader(Constants.HEADER_LOCATION, location);
 			
-			storageImplementationFactory.getStorageImplementation(resourceType).put(id, entity);
+			storageImplementationFactory.getStorageImplementation(schema.getName()).put(id, entity);
 			
-			entity = filterResponse(resourceType, entity);
+			entity = filterResponse(schema, entity);
 			
 			ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(entity, HttpStatus.OK);
-			logger.info("resource of type {} with id {} updated in {} ms", resourceType, id, ( System.currentTimeMillis() -start));
+			logger.info("resource of type {} with id {} updated in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 			
 			return result;
 			
@@ -129,11 +130,11 @@ public class Mapping {
 	
 	
 	
-	protected ResponseEntity<Map<String, Object>> patch(String id, Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, String schemaName, String resourceType) {
+	protected ResponseEntity<Map<String, Object>> patch(String id, Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema ) {
 		long start = System.currentTimeMillis();
 		try {
 			//validate
-			SchemaReader.getInstance().validate(schemaName, entity, false);
+			SchemaReader.getInstance().validate(schema, entity, false);
 			//check id
 			if ( !entity.get(Constants.ID).equals(id)){
 				return showError( 400, "invalid id given in the patch request", null );
@@ -141,14 +142,14 @@ public class Mapping {
 			String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
 			//create meta	
 			
-			Map<String,Object> existingEntity = storageImplementationFactory.getStorageImplementation(resourceType).get(id);
+			Map<String,Object> existingEntity = storageImplementationFactory.getStorageImplementation(schema.getName()).get(id);
 			if ( existingEntity != null ) {
 				//TODO check etag version and throw exception if no match
 				entity.put(Constants.KEY_META, existingEntity.get(Constants.KEY_META));
 				//perform delta
 			}
 			else {
-				return showError( 404, "resource of type " + resourceType + " with id " + id + " can not be updated", null );
+				return showError( 404, "resource of type " + schema.getName() + " with id " + id + " can not be updated", null );
 			}
 		
 			response.addHeader(Constants.HEADER_LOCATION, location);
@@ -159,14 +160,14 @@ public class Mapping {
 				}
 			}
 			
-			createMeta( new Date(), id, existingEntity, resourceType, location);
+			createMeta( new Date(), id, existingEntity, schema.getName(), location);
 			
-			storageImplementationFactory.getStorageImplementation(resourceType).put(id, existingEntity);
+			storageImplementationFactory.getStorageImplementation(schema.getName()).put(id, existingEntity);
 			
-			existingEntity = filterResponse(resourceType, existingEntity);
+			existingEntity = filterResponse(schema, existingEntity);
 			
 			ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(existingEntity, HttpStatus.OK);
-			logger.info("resource of type {} with id {} patched in {} ms", resourceType, id, ( System.currentTimeMillis() -start));
+			logger.info("resource of type {} with id {} patched in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 			
 			return result;
 			
@@ -184,33 +185,33 @@ public class Mapping {
 	
 	
 	
-	protected ResponseEntity<Map<String, Object>> get(String id, HttpServletRequest request, HttpServletResponse response, String resourceType) {
+	protected ResponseEntity<Map<String, Object>> get(String id, HttpServletRequest request, HttpServletResponse response, Schema schema) {
 		long start = System.currentTimeMillis();
-		Map<String,Object> user = storageImplementationFactory.getStorageImplementation(resourceType).get(id);
+		Map<String,Object> user = storageImplementationFactory.getStorageImplementation(schema.getName()).get(id);
 		
 		ResponseEntity<Map<String,Object>> result = null;
 		if ( user != null ) {
-			user = filterResponse(resourceType, user);
+			user = filterResponse(schema, user);
 			result = new ResponseEntity<Map<String,Object>>(user, HttpStatus.OK);
 			response.addHeader(Constants.HEADER_LOCATION, UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString());
 		}
 		else {
 			result = new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
 		}
-		logger.info("resource of type {} with id {} fetched in {} ms", resourceType, id, ( System.currentTimeMillis() -start));
+		logger.info("resource of type {} with id {} fetched in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 		return result;
 	}
 	
 	
 	
 	
-	protected ResponseEntity<Map<String, Object>> search(Integer startIndex, Integer count, String resourceType ) {
+	protected ResponseEntity<Map<String, Object>> search(Integer startIndex, Integer count, Schema schema ) {
 		long start = System.currentTimeMillis();
 				
-		List<Map<String,Object>> dataFetched = storageImplementationFactory.getStorageImplementation(resourceType).getAll();
+		List<Map<String,Object>> dataFetched = storageImplementationFactory.getStorageImplementation(schema.getName()).getAll();
 		List<Map<String,Object>> data = new ArrayList<Map<String,Object>>();
 		for ( Map<String,Object> entity : dataFetched) {
-			data.add(filterResponse(resourceType, entity));
+			data.add(filterResponse(schema, entity));
 		}
 		
 		
@@ -228,32 +229,32 @@ public class Mapping {
 		
 		result = new ResponseEntity<Map<String,Object>>(responseObject, HttpStatus.OK);
 		
-		logger.info("resources of type {} fetched in {} ms", resourceType, ( System.currentTimeMillis() -start));
+		logger.info("resources of type {} fetched in {} ms", schema.getName(), ( System.currentTimeMillis() -start));
 		
 		return result;
 	}
 	
 	
 	
-	protected ResponseEntity<?> delete(String id, String resourceType ) {
+	protected ResponseEntity<?> delete(String id, Schema schema ) {
 		long start = System.currentTimeMillis();
 		
-		Map<String,Object> m = storageImplementationFactory.getStorageImplementation(resourceType).get(id);
+		Map<String,Object> m = storageImplementationFactory.getStorageImplementation(schema.getName()).get(id);
 		
 		ResponseEntity<?> result = null;
 		if ( m != null ) {
-			boolean deleted = storageImplementationFactory.getStorageImplementation(resourceType).delete(id);
+			boolean deleted = storageImplementationFactory.getStorageImplementation(schema.getName()).delete(id);
 			if ( deleted ) {
 				result = new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 			}
 			else {
-				return showError( 400, "could not delete resource of type " + resourceType + " with id " + id, null );
+				return showError( 400, "could not delete resource of type " + schema.getName() + " with id " + id, null );
 			}
 		}
 		else {
 			result = new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
 		}
-		logger.info("resource of type {} with id {} deleted in {} ms", resourceType, id, ( System.currentTimeMillis() -start));
+		logger.info("resource of type {} with id {} deleted in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 		
 		return result;
 	}
@@ -302,8 +303,7 @@ public class Mapping {
 	
 	
 
-	protected Map<String, Object> filterResponse(String resourceType, Map<String, Object> entity) {
-		Schema schema = SchemaReader.getInstance().getSchemaByType(resourceType);
+	protected Map<String, Object> filterResponse(Schema schema, Map<String, Object> entity) {
 		Map<String,Object> copy = new HashMap<String, Object>();
 		copy.putAll(entity);
 		for ( SchemaAttribute attribute : schema.getAttributes()) {
@@ -328,15 +328,12 @@ public class Mapping {
 	}
 	
 	
-	protected ResponseEntity<Map<String, Object>> invalidSchemaForResource(String schemaName, String resourceType) {
-		return showError( 400, "schemas contains no " + resourceType +  " schema " + schemaName, ScimErrorType.invalidSyntax );
+	protected ResponseEntity<Map<String, Object>> invalidSchemaForResource(List<String> schemas, String resourceType) {
+		return showError( 400, "schemas contains no " + resourceType +  " schema " + schemas.toString(), ScimErrorType.invalidSyntax );
 	}
 
 	
 	
-	
-
-
 
 
 

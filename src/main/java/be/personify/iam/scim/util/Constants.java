@@ -12,8 +12,8 @@ public class Constants {
 	public static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
 	//format.setTimeZone(TimeZone.getTimeZone("UTC"));
 	
-	public static final String SCHEMA_USER = "urn:ietf:params:scim:schemas:core:2.0:User";
-	public static final String SCHEMA_GROUP = "urn:ietf:params:scim:schemas:core:2.0:Group";
+//	public static final String SCHEMA_USER = "urn:ietf:params:scim:schemas:core:2.0:User";
+//	public static final String SCHEMA_GROUP = "urn:ietf:params:scim:schemas:core:2.0:Group";
 	public static final String SCHEMA_SERVICEPROVIDERCONFIG = "urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig";
 	public static final String SCHEMA_LISTRESPONSE = "urn:ietf:params:scim:api:messages:2.0:ListResponse";
 	public static final String SCHEMA_BULKREQUEST = "urn:ietf:params:scim:api:messages:2.0:BulkRequest";

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaException;
 import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.util.Constants;
@@ -16,12 +17,14 @@ import be.personify.iam.scim.util.Constants;
 public class SchemaTest {
 	
 	private static final SchemaReader schemaReader = SchemaReader.getInstance();
+	
+	private static final Schema userSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
 
 	@Test
 	public void testEmptyMap() {	
 		Map<String,Object> map = new HashMap<String, Object>();
 		try {
-			schemaReader.validate(Constants.SCHEMA_USER, map,true);
+			schemaReader.validate(userSchema, map,true);
 		}
 		catch ( SchemaException se ) {
 			return ;
@@ -37,7 +40,7 @@ public class SchemaTest {
 		map.put("userName", "username");
 		map.put("externalId", "externalId");
 		try {
-			schemaReader.validate(Constants.SCHEMA_USER, map, true);
+			schemaReader.validate(userSchema, map, true);
 		}
 		catch ( SchemaException se ) {
 			fail("No schema exception thrown " + se.getMessage());
@@ -52,7 +55,7 @@ public class SchemaTest {
 		map.put("externalId", "externalId");
 		map.put("emails", "another email");
 		try {
-			schemaReader.validate(Constants.SCHEMA_USER, map, true);
+			schemaReader.validate(userSchema, map, true);
 		}
 		catch ( SchemaException se ) {
 			//se.printStackTrace();
@@ -70,7 +73,7 @@ public class SchemaTest {
 		String[] emails = new String[] {"another email"};
 		map.put("emails", emails);
 		try {
-			schemaReader.validate(Constants.SCHEMA_USER, map, true);
+			schemaReader.validate(userSchema, map, true);
 		}
 		catch ( SchemaException se ) {
 			//se.printStackTrace();
@@ -93,7 +96,7 @@ public class SchemaTest {
 		
 		map.put("emails", mailList);
 		try {
-			schemaReader.validate(Constants.SCHEMA_USER, map, true);
+			schemaReader.validate(userSchema, map, true);
 		}
 		catch ( SchemaException se ) {
 			//se.printStackTrace();
@@ -116,7 +119,7 @@ public class SchemaTest {
 		
 		map.put("emails", mailList);
 		try {
-			schemaReader.validate(Constants.SCHEMA_USER, map, true);
+			schemaReader.validate(userSchema, map, true);
 		}
 		catch ( SchemaException se ) {
 			fail("schema exception thrown " + se.getMessage());

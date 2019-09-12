@@ -19,6 +19,8 @@ public class SchemaReader {
 	
 	private Map<String,Schema> schemaMap = new HashMap<String, Schema>();
 	
+	private Map<String,String> schemaMapper = new HashMap<String, String>();
+	
 	private static SchemaReader _instance = null;
 	
 		
@@ -48,8 +50,9 @@ public class SchemaReader {
 			Schema schema = null;
 			while ( iterator.hasNext() ) {
 				schema = Constants.objectMapper.treeToValue(iterator.next(), Schema.class);
-				logger.info("storing schema with id [" + schema.getId() + "]");
+				logger.info("loading schema with id [" + schema.getId() + "]");
 				schemaMap.put(schema.getId(), schema);
+				schemaMapper.put(schema.getName(), schema.getId());
 			}
 		}
 		else {
@@ -69,14 +72,8 @@ public class SchemaReader {
 	}
 	
 	
-	public Schema getSchemaByType( String type) {
-		if ( type.equals(Constants.RESOURCE_TYPE_USER)) {
-			return getSchema(Constants.SCHEMA_USER);
-		}
-		else if ( type.equals(Constants.RESOURCE_TYPE_GROUP)) {
-			return getSchema(Constants.SCHEMA_GROUP);
-		}
-		return null;
+	public Schema getSchemaByResourceType( String resourceType ) {
+		return getSchema(schemaMapper.get(resourceType));
 	}
 	
 	
@@ -88,17 +85,11 @@ public class SchemaReader {
 	 * @return
 	 * @throws SchemaException
 	 */
-	public Map<String,Object> validate( String schemaId, Map<String,Object> map, boolean checkRequired ) throws SchemaException {
-		Schema schema = getSchema(schemaId);
-		if ( schema != null ) {
-			for ( SchemaAttribute attribute : schema.getAttributes() ) {
-				validateAttribute( map.get(attribute.getName()), attribute, checkRequired);
-			}
-			return map;
+	public Map<String,Object> validate( Schema schema, Map<String,Object> map, boolean checkRequired ) throws SchemaException {
+		for ( SchemaAttribute attribute : schema.getAttributes() ) {
+			validateAttribute( map.get(attribute.getName()), attribute, checkRequired);
 		}
-		else {
-			throw new SchemaException("schema with id " + schemaId + " not found");
-		}
+		return map;
 	}
 
 

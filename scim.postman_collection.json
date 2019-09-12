@@ -8,6 +8,40 @@
 	},
 	"item": [
 		{
+			"name": "bulk",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "scim-user",
+						"password": "changeit",
+						"saveHelperData": true,
+						"showPassword": false
+					}
+				},
+				"url": "http://localhost:9029/scim/v2/Bulk",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n     \"schemas\": [\"urn:ietf:params:scim:api:messages:2.0:BulkRequest\"],\n     \"Operations\": [\n       {\n         \"method\": \"POST\",\n         \"path\": \"/Users\",\n         \"bulkId\": \"qwerty\",\n         \"data\": {\n           \"schemas\": [\"urn:ietf:params:scim:schemas:core:2.0:User\"],\n           \"userName\": \"Alice\"\n         }\n       },\n       {\n         \"method\": \"POST\",\n         \"path\": \"/Groups\",\n         \"bulkId\": \"ytrewq\",\n         \"data\": {\n           \"schemas\": [\"urn:ietf:params:scim:schemas:core:2.0:Group\"],\n           \"displayName\": \"Tour Guides\",\n           \"members\": [\n             {\n               \"type\": \"User\",\n               \"value\": \"bulkId:qwerty\"\n             }\n           ]\n         }\n       }\n     ]\n   }\n"
+				},
+				"description": "create a user according to the scim schema"
+			},
+			"response": []
+		},
+		{
 			"name": "user create",
 			"request": {
 				"auth": {

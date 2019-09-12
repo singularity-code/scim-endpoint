@@ -20,9 +20,9 @@ import be.personify.iam.scim.util.Constants;
  * Discovery mappings
  */
 @RestController
-public class DiscoveryMapping extends Mapping {
+public class DiscoveryController extends Controller {
 
-	private static final Logger logger = LogManager.getLogger(DiscoveryMapping.class);
+	private static final Logger logger = LogManager.getLogger(DiscoveryController.class);
 	
 	private Map<String,Object> serviceProviderConfig = null;
 	private List<Object> resourceTypes = null;
@@ -36,7 +36,7 @@ public class DiscoveryMapping extends Mapping {
 		ResponseEntity<?> result = null;
 		try {
 			if ( serviceProviderConfig == null ) {
-				serviceProviderConfig = Constants.objectMapper.readValue(DiscoveryMapping.class.getResourceAsStream("/disc_service_provider_config.json"), Map.class);
+				serviceProviderConfig = Constants.objectMapper.readValue(DiscoveryController.class.getResourceAsStream("/disc_service_provider_config.json"), Map.class);
 			}
 			result = new ResponseEntity<Map<String,Object>>(serviceProviderConfig, HttpStatus.OK);
 		} 
@@ -60,7 +60,7 @@ public class DiscoveryMapping extends Mapping {
 		ResponseEntity<?> result = null;
 		try {
 			if ( resourceTypes == null ) {
-				resourceTypes = Constants.objectMapper.readValue(DiscoveryMapping.class.getResourceAsStream("/disc_resource_types.json"), List.class);
+				resourceTypes = Constants.objectMapper.readValue(DiscoveryController.class.getResourceAsStream("/disc_resource_types.json"), List.class);
 			}
 			result = new ResponseEntity<List<Object>>(resourceTypes, HttpStatus.OK);
 		} 
@@ -82,7 +82,7 @@ public class DiscoveryMapping extends Mapping {
 		ResponseEntity<?> result = null;
 		try {
 			if ( schemas == null ) {
-				schemas = Constants.objectMapper.readValue(DiscoveryMapping.class.getResourceAsStream("/disc_schemas.json"), List.class);
+				schemas = Constants.objectMapper.readValue(DiscoveryController.class.getResourceAsStream("/disc_schemas.json"), List.class);
 			}
 			result = new ResponseEntity<List<Object>>(schemas, HttpStatus.OK);
 		} 

@@ -31,11 +31,11 @@ import be.personify.iam.scim.util.Constants;
  * Bulk
  */
 @RestController
-public class BulkMapping extends Mapping {
+public class BulkController extends Controller {
 
-	private static final Logger logger = LogManager.getLogger(BulkMapping.class);
+	private static final Logger logger = LogManager.getLogger(BulkController.class);
 
-	private static final String SCHEMA = Constants.SCHEMA_BULKREQUEST;
+	private static final String SCHEMA = Constants.SCHEMA_BULKREQUEST; 
 	
 	@Autowired
 	private StorageImplementationFactory storageImplementationFactory;
@@ -46,7 +46,7 @@ public class BulkMapping extends Mapping {
 		if ( schemas.contains(SCHEMA)) {
 			return postBulk(group, request, response);
 		}
-		return invalidSchemaForResource(SCHEMA, null);
+		return invalidSchemaForResource(schemas, null);
 	}
 	
 	
@@ -61,27 +61,17 @@ public class BulkMapping extends Mapping {
 			List<String> schemas = extractSchemas(entity);
 			String method = (String)operation.get(Constants.KEY_METHOD);
 			String bulkId = (String)operation.get(Constants.KEY_BULKID);
-			String path = (String)operation.get(Constants.KEY_PATH);
+			String path = (String)operation.get(Constants.KEY_PATH); 
 			logger.info("operation {} {} {} {}", method, path, bulkId);
 			
 			Map<String,Object> operationResult = new HashMap<String, Object>();
 			
-			Schema schema = null;
-			if ( schemas.contains(Constants.SCHEMA_USER)) {
-				schema = SchemaReader.getInstance().getSchema(Constants.SCHEMA_USER);
-			}
-			else if (schemas.contains(Constants.SCHEMA_GROUP)) {
-				schema = SchemaReader.getInstance().getSchema(Constants.SCHEMA_GROUP);
-			}
-			else {
-				//no valid schema
-			}
-				
+			Schema schema = SchemaReader.getInstance().getSchema(schemas.get(0));
 			
 			if ( method.equalsIgnoreCase("POST")) {
 				logger.info("poooost");
 				try {
-					SchemaReader.getInstance().validate(schema.getId(),entity, true);
+					SchemaReader.getInstance().validate(schema,entity, true);
 					String id = createId(entity);
 					entity.put(Constants.ID, id);
 					String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + Constants.SLASH + id;
