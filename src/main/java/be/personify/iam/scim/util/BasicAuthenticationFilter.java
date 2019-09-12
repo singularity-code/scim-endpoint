@@ -29,7 +29,7 @@ public class BasicAuthenticationFilter implements Filter {
 	
 	private List<String> basicAuthCredentials = null;
 	
-	private Object lock = new Object();
+	private static Object lock = new Object();
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {

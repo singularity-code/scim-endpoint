@@ -60,7 +60,7 @@ public class GroupMapping extends Mapping {
 		if ( schemas.contains(Constants.SCHEMA_GROUP)) {
 			try {
 				//validate
-				SchemaReader.getInstance().validate(Constants.SCHEMA_GROUP, group);
+				SchemaReader.getInstance().validate(Constants.SCHEMA_GROUP, group,true);
 				//id
 				String id = createId(group);
 				group.put(Constants.ID, id);
@@ -111,7 +111,7 @@ public class GroupMapping extends Mapping {
 		if ( schemas.contains(Constants.SCHEMA_GROUP)) {
 			try {
 				//validate
-				SchemaReader.getInstance().validate(Constants.SCHEMA_GROUP, group);
+				SchemaReader.getInstance().validate(Constants.SCHEMA_GROUP, group, true);
 				//check id
 				if ( !group.get(Constants.ID).equals(id)){
 					return showError( 400, "invalid id given in the put", null );

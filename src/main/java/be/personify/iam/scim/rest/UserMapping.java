@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -61,7 +61,7 @@ public class UserMapping extends Mapping {
 		if ( schemas.contains(Constants.SCHEMA_USER)) {
 			try {
 				//validate
-				SchemaReader.getInstance().validate(Constants.SCHEMA_USER, user);
+				SchemaReader.getInstance().validate(Constants.SCHEMA_USER, user, true);
 				//id
 				String id = createId(user);
 				user.put(Constants.ID, id);
@@ -120,10 +120,10 @@ public class UserMapping extends Mapping {
 		if ( schemas.contains(Constants.SCHEMA_USER)) {
 			try {
 				//validate
-				SchemaReader.getInstance().validate(Constants.SCHEMA_USER, user);
+				SchemaReader.getInstance().validate(Constants.SCHEMA_USER, user, true);
 				//check id
 				if ( !user.get(Constants.ID).equals(id)){
-					return showError( 400, "invalid id given in the put", null );
+					return showError( 400, "invalid id given in the put request", null );
 				};
 				String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
 				//create meta	
@@ -153,8 +153,73 @@ public class UserMapping extends Mapping {
 				
 			} 
 			catch (SchemaException e) {
-				logger.error("invalid schema", e);
-				return showError( 400, "schema validation : " + e.getMessage(), null );
+				logger.error("invalid schema in {} ms : {}", ( System.currentTimeMillis() -start), e.getMessage());
+				return showError( 400, "schema validation : " + e.getMessage(), ScimErrorType.invalidSyntax );
+			}
+			catch ( ConstraintViolationException e) {
+				logger.error("constraint violation", e);
+				return showError( 409, "schema validation : " + e.getMessage(), ScimErrorType.uniqueness );
+			}
+		}
+		else {
+			return showError( 400, "schemas contains no user schema " + Constants.SCHEMA_USER, null );
+		}
+		
+	}
+	
+	
+	
+	
+	
+	@PatchMapping(path="/scim/v2/Users/{id}", produces = "application/scim+json")
+	public ResponseEntity<Map<String, Object>> patch(@PathVariable String id , @RequestBody Map<String,Object> user, HttpServletRequest request, HttpServletResponse response ) {
+		long start = System.currentTimeMillis();
+		
+		List<String> schemas = (List<String>)user.get(Constants.KEY_SCHEMAS);
+		if ( schemas.contains(Constants.SCHEMA_USER)) {
+			try {
+				//validate
+				SchemaReader.getInstance().validate(Constants.SCHEMA_USER, user, false);
+				//check id
+				if ( !user.get(Constants.ID).equals(id)){
+					return showError( 400, "invalid id given in the patch request", null );
+				};
+				String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
+				//create meta	
+				
+				Map<String,Object> existingUser = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).get(id);
+				if ( existingUser != null ) {
+					//TODO check etag version and throw exception if no match
+					user.put(Constants.KEY_META, existingUser.get(Constants.KEY_META));
+					//perform delta
+				}
+				else {
+					return showError( 404, "user with id " + id + " can not be updated", null );
+				}
+			
+				response.addHeader(Constants.HEADER_LOCATION, location);
+				
+				for ( String key : user.keySet()) {
+					if ( !key.equals(Constants.ID)) {
+						existingUser.put(key, user.get(key));
+					}
+				}
+				
+				createMeta( new Date(), id, existingUser, Constants.RESOURCE_TYPE_USER, location);
+				
+				storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).put(id, existingUser);
+				
+				existingUser = filterResponse(Constants.RESOURCE_TYPE_USER, existingUser);
+				
+				ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(existingUser, HttpStatus.OK);
+				logger.info("user patched in {} ms", ( System.currentTimeMillis() -start));
+				
+				return result;
+				
+			} 
+			catch (SchemaException e) {
+				logger.error("invalid schema in {} ms : {}", ( System.currentTimeMillis() -start), e.getMessage());
+				return showError( 400, "schema validation : " + e.getMessage(), ScimErrorType.invalidSyntax );
 			}
 			catch ( ConstraintViolationException e) {
 				logger.error("constraint violation", e);

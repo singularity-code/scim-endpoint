@@ -16,7 +16,7 @@ public interface Storage {
 	
 	public boolean deleteAll();
 	
-	public void put( String id, Map<String,Object> object) throws ConstraintViolationException;
+	public void put( String id, final Map<String,Object> object) throws ConstraintViolationException;
 	
 	public List<Map<String,Object>> getAll();
 	

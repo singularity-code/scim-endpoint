@@ -8,7 +8,7 @@ basic server implementation.
 
 **currently implemented :**
 
-- create, get, put, delete, search
+- create, get, put, delete, search, patch
 - discovery
 - basic authentication
 - schema validation
@@ -20,7 +20,6 @@ basic server implementation.
 
 - bulk
 - filtering
-- patch
 - JWT
 
 

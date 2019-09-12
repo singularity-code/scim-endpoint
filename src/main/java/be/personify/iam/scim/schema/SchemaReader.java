@@ -88,11 +88,11 @@ public class SchemaReader {
 	 * @return
 	 * @throws SchemaException
 	 */
-	public Map<String,Object> validate( String schemaId, Map<String,Object> map ) throws SchemaException {
+	public Map<String,Object> validate( String schemaId, Map<String,Object> map, boolean checkRequired ) throws SchemaException {
 		Schema schema = getSchema(schemaId);
 		if ( schema != null ) {
 			for ( SchemaAttribute attribute : schema.getAttributes() ) {
-				validateAttribute( map.get(attribute.getName()), attribute);
+				validateAttribute( map.get(attribute.getName()), attribute, checkRequired);
 			}
 			return map;
 		}
@@ -105,10 +105,10 @@ public class SchemaReader {
 	
 	
 	
-	private void validateAttribute(Object o, SchemaAttribute attribute) throws SchemaException {
+	private void validateAttribute(Object o, SchemaAttribute attribute, boolean checkRequired) throws SchemaException {
 		try {
 			if ( o == null ) {
-				if ( attribute.isRequired()) {
+				if ( attribute.isRequired() && checkRequired ) {
 					throw new SchemaException("attribute with name [" + attribute.getName() + "] is required");
 				}
 			}
@@ -137,11 +137,11 @@ public class SchemaReader {
 				else if ( type.equals(SchemaAttributeType.COMPLEX) ) {
 					if ( attribute.isMultiValued()) {
 						for ( Map<String,Object> mm : (List<Map<String,Object>>)o) {
-							validateMap(attribute, mm);
+							validateMap(attribute, mm,checkRequired);
 						}
 					}
 					else {
-						validateMap(attribute, (Map<String,Object>)o);
+						validateMap(attribute, (Map<String,Object>)o, checkRequired);
 					}
 				}
 				else if ( type.equals(SchemaAttributeType.BOOLEAN) ) {
@@ -157,12 +157,12 @@ public class SchemaReader {
 	}
 
 
-	private void validateMap(SchemaAttribute attribute, Map<String, Object> mm) throws SchemaException {
+	private void validateMap(SchemaAttribute attribute, Map<String, Object> mm, boolean checkRequired) throws SchemaException {
 		for ( String k : mm.keySet() ) {
 			boolean keyFoundInSchema = false;
 			for ( SchemaAttribute subAttribute : attribute.getSubAttributes()) {
 				if ( k.equals(subAttribute.getName())){
-					validateAttribute(mm.get(k), subAttribute);
+					validateAttribute(mm.get(k), subAttribute, checkRequired);
 					keyFoundInSchema = true;
 				}
 			}

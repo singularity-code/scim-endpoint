@@ -16,7 +16,7 @@ public class StorageImplementationFactory {
 	
 	private static final Logger logger = LogManager.getLogger(StorageImplementationFactory.class);
 	
-	@Value("${scim.storage.implementation:be.mogo.iam.scim.storage.MemoryStorageImpl}")
+	@Value("${scim.storage.implementation:be.personify.iam.scim.storage.MemoryStorageImpl}")
 	private String storageImplementation;
 	
 	private Map<String,Storage> storageMap = new HashMap<String, Storage>();

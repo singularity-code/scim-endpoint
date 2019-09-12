@@ -204,6 +204,13 @@ public class MemoryStorageImpl implements Storage {
 	
 	
 	private File getStorageFile() {
+		String dir = PropertyFactory.getInstance().getProperty("scim.storage.memory.flushToFileDirectory");
+		if ( dir != null) {
+			File directory = new File(dir);
+			if ( directory.exists() && directory.isDirectory()) {
+				return new File(directory,"personify-scim-" + type.toLowerCase() + ".dump");
+			}
+		}
 		return new File(Constants.tempDir,"personify-scim-" + type.toLowerCase() + ".dump");
 	}
 

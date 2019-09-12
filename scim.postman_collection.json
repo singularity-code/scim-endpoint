@@ -171,6 +171,40 @@
 			"response": []
 		},
 		{
+			"name": "user patch",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "scim-user",
+						"password": "changeit",
+						"saveHelperData": true,
+						"showPassword": false
+					}
+				},
+				"url": "http://localhost:9029/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"schemas\": [\n        \"urn:ietf:params:scim:schemas:core:2.0:User\"\n    ],\n    \"emails\": [\n        {\n            \"value\": \"homer.simpson@personify.be\",\n            \"type\": \"home\"\n        }\n    ],\n    \"id\": \"b18fd14b-3d68-4dd7-a22a-b0434c1f755d\"\n}"
+				},
+				"description": "create a user according to the scim schema"
+			},
+			"response": []
+		},
+		{
 			"name": "user delete",
 			"request": {
 				"auth": {

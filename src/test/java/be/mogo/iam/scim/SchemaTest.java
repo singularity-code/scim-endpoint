@@ -21,7 +21,7 @@ public class SchemaTest {
 	public void testEmptyMap() {	
 		Map<String,Object> map = new HashMap<String, Object>();
 		try {
-			schemaReader.validate(Constants.SCHEMA_USER, map);
+			schemaReader.validate(Constants.SCHEMA_USER, map,true);
 		}
 		catch ( SchemaException se ) {
 			return ;
@@ -37,7 +37,7 @@ public class SchemaTest {
 		map.put("userName", "username");
 		map.put("externalId", "externalId");
 		try {
-			schemaReader.validate(Constants.SCHEMA_USER, map);
+			schemaReader.validate(Constants.SCHEMA_USER, map, true);
 		}
 		catch ( SchemaException se ) {
 			fail("No schema exception thrown " + se.getMessage());
@@ -52,10 +52,10 @@ public class SchemaTest {
 		map.put("externalId", "externalId");
 		map.put("emails", "another email");
 		try {
-			schemaReader.validate(Constants.SCHEMA_USER, map);
+			schemaReader.validate(Constants.SCHEMA_USER, map, true);
 		}
 		catch ( SchemaException se ) {
-			se.printStackTrace();
+			//se.printStackTrace();
 			return;
 		}
 		fail("No schema exception thrown ");
@@ -70,7 +70,7 @@ public class SchemaTest {
 		String[] emails = new String[] {"another email"};
 		map.put("emails", emails);
 		try {
-			schemaReader.validate(Constants.SCHEMA_USER, map);
+			schemaReader.validate(Constants.SCHEMA_USER, map, true);
 		}
 		catch ( SchemaException se ) {
 			//se.printStackTrace();
@@ -93,10 +93,10 @@ public class SchemaTest {
 		
 		map.put("emails", mailList);
 		try {
-			schemaReader.validate(Constants.SCHEMA_USER, map);
+			schemaReader.validate(Constants.SCHEMA_USER, map, true);
 		}
 		catch ( SchemaException se ) {
-			se.printStackTrace();
+			//se.printStackTrace();
 			return;
 		}
 		fail("No schema exception thrown ");
@@ -116,7 +116,7 @@ public class SchemaTest {
 		
 		map.put("emails", mailList);
 		try {
-			schemaReader.validate(Constants.SCHEMA_USER, map);
+			schemaReader.validate(Constants.SCHEMA_USER, map, true);
 		}
 		catch ( SchemaException se ) {
 			fail("schema exception thrown " + se.getMessage());
