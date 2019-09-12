@@ -16,6 +16,8 @@ public class Constants {
 	public static final String SCHEMA_GROUP = "urn:ietf:params:scim:schemas:core:2.0:Group";
 	public static final String SCHEMA_SERVICEPROVIDERCONFIG = "urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig";
 	public static final String SCHEMA_LISTRESPONSE = "urn:ietf:params:scim:api:messages:2.0:ListResponse";
+	public static final String SCHEMA_BULKREQUEST = "urn:ietf:params:scim:api:messages:2.0:BulkRequest";
+	public static final String SCHEMA_BULKRESPONSE = "urn:ietf:params:scim:api:messages:2.0:BulkResponse";
 	
 	public static final String RESOURCE_TYPE_USER = "User";
 	public static final String RESOURCE_TYPE_GROUP = "Group";
@@ -32,6 +34,13 @@ public class Constants {
 	public static final String KEY_ITEMSPERPAGE = "itemsPerPage";
 	public static final String KEY_TOTALRESULTS = "totalResults";
 	public static final String KEY_RESOURCES = "Resources";
+	public static final String KEY_METHOD = "method";
+	public static final String KEY_BULKID = "bulkId";
+	public static final String KEY_OPERATIONS = "Operations";
+	public static final String KEY_PATH = "path";
+	public static final String KEY_DATA = "data";
+	public static final String KEY_STATUS = "status";
+	public static final String KEY_CODE = "code";
 	
 	
 	public static final ObjectMapper objectMapper = new ObjectMapper();

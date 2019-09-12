@@ -14,11 +14,10 @@ basic server implementation.
 - schema validation
 - paging
 - uniqueness constraint validation
-
+- bulk
 
 **on the list :**
 
-- bulk
 - filtering
 - JWT
 

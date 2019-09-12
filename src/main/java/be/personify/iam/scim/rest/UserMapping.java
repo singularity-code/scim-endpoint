@@ -1,20 +1,12 @@
 package be.personify.iam.scim.rest;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,26 +16,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import be.personify.iam.scim.schema.SchemaException;
-import be.personify.iam.scim.schema.SchemaReader;
-import be.personify.iam.scim.storage.ConstraintViolationException;
-import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
-import be.personify.iam.scim.util.ScimErrorType;
 
 /**
  * User mappings
  */
 @RestController
 public class UserMapping extends Mapping {
-
-	private static final Logger logger = LogManager.getLogger(UserMapping.class);
 	
-	
-	@Autowired
-	private StorageImplementationFactory storageImplementationFactory;
+	private static final String RESOURCE_TYPE = Constants.RESOURCE_TYPE_USER;
+	private static final String SCHEMA = Constants.SCHEMA_USER;
 	
 	
 	/**
@@ -55,53 +38,12 @@ public class UserMapping extends Mapping {
 	 */
 	@PostMapping(path="/scim/v2/Users", produces = "application/scim+json")
 	public ResponseEntity<Map<String, Object>> post(@RequestBody Map<String,Object> user, HttpServletRequest request, HttpServletResponse response ) {
-		long start = System.currentTimeMillis();
-		
-		List<String> schemas = (List<String>)user.get(Constants.KEY_SCHEMAS);
-		if ( schemas.contains(Constants.SCHEMA_USER)) {
-			try {
-				//validate
-				SchemaReader.getInstance().validate(Constants.SCHEMA_USER, user, true);
-				//id
-				String id = createId(user);
-				user.put(Constants.ID, id);
-				String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + Constants.SLASH + id;
-				//create meta			
-				createMeta( new Date(), id, user, Constants.RESOURCE_TYPE_USER, location);
-			
-				response.addHeader(Constants.HEADER_LOCATION, location);
-				
-				storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).put(id, user);
-				
-				user = filterResponse(Constants.RESOURCE_TYPE_USER, user);
-				
-				ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(user, HttpStatus.CREATED);
-				logger.info("user with id {} created in {} ms", id, ( System.currentTimeMillis() -start));
-				
-				return result;
-				
-			} 
-			catch (SchemaException e) { 
-				logger.error("invalid schema in {} ms : {}", ( System.currentTimeMillis() -start), e.getMessage());
-				return showError( 400, "schema validation : " + e.getMessage(), ScimErrorType.invalidSyntax );
-			}
-			catch ( ConstraintViolationException e) {
-				logger.error("constraint violation in {} ms : {}", ( System.currentTimeMillis() -start), e.getMessage());
-				return showError( 409, "schema validation : " + e.getMessage(), ScimErrorType.uniqueness );
-			}
+		List<String> schemas = extractSchemas(user);
+		if ( schemas.contains(SCHEMA)) {
+			return post(user, request, response, SCHEMA, RESOURCE_TYPE);
 		}
-		else {
-			return showError( 400, "schemas contains no user schema " + Constants.SCHEMA_USER, ScimErrorType.invalidSyntax );
-		}
-		
+		return invalidSchemaForResource(SCHEMA, RESOURCE_TYPE);
 	}
-	
-	
-	
-	
-
-
-
 
 
 	/**
@@ -114,124 +56,33 @@ public class UserMapping extends Mapping {
 	 */
 	@PutMapping(path="/scim/v2/Users/{id}", produces = "application/scim+json")
 	public ResponseEntity<Map<String, Object>> put(@PathVariable String id , @RequestBody Map<String,Object> user, HttpServletRequest request, HttpServletResponse response ) {
-		long start = System.currentTimeMillis();
-		
-		List<String> schemas = (List<String>)user.get(Constants.KEY_SCHEMAS);
-		if ( schemas.contains(Constants.SCHEMA_USER)) {
-			try {
-				//validate
-				SchemaReader.getInstance().validate(Constants.SCHEMA_USER, user, true);
-				//check id
-				if ( !user.get(Constants.ID).equals(id)){
-					return showError( 400, "invalid id given in the put request", null );
-				};
-				String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
-				//create meta	
-				
-				Map<String,Object> existingUser = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).get(id);
-				if ( existingUser != null ) {
-					//TODO check etag version and throw exception if no match
-					user.put(Constants.KEY_META, existingUser.get(Constants.KEY_META));
-					//perform delta
-				}
-				else {
-					return showError( 404, "user with id " + id + " can not be updated", null );
-				}
-				
-				createMeta( new Date(), id, user, Constants.RESOURCE_TYPE_USER, location);
-			
-				response.addHeader(Constants.HEADER_LOCATION, location);
-				
-				storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).put(id, user);
-				
-				user = filterResponse(Constants.RESOURCE_TYPE_USER, user);
-				
-				ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(user, HttpStatus.OK);
-				logger.info("user updated in {} ms", ( System.currentTimeMillis() -start));
-				
-				return result;
-				
-			} 
-			catch (SchemaException e) {
-				logger.error("invalid schema in {} ms : {}", ( System.currentTimeMillis() -start), e.getMessage());
-				return showError( 400, "schema validation : " + e.getMessage(), ScimErrorType.invalidSyntax );
-			}
-			catch ( ConstraintViolationException e) {
-				logger.error("constraint violation", e);
-				return showError( 409, "schema validation : " + e.getMessage(), ScimErrorType.uniqueness );
-			}
+		List<String> schemas = extractSchemas(user);
+		if ( schemas.contains(SCHEMA)) {
+			return put(id, user, request, response, SCHEMA, RESOURCE_TYPE);
 		}
-		else {
-			return showError( 400, "schemas contains no user schema " + Constants.SCHEMA_USER, null );
-		}
-		
+		return invalidSchemaForResource(SCHEMA, RESOURCE_TYPE);
 	}
+
+
 	
 	
-	
-	
-	
+	/**
+	 * PATCH a user
+	 * @param id
+	 * @param user
+	 * @param request
+	 * @param response
+	 * @return
+	 */
 	@PatchMapping(path="/scim/v2/Users/{id}", produces = "application/scim+json")
 	public ResponseEntity<Map<String, Object>> patch(@PathVariable String id , @RequestBody Map<String,Object> user, HttpServletRequest request, HttpServletResponse response ) {
-		long start = System.currentTimeMillis();
-		
-		List<String> schemas = (List<String>)user.get(Constants.KEY_SCHEMAS);
-		if ( schemas.contains(Constants.SCHEMA_USER)) {
-			try {
-				//validate
-				SchemaReader.getInstance().validate(Constants.SCHEMA_USER, user, false);
-				//check id
-				if ( !user.get(Constants.ID).equals(id)){
-					return showError( 400, "invalid id given in the patch request", null );
-				};
-				String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
-				//create meta	
-				
-				Map<String,Object> existingUser = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).get(id);
-				if ( existingUser != null ) {
-					//TODO check etag version and throw exception if no match
-					user.put(Constants.KEY_META, existingUser.get(Constants.KEY_META));
-					//perform delta
-				}
-				else {
-					return showError( 404, "user with id " + id + " can not be updated", null );
-				}
-			
-				response.addHeader(Constants.HEADER_LOCATION, location);
-				
-				for ( String key : user.keySet()) {
-					if ( !key.equals(Constants.ID)) {
-						existingUser.put(key, user.get(key));
-					}
-				}
-				
-				createMeta( new Date(), id, existingUser, Constants.RESOURCE_TYPE_USER, location);
-				
-				storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).put(id, existingUser);
-				
-				existingUser = filterResponse(Constants.RESOURCE_TYPE_USER, existingUser);
-				
-				ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(existingUser, HttpStatus.OK);
-				logger.info("user patched in {} ms", ( System.currentTimeMillis() -start));
-				
-				return result;
-				
-			} 
-			catch (SchemaException e) {
-				logger.error("invalid schema in {} ms : {}", ( System.currentTimeMillis() -start), e.getMessage());
-				return showError( 400, "schema validation : " + e.getMessage(), ScimErrorType.invalidSyntax );
-			}
-			catch ( ConstraintViolationException e) {
-				logger.error("constraint violation", e);
-				return showError( 409, "schema validation : " + e.getMessage(), ScimErrorType.uniqueness );
-			}
+		List<String> schemas = extractSchemas(user);
+		if ( schemas.contains(SCHEMA)) {
+			return patch(id, user, request, response,SCHEMA, RESOURCE_TYPE );
 		}
-		else {
-			return showError( 400, "schemas contains no user schema " + Constants.SCHEMA_USER, null );
-		}
-		
+		return invalidSchemaForResource(SCHEMA, RESOURCE_TYPE);
 	}
-	
+
 
 	
 
@@ -244,25 +95,10 @@ public class UserMapping extends Mapping {
 	 */
 	@GetMapping(path="/scim/v2/Users/{id}", produces = "application/scim+json")
 	public ResponseEntity<Map<String,Object>> get(@PathVariable String id , HttpServletRequest request, HttpServletResponse response ) {
-		
-		long start = System.currentTimeMillis();
-		
-		Map<String,Object> user = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).get(id);
-		
-		ResponseEntity<Map<String,Object>> result = null;
-		if ( user != null ) {
-			user = filterResponse(Constants.RESOURCE_TYPE_USER, user);
-			result = new ResponseEntity<Map<String,Object>>(user, HttpStatus.OK);
-			response.addHeader(Constants.HEADER_LOCATION, UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString());
-		}
-		else {
-			result = new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
-		}
-		logger.info("user with id {} fetched in {} ms", id, ( System.currentTimeMillis() -start));
-		
-		return result;
-		
+		return get(id, request, response, RESOURCE_TYPE);
 	}
+
+
 	
 	
 	/**
@@ -278,37 +114,11 @@ public class UserMapping extends Mapping {
 			@RequestParam(required = false, name = "startIndex", defaultValue = "1") Integer startIndex, 
 			@RequestParam(required = false, name="count", defaultValue = "200") Integer count, 
 			HttpServletRequest request, HttpServletResponse response ) {
-		
-		long start = System.currentTimeMillis();
-				
-		List<Map<String,Object>> dataFetched = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).getAll();
-		List<Map<String,Object>> data = new ArrayList<Map<String,Object>>();
-		for ( Map<String,Object> entity : dataFetched) {
-			data.add(filterResponse(Constants.RESOURCE_TYPE_USER, entity));
-		}
-		
-		
-		ResponseEntity<Map<String,Object>> result = null;
-		
-		Map<String,Object> responseObject = new HashMap<String, Object>();
-		responseObject.put(Constants.KEY_SCHEMAS, new String[] {Constants.SCHEMA_LISTRESPONSE});
-		responseObject.put(Constants.KEY_STARTINDEX, startIndex);
-		responseObject.put(Constants.KEY_ITEMSPERPAGE, count);
-		
-		count = count > data.size() ? data.size() : count;
-		List<Map<String,Object>> sublist = data.subList(startIndex -1, count);
-		responseObject.put(Constants.KEY_TOTALRESULTS, data.size());
-		responseObject.put(Constants.KEY_RESOURCES, sublist);
-		
-		result = new ResponseEntity<Map<String,Object>>(responseObject, HttpStatus.OK);
-		
-		logger.info("users fetched in {} ms", ( System.currentTimeMillis() -start));
-		
-		return result;
-		
+		return search(startIndex, count, RESOURCE_TYPE);
 	}
-	
-	
+
+
+
 	
 	
 	/**
@@ -318,28 +128,8 @@ public class UserMapping extends Mapping {
 	 */
 	@DeleteMapping(path="/scim/v2/Users/{id}")
 	public ResponseEntity<?> delete(@PathVariable String id ) {
-		long start = System.currentTimeMillis();
-		
-		Map<String,Object> m = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).get(id);
-		
-		ResponseEntity<?> result = null;
-		if ( m != null ) {
-			boolean deleted = storageImplementationFactory.getStorageImplementation(Constants.RESOURCE_TYPE_USER).delete(id);
-			if ( deleted ) {
-				result = new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
-			}
-			else {
-				return showError( 400, "could not delete user with id " + id, null );
-			}
-		}
-		else {
-			result = new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
-		}
-		logger.info("user with id {} deleted in {} ms", id, ( System.currentTimeMillis() -start));
-		
-		return result;
+		return delete(id, RESOURCE_TYPE);
 	}
-	
 	
 	
 	
