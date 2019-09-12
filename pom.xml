@@ -2,10 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	
-	
-	
-	
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>be.personify.iam</groupId>
 	<artifactId>personify-scim-server</artifactId>
@@ -20,8 +16,14 @@
 		<url>https://www.personify.be</url>
 	</organization>
 
-	<inceptionYear>2019</inceptionYear>
+	<developers>
+		<developer>
+			<name>Wouter Van der beken</name>
+			<email>wouter@mogo.be</email>
+		</developer>
+	</developers>
 	
+	<inceptionYear>2019</inceptionYear>
 	
 	
 	<properties>
@@ -29,46 +31,8 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<project.date>${maven.build.timestamp}</project.date>
-
-		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
-
-		<config.dir>/var/tmp/</config.dir>
-
-		<spring.version>5.0.7.RELEASE</spring.version>
-		<spring.security.version>5.0.2.RELEASE</spring.security.version>
 		<spring-boot-starter-version>2.1.7.RELEASE</spring-boot-starter-version>
-		<spring-hateoas.version>0.23.0.RELEASE</spring-hateoas.version>
-
-		<wicket.version>7.9.0</wicket.version>
-		
-		<jetty9.version>9.2.19.v20160908</jetty9.version>
-		<log4j.version>2.12.1</log4j.version>
 		<junit.version>4.12</junit.version>
-		<!-- allowed values: R7, 1.0, 1.5, 2.0 or none -->
-		<wtp.version>none</wtp.version>
-		<apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
-		<google.collections.version>1.0</google.collections.version>
-		<freemarker.version>2.3.23</freemarker.version>
-		
-		<jackson-core.version>2.9.6</jackson-core.version>
-		<jackson-annotations.version>2.9.2</jackson-annotations.version>
-		<mail.version>1.4</mail.version>
-		
-		<querydsl.version>4.2.1</querydsl.version>
-		
-		<validation-api.version>2.0.0.Final</validation-api.version>
-		
-		<commons-lang3.version>3.6</commons-lang3.version>
-		<commons-io.version>2.6</commons-io.version>
-		<commons-csv.version>1.5</commons-csv.version>
-		<apache-directory-api-all.version>1.0.0</apache-directory-api-all.version>
-		
-		<postgress.version>9.1-901-1.jdbc4</postgress.version>
-		<servlet-api.version>3.0.1</servlet-api.version>
-		<httpclient.version>4.5.6</httpclient.version>
-		<httpasyncclient.version>4.1.4</httpasyncclient.version>
-		
 	</properties>
 
 
@@ -91,41 +55,13 @@
 			<artifactId>spring-boot-starter-log4j2</artifactId>
 			<version>${spring-boot-starter-version}</version>
 		</dependency>
-
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework.boot</groupId> -->
-<!-- 			<artifactId>spring-boot-starter-data-rest</artifactId> -->
-<!-- 			<version>${spring-boot-starter-version}</version> -->
-<!-- 		</dependency> -->
-
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework.boot</groupId> -->
-<!-- 			<artifactId>spring-boot-starter-test</artifactId> -->
-<!-- 			<version>${spring-boot-starter-version}</version> -->
-<!-- 		</dependency> -->
 		
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework.boot</groupId> -->
-<!-- 			<artifactId>spring-boot-starter-actuator</artifactId> -->
-<!-- 			<version>${spring-boot-starter-version}</version> -->
-<!-- 		</dependency> -->
-
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.apache.httpcomponents</groupId> -->
-<!-- 			<artifactId>httpasyncclient</artifactId> -->
-<!-- 			<version>${httpasyncclient.version}</version> -->
-<!-- 		</dependency> -->
-
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
-		
-
 
 	</dependencies>
 
