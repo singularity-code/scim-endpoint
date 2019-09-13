@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import be.personify.iam.scim.schema.Schema;
+
 @Component
 public class StorageImplementationFactory {
 	
@@ -27,7 +29,8 @@ public class StorageImplementationFactory {
 	 * @param resourceType
 	 * @return
 	 */
-	public Storage getStorageImplementation( String resourceType ) {
+	public Storage getStorageImplementation( Schema schema ) {
+		String resourceType = schema.getName();
 		Storage storage = storageMap.get(resourceType);
 		if ( storage == null ) {
 			logger.info("initializing storage for type {}", resourceType);

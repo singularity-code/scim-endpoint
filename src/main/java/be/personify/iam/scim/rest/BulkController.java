@@ -77,7 +77,7 @@ public class BulkController extends Controller {
 					String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + Constants.SLASH + id;
 					Date now = new Date();
 					createMeta( now, id, entity, schema.getName(), location);
-					storageImplementationFactory.getStorageImplementation(schema.getName()).put(id, entity);
+					storageImplementationFactory.getStorageImplementation(schema).put(id, entity);
 					operationResult = composeResultMap(method, bulkId, HttpStatus.CREATED);
 					operationResult.put(Constants.KEY_LOCATION, location);
 					operationResult.put(Constants.KEY_VERSION, createVersion(now));

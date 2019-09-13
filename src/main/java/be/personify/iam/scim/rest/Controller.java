@@ -1,7 +1,6 @@
 package be.personify.iam.scim.rest;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +55,7 @@ public class Controller {
 		
 			response.addHeader(Constants.HEADER_LOCATION, location);
 			
-			storageImplementationFactory.getStorageImplementation(schema.getName()).put(id, entity);
+			storageImplementationFactory.getStorageImplementation(schema).put(id, entity);
 			
 			entity = filterResponse(schema, entity);
 			
@@ -92,7 +91,7 @@ public class Controller {
 			String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
 			//create meta	
 			
-			Map<String,Object> existingUser = storageImplementationFactory.getStorageImplementation(schema.getName()).get(id);
+			Map<String,Object> existingUser = storageImplementationFactory.getStorageImplementation(schema).get(id);
 			if ( existingUser != null ) {
 				//TODO check etag version and throw exception if no match
 				entity.put(Constants.KEY_META, existingUser.get(Constants.KEY_META));
@@ -106,7 +105,7 @@ public class Controller {
 		
 			response.addHeader(Constants.HEADER_LOCATION, location);
 			
-			storageImplementationFactory.getStorageImplementation(schema.getName()).put(id, entity);
+			storageImplementationFactory.getStorageImplementation(schema).put(id, entity);
 			
 			entity = filterResponse(schema, entity);
 			
@@ -142,7 +141,7 @@ public class Controller {
 			String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
 			//create meta	
 			
-			Map<String,Object> existingEntity = storageImplementationFactory.getStorageImplementation(schema.getName()).get(id);
+			Map<String,Object> existingEntity = storageImplementationFactory.getStorageImplementation(schema).get(id);
 			if ( existingEntity != null ) {
 				//TODO check etag version and throw exception if no match
 				entity.put(Constants.KEY_META, existingEntity.get(Constants.KEY_META));
@@ -162,7 +161,7 @@ public class Controller {
 			
 			createMeta( new Date(), id, existingEntity, schema.getName(), location);
 			
-			storageImplementationFactory.getStorageImplementation(schema.getName()).put(id, existingEntity);
+			storageImplementationFactory.getStorageImplementation(schema).put(id, existingEntity);
 			
 			existingEntity = filterResponse(schema, existingEntity);
 			
@@ -187,7 +186,7 @@ public class Controller {
 	
 	protected ResponseEntity<Map<String, Object>> get(String id, HttpServletRequest request, HttpServletResponse response, Schema schema) {
 		long start = System.currentTimeMillis();
-		Map<String,Object> user = storageImplementationFactory.getStorageImplementation(schema.getName()).get(id);
+		Map<String,Object> user = storageImplementationFactory.getStorageImplementation(schema).get(id);
 		
 		ResponseEntity<Map<String,Object>> result = null;
 		if ( user != null ) {
@@ -208,7 +207,7 @@ public class Controller {
 	protected ResponseEntity<Map<String, Object>> search(Integer startIndex, Integer count, Schema schema ) {
 		long start = System.currentTimeMillis();
 				
-		List<Map<String,Object>> dataFetched = storageImplementationFactory.getStorageImplementation(schema.getName()).getAll();
+		List<Map<String,Object>> dataFetched = storageImplementationFactory.getStorageImplementation(schema).getAll();
 		List<Map<String,Object>> data = new ArrayList<Map<String,Object>>();
 		for ( Map<String,Object> entity : dataFetched) {
 			data.add(filterResponse(schema, entity));
@@ -239,11 +238,11 @@ public class Controller {
 	protected ResponseEntity<?> delete(String id, Schema schema ) {
 		long start = System.currentTimeMillis();
 		
-		Map<String,Object> m = storageImplementationFactory.getStorageImplementation(schema.getName()).get(id);
+		Map<String,Object> m = storageImplementationFactory.getStorageImplementation(schema).get(id);
 		
 		ResponseEntity<?> result = null;
 		if ( m != null ) {
-			boolean deleted = storageImplementationFactory.getStorageImplementation(schema.getName()).delete(id);
+			boolean deleted = storageImplementationFactory.getStorageImplementation(schema).delete(id);
 			if ( deleted ) {
 				result = new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 			}

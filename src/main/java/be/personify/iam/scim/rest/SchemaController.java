@@ -28,7 +28,6 @@ import be.personify.iam.scim.schema.SchemaReader;
 public class SchemaController extends Controller {
 	
 	
-	
 	/**
 	 * POST a entity
 	 * @param entity
@@ -37,7 +36,10 @@ public class SchemaController extends Controller {
 	 * @return
 	 */
 	@PostMapping(path="/scim/v2/{resourceType}s", produces = "application/scim+json")
-	public ResponseEntity<Map<String, Object>> post(@PathVariable String resourceType, @RequestBody Map<String,Object> entity, HttpServletRequest request, HttpServletResponse response ) {
+	public ResponseEntity<Map<String, Object>> post(@PathVariable String resourceType, 
+													@RequestBody Map<String,Object> entity, 
+													HttpServletRequest request, 
+													HttpServletResponse response ) {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
 		if ( schema != null ) {
 			List<String> schemas = extractSchemas(entity);
@@ -59,7 +61,11 @@ public class SchemaController extends Controller {
 	 * @return
 	 */
 	@PutMapping(path="/scim/v2/{resourceType}s/{id}", produces = "application/scim+json")
-	public ResponseEntity<Map<String, Object>> put(@PathVariable String resourceType, @PathVariable String id , @RequestBody Map<String,Object> entity, HttpServletRequest request, HttpServletResponse response ) {
+	public ResponseEntity<Map<String, Object>> put(@PathVariable String resourceType,
+													@PathVariable String id , 
+													@RequestBody Map<String,Object> entity, 
+													HttpServletRequest request, 
+													HttpServletResponse response ) {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
 		if ( schema != null ) {
 			List<String> schemas = extractSchemas(entity);
@@ -83,7 +89,11 @@ public class SchemaController extends Controller {
 	 * @return
 	 */
 	@PatchMapping(path="/scim/v2/{resourceType}s/{id}", produces = "application/scim+json")
-	public ResponseEntity<Map<String, Object>> patch(@PathVariable String resourceType, @PathVariable String id , @RequestBody Map<String,Object> entity, HttpServletRequest request, HttpServletResponse response ) {
+	public ResponseEntity<Map<String, Object>> patch(@PathVariable String resourceType,
+														@PathVariable String id , 
+														@RequestBody Map<String,Object> entity, 
+														HttpServletRequest request, 
+														HttpServletResponse response ) {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
 		if ( schema != null ) {
 			List<String> schemas = extractSchemas(entity);
@@ -106,9 +116,15 @@ public class SchemaController extends Controller {
 	 * @return
 	 */
 	@GetMapping(path="/scim/v2/{resourceType}s/{id}", produces = "application/scim+json")
-	public ResponseEntity<Map<String,Object>> get(@PathVariable String resourceType, @PathVariable String id , HttpServletRequest request, HttpServletResponse response ) {
+	public ResponseEntity<Map<String,Object>> get(@PathVariable String resourceType, 
+													@PathVariable String id , 
+													HttpServletRequest request, 
+													HttpServletResponse response ) {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
-		return get(id, request, response, schema);
+		if ( schema != null ) {
+			return get(id, request, response, schema);
+		}
+		return new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
 	}
 
 
@@ -129,7 +145,10 @@ public class SchemaController extends Controller {
 			@RequestParam(required = false, name="count", defaultValue = "200") Integer count, 
 			HttpServletRequest request, HttpServletResponse response ) {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
-		return search(startIndex, count, schema);
+		if (schema != null ) {
+			return search(startIndex, count, schema);
+		}
+		return new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
 	}
 
 
@@ -144,7 +163,10 @@ public class SchemaController extends Controller {
 	@DeleteMapping(path="/scim/v2/{resourceType}s/{id}")
 	public ResponseEntity<?> delete(@PathVariable String resourceType, @PathVariable String id ) {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
-		return delete(id, schema);
+		if (schema != null ) {
+			return delete(id, schema);
+		}
+		return new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
 	}
 	
 	
