@@ -40,7 +40,7 @@ public class BulkController extends Controller {
 	@Autowired
 	private StorageImplementationFactory storageImplementationFactory;
 
-	@PostMapping(path="/scim/v2/Bulk", produces = "application/scim+json")
+	@PostMapping(path="/scim/v2/Bulk", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String, Object>> post(@RequestBody Map<String,Object> group, HttpServletRequest request, HttpServletResponse response ) {
 		List<String> schemas = extractSchemas(group);
 		if ( schemas.contains(SCHEMA)) {

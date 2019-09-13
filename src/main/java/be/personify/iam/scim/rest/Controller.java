@@ -1,9 +1,11 @@
 package be.personify.iam.scim.rest;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -34,6 +36,9 @@ import be.personify.iam.scim.util.ScimErrorType;
  */
 public class Controller {
 	
+	private static final String SCHEMA_VALIDATION = "schema validation : ";
+
+
 	private static final Logger logger = LogManager.getLogger(Controller.class);
 	
 	@Autowired
@@ -46,32 +51,27 @@ public class Controller {
 		try {
 			//validate
 			SchemaReader.getInstance().validate(schema, entity, true);
-			//id
+
+			//prepare
 			String id = createId(entity);
 			entity.put(Constants.ID, id);
 			String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + Constants.SLASH + id;
-			//create meta
 			createMeta( new Date(), id, entity, schema.getName(), location);
-		
 			response.addHeader(Constants.HEADER_LOCATION, location);
 			
+			//store and return
 			storageImplementationFactory.getStorageImplementation(schema).put(id, entity);
-			
-			entity = filterResponse(schema, entity);
-			
-			ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(entity, HttpStatus.CREATED);
 			logger.info("resource of type {} with id {} created in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
-			
-			return result;
+			return new ResponseEntity<>(filterResponse(schema, entity), HttpStatus.CREATED);
 			
 		} 
 		catch (SchemaException e) { 
 			logger.error("invalid schema in {} ms : {}", ( System.currentTimeMillis() -start), e.getMessage());
-			return showError( 400, "schema validation : " + e.getMessage(), ScimErrorType.invalidSyntax );
+			return showError( 400, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.invalidSyntax );
 		}
 		catch ( ConstraintViolationException e) {
 			logger.error("constraint violation in {} ms : {}", ( System.currentTimeMillis() -start), e.getMessage());
-			return showError( 409, "schema validation : " + e.getMessage(), ScimErrorType.uniqueness );
+			return showError( 409, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.uniqueness );
 		}
 	}
 	
@@ -84,44 +84,35 @@ public class Controller {
 		try {
 			//validate
 			SchemaReader.getInstance().validate(schema, entity, true);
-			//check id
 			if ( !entity.get(Constants.ID).equals(id)){
 				return showError( 400, "id [" + entity.get(Constants.ID) + "] given in the data does not match the one in the url [" + id + "]", null );
 			};
-			String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
-			//create meta	
-			
 			Map<String,Object> existingUser = storageImplementationFactory.getStorageImplementation(schema).get(id);
 			if ( existingUser != null ) {
-				//TODO check etag version and throw exception if no match
 				entity.put(Constants.KEY_META, existingUser.get(Constants.KEY_META));
-				//perform delta
 			}
 			else {
 				return showError( 404, "resource of type " + schema.getName() + " with id " + id + " can not be updated", null );
 			}
 			
+			//prepare
+			String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
 			createMeta( new Date(), id, entity, schema.getName(), location);
-		
 			response.addHeader(Constants.HEADER_LOCATION, location);
 			
+			//store
 			storageImplementationFactory.getStorageImplementation(schema).put(id, entity);
-			
-			entity = filterResponse(schema, entity);
-			
-			ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(entity, HttpStatus.OK);
 			logger.info("resource of type {} with id {} updated in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
-			
-			return result;
+			return new ResponseEntity<>(filterResponse(schema, entity), HttpStatus.OK);
 			
 		} 
 		catch (SchemaException e) {
 			logger.error("invalid schema in {} ms : {}", ( System.currentTimeMillis() -start), e.getMessage());
-			return showError( 400, "schema validation : " + e.getMessage(), ScimErrorType.invalidSyntax );
+			return showError( 400, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.invalidSyntax );
 		}
 		catch ( ConstraintViolationException e) {
 			logger.error("constraint violation", e);
-			return showError( 409, "schema validation : " + e.getMessage(), ScimErrorType.uniqueness );
+			return showError( 409, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.uniqueness );
 		}
 	}
 	
@@ -134,18 +125,15 @@ public class Controller {
 		try {
 			//validate
 			SchemaReader.getInstance().validate(schema, entity, false);
-			//check id
 			if ( !entity.get(Constants.ID).equals(id)){
 				return showError( 400, "invalid id given in the patch request", null );
 			};
 			String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
-			//create meta	
+			
 			
 			Map<String,Object> existingEntity = storageImplementationFactory.getStorageImplementation(schema).get(id);
 			if ( existingEntity != null ) {
-				//TODO check etag version and throw exception if no match
 				entity.put(Constants.KEY_META, existingEntity.get(Constants.KEY_META));
-				//perform delta
 			}
 			else {
 				return showError( 404, "resource of type " + schema.getName() + " with id " + id + " can not be updated", null );
@@ -160,24 +148,19 @@ public class Controller {
 			}
 			
 			createMeta( new Date(), id, existingEntity, schema.getName(), location);
-			
 			storageImplementationFactory.getStorageImplementation(schema).put(id, existingEntity);
 			
-			existingEntity = filterResponse(schema, existingEntity);
-			
-			ResponseEntity<Map<String, Object>> result = new ResponseEntity<Map<String, Object>>(existingEntity, HttpStatus.OK);
 			logger.info("resource of type {} with id {} patched in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
-			
-			return result;
+			return new ResponseEntity<>(filterResponse(schema, existingEntity), HttpStatus.OK);
 			
 		} 
 		catch (SchemaException e) {
 			logger.error("invalid schema in {} ms : {}", ( System.currentTimeMillis() -start), e.getMessage());
-			return showError( 400, "schema validation : " + e.getMessage(), ScimErrorType.invalidSyntax );
+			return showError( 400, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.invalidSyntax );
 		}
 		catch ( ConstraintViolationException e) {
 			logger.error("constraint violation", e);
-			return showError( 409, "schema validation : " + e.getMessage(), ScimErrorType.uniqueness );
+			return showError( 409, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.uniqueness );
 		}
 	}
 	
@@ -191,7 +174,7 @@ public class Controller {
 		ResponseEntity<Map<String,Object>> result = null;
 		if ( user != null ) {
 			user = filterResponse(schema, user);
-			result = new ResponseEntity<Map<String,Object>>(user, HttpStatus.OK);
+			result = new ResponseEntity<>(user, HttpStatus.OK);
 			response.addHeader(Constants.HEADER_LOCATION, UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString());
 		}
 		else {
@@ -208,7 +191,7 @@ public class Controller {
 		long start = System.currentTimeMillis();
 				
 		List<Map<String,Object>> dataFetched = storageImplementationFactory.getStorageImplementation(schema).getAll();
-		List<Map<String,Object>> data = new ArrayList<Map<String,Object>>();
+		List<Map<String,Object>> data = new ArrayList<>();
 		for ( Map<String,Object> entity : dataFetched) {
 			data.add(filterResponse(schema, entity));
 		}
@@ -216,7 +199,7 @@ public class Controller {
 		
 		ResponseEntity<Map<String,Object>> result = null;
 		
-		Map<String,Object> responseObject = new HashMap<String, Object>();
+		Map<String,Object> responseObject = new HashMap<>();
 		responseObject.put(Constants.KEY_SCHEMAS, new String[] {Constants.SCHEMA_LISTRESPONSE});
 		responseObject.put(Constants.KEY_STARTINDEX, startIndex);
 		responseObject.put(Constants.KEY_ITEMSPERPAGE, count);
@@ -226,7 +209,7 @@ public class Controller {
 		responseObject.put(Constants.KEY_TOTALRESULTS, data.size());
 		responseObject.put(Constants.KEY_RESOURCES, sublist);
 		
-		result = new ResponseEntity<Map<String,Object>>(responseObject, HttpStatus.OK);
+		result = new ResponseEntity<>(responseObject, HttpStatus.OK);
 		
 		logger.info("resources of type {} fetched in {} ms", schema.getName(), ( System.currentTimeMillis() -start));
 		
@@ -251,7 +234,7 @@ public class Controller {
 			}
 		}
 		else {
-			result = new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
+			result = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		logger.info("resource of type {} with id {} deleted in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 		
@@ -265,7 +248,7 @@ public class Controller {
 	protected void createMeta(Date date, String id, Map<String, Object> user, String resourceType, String location) {
 		
 		Map<String,String> map = new HashMap<String, String>();
-		String formattedDate = Constants.format.format(date);
+		String formattedDate = new SimpleDateFormat(Constants.DATEFORMAT_STRING, Locale.US).format(date);
 		if ( user.containsKey(Constants.KEY_META)) {
 			map = (Map<String,String>)user.get(Constants.KEY_META);
 		}
@@ -289,7 +272,7 @@ public class Controller {
 
 
 	protected ResponseEntity<Map<String, Object>> showError(int status, String detail, ScimErrorType scimType) {
-		Map<String,Object> error = new HashMap<String, Object>();
+		Map<String,Object> error = new HashMap<>();
 		error.put(Constants.KEY_SCHEMAS, new String[] {"urn:ietf:params:scim:api:messages:2.0:Error"});
 		if ( scimType != null) {
 			error.put("scimType", scimType);
@@ -303,7 +286,7 @@ public class Controller {
 	
 
 	protected Map<String, Object> filterResponse(Schema schema, Map<String, Object> entity) {
-		Map<String,Object> copy = new HashMap<String, Object>();
+		Map<String,Object> copy = new HashMap<>();
 		copy.putAll(entity);
 		for ( SchemaAttribute attribute : schema.getAttributes()) {
 			if ( attribute.getReturned().equalsIgnoreCase(Constants.NEVER)) {

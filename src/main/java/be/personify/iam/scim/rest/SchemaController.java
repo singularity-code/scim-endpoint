@@ -35,7 +35,7 @@ public class SchemaController extends Controller {
 	 * @param response
 	 * @return
 	 */
-	@PostMapping(path="/scim/v2/{resourceType}s", produces = "application/scim+json")
+	@PostMapping(path="/scim/v2/{resourceType}s", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String, Object>> post(@PathVariable String resourceType, 
 													@RequestBody Map<String,Object> entity, 
 													HttpServletRequest request, 
@@ -43,10 +43,15 @@ public class SchemaController extends Controller {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
 		if ( schema != null ) {
 			List<String> schemas = extractSchemas(entity);
-			if ( schemas.contains(schema.getId())) {
+			if ( schemas != null && schemas.size() > 0) {
+				if ( schemas.contains(schema.getId())) {
+					return post(entity, request, response, schema);
+				}
+				return invalidSchemaForResource(schemas, resourceType);
+			}
+			else {
 				return post(entity, request, response, schema);
 			}
-			return invalidSchemaForResource(schemas, resourceType);
 		}
 		return new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
 	}
@@ -60,7 +65,7 @@ public class SchemaController extends Controller {
 	 * @param response
 	 * @return
 	 */
-	@PutMapping(path="/scim/v2/{resourceType}s/{id}", produces = "application/scim+json")
+	@PutMapping(path="/scim/v2/{resourceType}s/{id}", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String, Object>> put(@PathVariable String resourceType,
 													@PathVariable String id , 
 													@RequestBody Map<String,Object> entity, 
@@ -69,10 +74,15 @@ public class SchemaController extends Controller {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
 		if ( schema != null ) {
 			List<String> schemas = extractSchemas(entity);
-			if ( schemas.contains(schema.getId())) {
+			if ( schemas != null && schemas.size() > 0) {
+				if ( schemas.contains(schema.getId())) {
+					return put(id, entity, request, response, schema);
+				}
+				return invalidSchemaForResource(schemas, resourceType);
+			}
+			else {
 				return put(id, entity, request, response, schema);
 			}
-			return invalidSchemaForResource(schemas, resourceType);
 		}
 		return new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
 	}
@@ -88,7 +98,7 @@ public class SchemaController extends Controller {
 	 * @param response
 	 * @return
 	 */
-	@PatchMapping(path="/scim/v2/{resourceType}s/{id}", produces = "application/scim+json")
+	@PatchMapping(path="/scim/v2/{resourceType}s/{id}", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String, Object>> patch(@PathVariable String resourceType,
 														@PathVariable String id , 
 														@RequestBody Map<String,Object> entity, 
@@ -115,7 +125,7 @@ public class SchemaController extends Controller {
 	 * @param response
 	 * @return
 	 */
-	@GetMapping(path="/scim/v2/{resourceType}s/{id}", produces = "application/scim+json")
+	@GetMapping(path="/scim/v2/{resourceType}s/{id}", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String,Object>> get(@PathVariable String resourceType, 
 													@PathVariable String id , 
 													HttpServletRequest request, 
@@ -138,7 +148,7 @@ public class SchemaController extends Controller {
 	 * @param response
 	 * @return
 	 */
-	@GetMapping(path="/scim/v2/{resourceType}s", produces = "application/scim+json")
+	@GetMapping(path="/scim/v2/{resourceType}s", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String,Object>> search( 
 			@PathVariable String resourceType,
 			@RequestParam(required = false, name = "startIndex", defaultValue = "1") Integer startIndex, 

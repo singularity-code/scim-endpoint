@@ -34,8 +34,7 @@ public class SchemaReader {
 			try {
 				_instance.read();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("can not create a schemareader instance", e);
 				_instance = null;
 			}
 		}

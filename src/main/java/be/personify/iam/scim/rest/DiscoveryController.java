@@ -29,7 +29,7 @@ public class DiscoveryController extends Controller {
 	private List<Object> schemas = null;
 
 
-	@GetMapping(path="/scim/v2/ServiceProviderConfig", produces = "application/scim+json")
+	@GetMapping(path="/scim/v2/ServiceProviderConfig", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<?> getServiceProviderConfig(HttpServletRequest request, HttpServletResponse response ) {
 		
 		long start = System.currentTimeMillis();
@@ -53,7 +53,7 @@ public class DiscoveryController extends Controller {
 	
 	
 	
-	@GetMapping(path="/scim/v2/ResourceTypes", produces = "application/scim+json")
+	@GetMapping(path="/scim/v2/ResourceTypes", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<?> getResourceTypes(HttpServletRequest request, HttpServletResponse response ) {
 		
 		long start = System.currentTimeMillis();
@@ -75,7 +75,7 @@ public class DiscoveryController extends Controller {
 	}
 	
 	
-	@GetMapping(path="/scim/v2/Schemas", produces = "application/scim+json")
+	@GetMapping(path="/scim/v2/Schemas", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<?> getSchemas(HttpServletRequest request, HttpServletResponse response ) {
 		
 		long start = System.currentTimeMillis();

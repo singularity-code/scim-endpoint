@@ -9,7 +9,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Constants {
 	
-	public static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+	
+	public static final String DATEFORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+	
+	
 	//format.setTimeZone(TimeZone.getTimeZone("UTC"));
 	
 //	public static final String SCHEMA_USER = "urn:ietf:params:scim:schemas:core:2.0:User";

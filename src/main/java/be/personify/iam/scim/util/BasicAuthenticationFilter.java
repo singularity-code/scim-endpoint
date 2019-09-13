@@ -42,7 +42,8 @@ public class BasicAuthenticationFilter implements Filter {
 			if ( auth.length == 2) {
 				if ( auth[0].equalsIgnoreCase(BASIC)) {
 					String credential = new String(Base64Utils.decode(auth[1].getBytes()));
-					if ( getBasicAuthList().contains(credential)) {
+					List<String> users =  getBasicAuthList();
+					if ( users != null && users.contains(credential)) {
 						chain.doFilter(request, response);
 						filtered = true;
 					}
