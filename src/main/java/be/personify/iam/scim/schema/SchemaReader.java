@@ -26,7 +26,7 @@ public class SchemaReader {
 		
 	/**
 	 * Creates an instance if not yet present
-	 * @return
+	 * @return a instance of the SchemaReader
 	 */
 	public static synchronized SchemaReader getInstance() {
 		if ( _instance == null ) {
@@ -63,8 +63,8 @@ public class SchemaReader {
 	
 	/**
 	 * Gets the schema from the cache
-	 * @param id
-	 * @return
+	 * @param id the id of the schema
+	 * @return the schema with the given id
 	 */
 	public Schema getSchema( String id) {
 		return schemaMap.get(id);
@@ -78,11 +78,12 @@ public class SchemaReader {
 	
 	
 	/**
-	 * Validates the object against the schema
-	 * @param schemaId
-	 * @param map
-	 * @return
-	 * @throws SchemaException
+	 * Validates		
+	 * @param schema the schema to validate
+	 * @param map the map to be validated
+	 * @param checkRequired boolean indicating if the required attributes have to be checked
+	 * @return the same map
+	 * @throws SchemaException exception containing the errors
 	 */
 	public Map<String,Object> validate( Schema schema, Map<String,Object> map, boolean checkRequired ) throws SchemaException {
 		for ( SchemaAttribute attribute : schema.getAttributes() ) {

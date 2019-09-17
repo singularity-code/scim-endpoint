@@ -15,9 +15,10 @@ public class SearchCriteria implements Serializable {
 
 	private List<SearchCriterium> criteria = new ArrayList<>();
 
+	
 	/**
 	 * constructor with array of criteriums
-	 * @param criteriums
+	 * @param criteriums the array of criteriums
 	 */
 	public SearchCriteria( SearchCriterium...criteriums ) {
 		for ( SearchCriterium sc : criteriums ) {
@@ -27,7 +28,7 @@ public class SearchCriteria implements Serializable {
 	
 	/**
 	 * Gets the criteria
-	 * @return
+	 * @return the list containing the criteria
 	 */
 	public List<SearchCriterium> getCriteria() {
 		return criteria;
@@ -35,7 +36,7 @@ public class SearchCriteria implements Serializable {
 
 	/**
 	 * Sets the criteria
-	 * @param criteria
+	 * @param criteria the criteria to be set
 	 */
 	public void setCriteria(List<SearchCriterium> criteria) {
 		this.criteria = criteria;

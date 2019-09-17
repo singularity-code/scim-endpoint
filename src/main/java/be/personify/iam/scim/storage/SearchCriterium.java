@@ -20,14 +20,15 @@ public class SearchCriterium implements Serializable {
 	
 	/**
 	 * Constructor
-	 * @param key
-	 * @param value
+	 * @param key the key of the criterium
+	 * @param value the value of the criterium
 	 */
 	public SearchCriterium(String key, Object value) {
 		this.key = key;
 		this.value = value;
 		this.searchOperation = SearchOperation.EQUALS;
 	}
+	
 	
 	public SearchCriterium(String key, Object value, SearchOperation searchOperation) {
 		this.key = key;

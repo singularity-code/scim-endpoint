@@ -25,9 +25,9 @@ public class StorageImplementationFactory {
 	
 	
 	/**
-	 * returns the storage implementation
-	 * @param resourceType
-	 * @return
+	 * Gets the storage implementation
+	 * @param schema the schema
+	 * @return the storage
 	 */
 	public Storage getStorageImplementation( Schema schema ) {
 		String resourceType = schema.getName();

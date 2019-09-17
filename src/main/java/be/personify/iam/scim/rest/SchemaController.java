@@ -29,11 +29,12 @@ public class SchemaController extends Controller {
 	
 	
 	/**
-	 * POST a entity
-	 * @param entity
-	 * @param request
-	 * @param response
-	 * @return
+	 * POST of a entity
+	 * @param resourceType the resourcetype for which to POST
+	 * @param entity the entity to post
+	 * @param request the HttpServletRequest
+	 * @param response the HttpServletResponse
+	 * @return the map as a ResponseEntity
 	 */
 	@PostMapping(path="/scim/v2/{resourceType}s", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String, Object>> post(@PathVariable String resourceType, 
@@ -58,12 +59,13 @@ public class SchemaController extends Controller {
 
 
 	/**
-	 * PUT a entity
-	 * @param id
-	 * @param entity
-	 * @param request
-	 * @param response
-	 * @return
+	 * PUT of a entity
+	 * @param resourceType the resourcetype of the entity to PUT
+	 * @param id the id of the entity of the given resourcetype
+	 * @param entity the entity itself as a map
+	 * @param request the HttpServletRequest
+	 * @param response the HttpServletResponse
+	 * @return the map as a ResponseEntity
 	 */
 	@PutMapping(path="/scim/v2/{resourceType}s/{id}", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String, Object>> put(@PathVariable String resourceType,
@@ -92,11 +94,12 @@ public class SchemaController extends Controller {
 	
 	/**
 	 * PATCH a entity
-	 * @param id
-	 * @param enitty
-	 * @param request
-	 * @param response
-	 * @return
+	 * @param resourceType the resourcetype of the entity to PATCH
+	 * @param id the id of the entity
+	 * @param entity the entity
+	 * @param request the HttpServletRequest
+	 * @param response the HttpServletResponse
+	 * @return the map as a ResponseEntity
 	 */
 	@PatchMapping(path="/scim/v2/{resourceType}s/{id}", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String, Object>> patch(@PathVariable String resourceType,
@@ -119,11 +122,12 @@ public class SchemaController extends Controller {
 	
 
 	/**
-	 * GET a entity
-	 * @param id
-	 * @param request
-	 * @param response
-	 * @return
+	 * GETs the entity
+	 * @param resourceType the resourceType of the entity
+	 * @param id the id of the entity
+	 * @param request the HttpServletRequest
+	 * @param response the HttpServletResponse
+	 * @return the map containing the entity
 	 */
 	@GetMapping(path="/scim/v2/{resourceType}s/{id}", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String,Object>> get(@PathVariable String resourceType, 
@@ -141,12 +145,14 @@ public class SchemaController extends Controller {
 	
 	
 	/**
-	 * SEARCH entities
-	 * @param startIndex
-	 * @param count
-	 * @param request
-	 * @param response
-	 * @return
+	 * Searches teh entity
+	 * @param resourceType the resourcetype of the entities to be found
+	 * @param startIndex the starindex ( default 1 )
+	 * @param count the count of the entities to be returned
+	 * @param filter the filter to be used
+	 * @param request the HttpServletRequest
+	 * @param response the HttpSevletResponse
+	 * @return the entities found
 	 */
 	@GetMapping(path="/scim/v2/{resourceType}s", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String,Object>> search( 
@@ -167,9 +173,10 @@ public class SchemaController extends Controller {
 	
 	
 	/**
-	 * Deletes the entity
-	 * @param id
-	 * @return
+	 * DELETEs the entity
+	 * @param resourceType the resourcetype of the entity to be deleted
+	 * @param id the id of the entity to be deleted
+	 * @return the entity deleted
 	 */
 	@DeleteMapping(path="/scim/v2/{resourceType}s/{id}")
 	public ResponseEntity<?> delete(@PathVariable String resourceType, @PathVariable String id ) {
