@@ -153,6 +153,7 @@ public class SchemaController extends Controller {
 			@PathVariable String resourceType,
 			@RequestParam(required = false, name = "startIndex", defaultValue = "1") Integer startIndex, 
 			@RequestParam(required = false, name="count", defaultValue = "200") Integer count, 
+			@RequestParam(required = false, name="filter") String filter,
 			HttpServletRequest request, HttpServletResponse response ) {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
 		if (schema != null ) {
