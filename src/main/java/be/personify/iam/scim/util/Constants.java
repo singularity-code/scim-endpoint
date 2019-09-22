@@ -1,10 +1,5 @@
 package be.personify.iam.scim.util;
 
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Constants {
