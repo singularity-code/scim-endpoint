@@ -29,7 +29,7 @@ You can either choose to download the binaries or clone the project.
 
 For spinning up a scim server from the [downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/) : 
 
-> jjava -jar personify-scim-server-1.0.0-SNAPSHOT.jar
+> java -jar personify-scim-server-1.0.0-SNAPSHOT.jar
 
 When you have cloned the project, you can build the binary from source.
 
