@@ -72,6 +72,7 @@ public class MemoryStorageImpl implements Storage {
 		if (storage.remove(id) == null ) {
 			return false;
 		}
+		removeConstraints(id);
 		return true;
 	}
 	
@@ -160,12 +161,28 @@ public class MemoryStorageImpl implements Storage {
 	}
 	
 	
-	private void updateConstraints(Object id, Map<String, Object> object) {
+	private void updateConstraints(String id, Map<String, Object> object) {
 		for ( String constraint : uniqueConstraintsList) {
 			Object valueFromEntity = object.get(constraint);
 			if ( valueFromEntity != null ) {
 				uniqueConstraints.get(constraint).put(valueFromEntity, id);
 			}
+		}
+	}
+	
+	private void removeConstraints(String id) {
+		for ( String constraint : uniqueConstraintsList) {
+			 Map<Object,Object> c = uniqueConstraints.get(constraint);
+			 if ( c.containsValue(id)) {
+				 Map<Object,Object> newMap = new HashMap<Object, Object>();
+				 for (Object o : c.values()) {
+					 if ( !c.get(o).equals(id)) {
+						 newMap.put(o, c.get(o));
+					 }
+				 }
+				 uniqueConstraints.put(constraint, newMap);
+			 }
+			
 		}
 	}
 
