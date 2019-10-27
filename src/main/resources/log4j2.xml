@@ -9,8 +9,8 @@
 			</PatternLayout>
 		</Console>
 		<RollingFile name="RollingFile"
-			fileName="personify-scim-server.log"
-			filePattern="personify-scim-server-%d{MM-dd-yyyy}-%i.log.gz">
+			fileName="/export/data/logs/personify-scim-server.log"
+			filePattern="/export/data/logs/personify-scim-server-%d{MM-dd-yyyy}-%i.log.gz">
 			<PatternLayout>
 				<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
 			</PatternLayout>

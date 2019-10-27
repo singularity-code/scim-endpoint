@@ -40,9 +40,8 @@ items:
         volumes:
         - emptyDir: {}
           name: personify-scim-server-volume-1
-        - name: personify-scim-server-volume-2
-          persistentVolumeClaim:
-            claimName: logs-pv-claim
+        - emptyDir: {}
+          name: personify-scim-server-volume-2
     test: false
     triggers:
     - type: ConfigChange
