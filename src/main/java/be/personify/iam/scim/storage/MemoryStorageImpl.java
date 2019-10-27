@@ -175,7 +175,7 @@ public class MemoryStorageImpl implements Storage {
 			 Map<Object,Object> c = uniqueConstraints.get(constraint);
 			 if ( c.containsValue(id)) {
 				 Map<Object,Object> newMap = new HashMap<Object, Object>();
-				 for (Object o : c.values()) {
+				 for (Object o : c.keySet()) {
 					 if ( !c.get(o).equals(id)) {
 						 newMap.put(o, c.get(o));
 					 }
