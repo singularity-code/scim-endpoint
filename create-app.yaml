@@ -33,15 +33,11 @@ items:
             protocol: TCP
           resources: {}
           volumeMounts:
-          - mountPath: /export/data/logs
-            name: personify-scim-server-volume-1
           - mountPath: /tmp
-            name: personify-scim-server-volume-2
+            name: personify-scim-server-volume-1
         volumes:
         - emptyDir: {}
           name: personify-scim-server-volume-1
-        - emptyDir: {}
-          name: personify-scim-server-volume-2
     test: false
     triggers:
     - type: ConfigChange

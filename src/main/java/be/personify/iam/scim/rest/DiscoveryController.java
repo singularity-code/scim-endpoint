@@ -39,7 +39,7 @@ public class DiscoveryController extends Controller {
 				serviceProviderConfig = Constants.objectMapper.readValue(DiscoveryController.class.getResourceAsStream("/disc_service_provider_config.json"), Map.class);
 			}
 			result = new ResponseEntity<Map<String,Object>>(serviceProviderConfig, HttpStatus.OK);
-		} 
+		}
 		catch (IOException e) {
 			logger.error("can not read service provider config", e);
 			result = new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
