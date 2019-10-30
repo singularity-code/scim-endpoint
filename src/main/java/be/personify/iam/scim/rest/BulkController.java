@@ -69,7 +69,6 @@ public class BulkController extends Controller {
 			Schema schema = SchemaReader.getInstance().getSchema(schemas.get(0));
 			
 			if ( method.equalsIgnoreCase("POST")) {
-				logger.info("poooost");
 				try {
 					SchemaReader.getInstance().validate(schema,entity, true);
 					String id = createId(entity);
@@ -87,7 +86,6 @@ public class BulkController extends Controller {
 					operationResult = composeResultMap(method, bulkId, HttpStatus.BAD_REQUEST);
 				} 
 				catch (ConstraintViolationException e) {
-					// TODO Auto-generated catch block
 					//e.printStackTrace();
 					operationResult = composeResultMap(method, bulkId, HttpStatus.BAD_REQUEST);
 				}

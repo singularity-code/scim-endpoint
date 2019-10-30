@@ -3,7 +3,7 @@
 	"info": {
 		"name": "scim",
 		"_postman_id": "d54abaf7-a82f-61c5-adbc-99b7a1f6b15b",
-		"description": "core scim implementation postman calls",
+		"description": "core scim server implementation postman calls",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
 	"item": [
@@ -53,7 +53,7 @@
 						"showPassword": false
 					}
 				},
-				"url": "http://localhost:9029/scim/v2/Users",
+				"url": "https://www.personify.be/scim/v2/Users",
 				"method": "POST",
 				"header": [
 					{
@@ -87,7 +87,7 @@
 						"showPassword": false
 					}
 				},
-				"url": "http://localhost:9029/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
+				"url": "{{protocol}}://{{host}}/scim/v2/Users",
 				"method": "GET",
 				"header": [
 					{
@@ -98,6 +98,11 @@
 					{
 						"key": "Content-Type",
 						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Forwarded",
+						"value": "by=https://www.personify.be",
 						"description": ""
 					}
 				],
@@ -166,7 +171,7 @@
 					"mode": "raw",
 					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
 				},
-				"description": ""
+				"description": null
 			},
 			"response": []
 		},
@@ -221,13 +226,11 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0"
 					},
 					{
 						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
+						"value": "application/json"
 					}
 				],
 				"body": {
@@ -268,7 +271,7 @@
 					"mode": "raw",
 					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
 				},
-				"description": ""
+				"description": null
 			},
 			"response": []
 		},
@@ -336,7 +339,7 @@
 					"mode": "raw",
 					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
 				},
-				"description": ""
+				"description": null
 			},
 			"response": []
 		},
@@ -357,13 +360,11 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0"
 					},
 					{
 						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
+						"value": "application/json"
 					}
 				],
 				"body": {
@@ -401,15 +402,11 @@
 					"query": [
 						{
 							"key": "startIndex",
-							"value": "1",
-							"equals": true,
-							"description": ""
+							"value": "1"
 						},
 						{
 							"key": "count",
-							"value": "10",
-							"equals": true,
-							"description": ""
+							"value": "10"
 						}
 					],
 					"variable": []
@@ -418,13 +415,11 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0"
 					},
 					{
 						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
+						"value": "application/json"
 					}
 				],
 				"body": {
@@ -465,7 +460,7 @@
 					"mode": "raw",
 					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
 				},
-				"description": ""
+				"description": null
 			},
 			"response": []
 		},
@@ -499,7 +494,7 @@
 					"mode": "raw",
 					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
 				},
-				"description": ""
+				"description": null
 			},
 			"response": []
 		},
@@ -533,7 +528,7 @@
 					"mode": "raw",
 					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
 				},
-				"description": ""
+				"description": null
 			},
 			"response": []
 		},
@@ -567,7 +562,7 @@
 					"mode": "raw",
 					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
 				},
-				"description": ""
+				"description": null
 			},
 			"response": []
 		}
