@@ -45,7 +45,7 @@ use the integrated [postman collection](https://bitbucket.org/wouter29/personify
 a storage implementation is included, tune or implement other storages
 
 if you **really** do not want to build or run it yourself : point the postman collection 
-towards https://www.personify.be/scim/v2/Users
+towards https://www.personify.be/scim/v2/Users ( 401 means unauthorized, so use correct basic auth credentials )
 
 if you **really really** do not want to build anything : spin up the [docker image](https://hub.docker.com/r/personify/personify-scim-server)
 
