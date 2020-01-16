@@ -53,7 +53,7 @@
 						"showPassword": false
 					}
 				},
-				"url": "https://www.personify.be/scim/v2/Users",
+				"url": "{{protocol}}://{{host}}/scim/v2/Users",
 				"method": "POST",
 				"header": [
 					{
@@ -127,7 +127,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:9029/scim/v2/Users?startIndex=1&count=10",
+					"raw": "{{protocol}}://{{host}}/scim/v2/Users?startIndex=1&count=10",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -187,7 +187,7 @@
 						"showPassword": false
 					}
 				},
-				"url": "http://localhost:9029/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
+				"url": "{{protocol}}://{{host}}/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
 				"method": "PUT",
 				"header": [
 					{
@@ -221,7 +221,7 @@
 						"showPassword": false
 					}
 				},
-				"url": "http://localhost:9029/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
+				"url": "{{protocol}}://{{host}}/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
 				"method": "PATCH",
 				"header": [
 					{
@@ -253,7 +253,7 @@
 						"showPassword": false
 					}
 				},
-				"url": "http://localhost:9029/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
+				"url": "{{protocol}}://{{host}}/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
 				"method": "DELETE",
 				"header": [
 					{
@@ -287,7 +287,7 @@
 						"showPassword": false
 					}
 				},
-				"url": "http://localhost:9029/scim/v2/Groups",
+				"url": "{{protocol}}://{{host}}/scim/v2/Groups",
 				"method": "POST",
 				"header": [
 					{
@@ -321,7 +321,7 @@
 						"showPassword": false
 					}
 				},
-				"url": "http://localhost:9029/scim/v2/Groups/e98b6d2a-efdd-4e0a-a66f-80f3041a56b2",
+				"url": "{{protocol}}://{{host}}/scim/v2/Groups/e98b6d2a-efdd-4e0a-a66f-80f3041a56b2",
 				"method": "GET",
 				"header": [
 					{
@@ -355,7 +355,7 @@
 						"showPassword": false
 					}
 				},
-				"url": "http://localhost:9029/scim/v2/Groups/e98b6d2a-efdd-4e0a-a66f-80f3041a56b2",
+				"url": "{{protocol}}://{{host}}/scim/v2/Groups/e98b6d2a-efdd-4e0a-a66f-80f3041a56b2",
 				"method": "PUT",
 				"header": [
 					{
@@ -388,7 +388,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:9029/scim/v2/Groups?startIndex=1&count=10",
+					"raw": "{{protocol}}://{{host}}/scim/v2/Groups?startIndex=1&count=10",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -442,7 +442,7 @@
 						"showPassword": false
 					}
 				},
-				"url": "http://localhost:9029/scim/v2/Groups/e98b6d2a-efdd-4e0a-a66f-80f3041a56b2",
+				"url": "{{protocol}}://{{host}}/scim/v2/Groups/e98b6d2a-efdd-4e0a-a66f-80f3041a56b2",
 				"method": "DELETE",
 				"header": [
 					{
@@ -476,7 +476,7 @@
 						"showPassword": false
 					}
 				},
-				"url": "http://localhost:9029/scim/v2/ServiceProviderConfig",
+				"url": "{{protocol}}://{{host}}/scim/v2/ServiceProviderConfig",
 				"method": "GET",
 				"header": [
 					{
@@ -510,7 +510,7 @@
 						"showPassword": false
 					}
 				},
-				"url": "http://localhost:9029/scim/v2/ResourceTypes",
+				"url": "{{protocol}}://{{host}}/scim/v2/ResourceTypes",
 				"method": "GET",
 				"header": [
 					{
@@ -544,7 +544,7 @@
 						"showPassword": false
 					}
 				},
-				"url": "http://localhost:9029/scim/v2/Schemas",
+				"url": "{{protocol}}://{{host}}/scim/v2/Schemas",
 				"method": "GET",
 				"header": [
 					{
