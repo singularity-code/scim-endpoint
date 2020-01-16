@@ -28,13 +28,16 @@ basic server implementation.
 
 You can either choose to download the binaries or clone the project.
 
-For spinning up a scim server from the [downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/) : 
+1.  For spinning up a scim server from the [downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/) : 
 
 > java -jar personify-scim-server-1.0.0-SNAPSHOT.jar
 
-When port 8080 is already taken, add the vm parameter -Dserver.port=9090 or any other port you prefer
+When port 8080 is already taken or other problems occur, edit the jar -> find application.properties and adapt the server.port or other settings.
+SSL can also be configured this way ( see spring-boot documentation for this ).
 
-When you cloned the project, you can build the binary from source.
+
+
+2.  When you clone the project, you can build the binary from source.
 
 Requirements to build are installation of a Java JDK 1.8+ and Maven.
 
@@ -43,12 +46,13 @@ For running the maven project :
 > mvn spring-boot:run
 
 
+
 use the integrated [postman collection](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json) to test.
 
 a storage implementation is included, tune or implement other storages
 
 if you **really** do not want to build or run it yourself : point the postman collection 
-towards https://www.personify.be/scim/v2/Users ( 401 means unauthorized, so use correct basic auth credentials )
+towards https://www.personify.be/scim/v2/Users ( 401 means unauthorized, so use correct basic auth credentials : scim-user/changeit )
 
 if you **really really** do not want to build anything : spin up the [docker image](https://hub.docker.com/r/personify/personify-scim-server)
 
