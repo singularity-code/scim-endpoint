@@ -28,7 +28,7 @@ basic server implementation.
 
 You can either choose to download the binaries or clone the project.
 
-1.  For spinning up a scim server from the [downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/) : 
+For spinning up a scim server from the [downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/) : 
 
 > java -jar personify-scim-server-1.0.0-SNAPSHOT.jar
 
@@ -36,8 +36,7 @@ When port 8080 is already taken or other problems occur, edit the jar -> find ap
 SSL can also be configured this way ( see spring-boot documentation for this ).
 
 
-
-2.  When you clone the project, you can build the binary from source.
+When you clone the project, you can build the binary from source.
 
 Requirements to build are installation of a Java JDK 1.8+ and Maven.
 
