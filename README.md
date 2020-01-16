@@ -23,6 +23,7 @@ basic server implementation.
 
 
 
+
 ## usage
 
 You can either choose to download the binaries or clone the project.
@@ -31,7 +32,9 @@ For spinning up a scim server from the [downloaded binary](https://bitbucket.org
 
 > java -jar personify-scim-server-1.0.0-SNAPSHOT.jar
 
-When you have cloned the project, you can build the binary from source.
+When port 8080 is already taken, add the vm parameter -Dserver.port=9090 or any other port you prefer
+
+When you cloned the project, you can build the binary from source.
 
 Requirements to build are installation of a Java JDK 1.8+ and Maven.
 
