@@ -38,12 +38,10 @@ public class Controller {
 	
 	private static final String SCHEMA_VALIDATION = "schema validation : ";
 
-
 	private static final Logger logger = LogManager.getLogger(Controller.class);
 	
 	@Autowired
 	private StorageImplementationFactory storageImplementationFactory;
-	
 	
 	
 	protected ResponseEntity<Map<String, Object>> post(Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema ) {
@@ -196,7 +194,6 @@ public class Controller {
 			data.add(filterResponse(schema, entity));
 		}
 		
-		
 		ResponseEntity<Map<String,Object>> result = null;
 		
 		Map<String,Object> responseObject = new HashMap<>();
@@ -273,12 +270,12 @@ public class Controller {
 
 	protected ResponseEntity<Map<String, Object>> showError(int status, String detail, ScimErrorType scimType) {
 		Map<String,Object> error = new HashMap<>();
-		error.put(Constants.KEY_SCHEMAS, new String[] {"urn:ietf:params:scim:api:messages:2.0:Error"});
+		error.put(Constants.KEY_SCHEMAS, Constants.SCHEMA_ERROR);
 		if ( scimType != null) {
-			error.put("scimType", scimType);
+			error.put(Constants.KEY_SCIMTYPE, scimType);
 		}
-		error.put("detail", detail);
-		error.put("status", "" + status );
+		error.put(Constants.KEY_DETAIL, detail);
+		error.put(Constants.KEY_STATUS, Constants.EMPTY + status );
 		return new ResponseEntity<Map<String, Object>>(error, HttpStatus.valueOf(status));
 	}
 	

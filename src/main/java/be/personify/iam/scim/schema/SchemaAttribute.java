@@ -2,8 +2,12 @@ package be.personify.iam.scim.schema;
 
 import java.util.List;
 
+/**
+ * Basic SchemaAttribute class
+ * @author wouter
+ *
+ */
 public class SchemaAttribute {
-	
 	
 	private String name;
 	private String type;

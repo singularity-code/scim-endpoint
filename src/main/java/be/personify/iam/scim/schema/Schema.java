@@ -2,6 +2,11 @@ package be.personify.iam.scim.schema;
 
 import java.util.List;
 
+/**
+ * Basic Schema class
+ * @author wouter
+ *
+ */
 public class Schema {
 	
 	private String id;

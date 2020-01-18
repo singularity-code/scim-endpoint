@@ -28,7 +28,7 @@ import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
 
 /**
- * Bulk
+ * Controller managing bulk operations
  */
 @RestController
 public class BulkController extends Controller {
@@ -40,11 +40,12 @@ public class BulkController extends Controller {
 	@Autowired
 	private StorageImplementationFactory storageImplementationFactory;
 
+	
 	@PostMapping(path="/scim/v2/Bulk", produces = {"application/scim+json","application/json"})
-	public ResponseEntity<Map<String, Object>> post(@RequestBody Map<String,Object> group, HttpServletRequest request, HttpServletResponse response ) {
-		List<String> schemas = extractSchemas(group);
+	public ResponseEntity<Map<String, Object>> post(@RequestBody Map<String,Object> objects, HttpServletRequest request, HttpServletResponse response ) {
+		List<String> schemas = extractSchemas(objects);
 		if ( schemas.contains(SCHEMA)) {
-			return postBulk(group, request, response);
+			return postBulk(objects, request, response);
 		}
 		return invalidSchemaForResource(schemas, null);
 	}
@@ -62,7 +63,7 @@ public class BulkController extends Controller {
 			String method = (String)operation.get(Constants.KEY_METHOD);
 			String bulkId = (String)operation.get(Constants.KEY_BULKID);
 			String path = (String)operation.get(Constants.KEY_PATH); 
-			logger.info("operation {} {} {} {}", method, path, bulkId);
+			logger.info("operation {} {} {}", method, path, bulkId);
 			
 			Map<String,Object> operationResult = new HashMap<String, Object>();
 			
@@ -82,17 +83,18 @@ public class BulkController extends Controller {
 					operationResult.put(Constants.KEY_VERSION, createVersion(now));
 				}
 				catch( SchemaException se ) {
-					//se.printStackTrace();
+					logger.error("error validating", se);
 					operationResult = composeResultMap(method, bulkId, HttpStatus.BAD_REQUEST);
 				} 
 				catch (ConstraintViolationException e) {
-					//e.printStackTrace();
+					logger.error("constraint error", e);
 					operationResult = composeResultMap(method, bulkId, HttpStatus.BAD_REQUEST);
 				}
 			}
 			
 			resultOperations.add(operationResult);
 		}
+		
 		Map<String,Object> result = new HashMap<String, Object>();
 		result.put(Constants.KEY_SCHEMAS, new String[] { Constants.SCHEMA_BULKRESPONSE });
 		result.put(Constants.KEY_OPERATIONS, resultOperations);
@@ -108,7 +110,7 @@ public class BulkController extends Controller {
 		result.put(Constants.KEY_METHOD, method);
 		result.put(Constants.KEY_BULKID, bulkId);
 		Map<String,String> statusMap = new HashMap<String, String>();
-		statusMap.put(Constants.KEY_CODE, "" + status.value());
+		statusMap.put(Constants.KEY_CODE, Constants.EMPTY + status.value());
 		result.put(Constants.KEY_STATUS, statusMap);
 		return result;
 	}

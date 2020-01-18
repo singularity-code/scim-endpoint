@@ -16,6 +16,7 @@ public class Constants {
 	public static final String SCHEMA_LISTRESPONSE = "urn:ietf:params:scim:api:messages:2.0:ListResponse";
 	public static final String SCHEMA_BULKREQUEST = "urn:ietf:params:scim:api:messages:2.0:BulkRequest";
 	public static final String SCHEMA_BULKRESPONSE = "urn:ietf:params:scim:api:messages:2.0:BulkResponse";
+	public static final String[] SCHEMA_ERROR = new String[] {"urn:ietf:params:scim:api:messages:2.0:Error"};
 	
 	public static final String RESOURCE_TYPE_USER = "User";
 	public static final String RESOURCE_TYPE_GROUP = "Group";
@@ -38,7 +39,9 @@ public class Constants {
 	public static final String KEY_PATH = "path";
 	public static final String KEY_DATA = "data";
 	public static final String KEY_STATUS = "status";
+	public static final String KEY_DETAIL = "detail";
 	public static final String KEY_CODE = "code";
+	public static final String KEY_SCIMTYPE = "scimType";
 	
 	
 	public static final ObjectMapper objectMapper = new ObjectMapper();

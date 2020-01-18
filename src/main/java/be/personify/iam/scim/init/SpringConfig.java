@@ -13,7 +13,6 @@ import be.personify.iam.scim.util.BasicAuthenticationFilter;
 @EnableAsync
 public class SpringConfig{
 
-	
 	@Bean
 	public FilterRegistrationBean<BasicAuthenticationFilter> authenticationFilters(){
 	    FilterRegistrationBean<BasicAuthenticationFilter> registrationBean = new FilterRegistrationBean<>();     

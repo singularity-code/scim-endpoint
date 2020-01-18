@@ -1,4 +1,4 @@
-package be.mogo.iam.scim;
+package be.personify.iam.scim;
 
 import static org.junit.Assert.fail;
 

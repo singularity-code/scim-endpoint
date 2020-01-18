@@ -3,77 +3,33 @@
 	"info": {
 		"name": "scim",
 		"_postman_id": "d54abaf7-a82f-61c5-adbc-99b7a1f6b15b",
-		"description": "core scim server implementation postman calls",
+		"description": "Core SCIM server implementation requests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
 	"item": [
-		{
-			"name": "bulk",
-			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
-					}
-				},
-				"url": "http://localhost:9029/scim/v2/Bulk",
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n     \"schemas\": [\"urn:ietf:params:scim:api:messages:2.0:BulkRequest\"],\n     \"Operations\": [\n       {\n         \"method\": \"POST\",\n         \"path\": \"/Users\",\n         \"bulkId\": \"qwerty\",\n         \"data\": {\n           \"schemas\": [\"urn:ietf:params:scim:schemas:core:2.0:User\"],\n           \"userName\": \"Alice\"\n         }\n       },\n       {\n         \"method\": \"POST\",\n         \"path\": \"/Groups\",\n         \"bulkId\": \"ytrewq\",\n         \"data\": {\n           \"schemas\": [\"urn:ietf:params:scim:schemas:core:2.0:Group\"],\n           \"displayName\": \"Tour Guides\",\n           \"members\": [\n             {\n               \"type\": \"User\",\n               \"value\": \"bulkId:qwerty\"\n             }\n           ]\n         }\n       }\n     ]\n   }\n"
-				},
-				"description": "create a user according to the scim schema"
-			},
-			"response": []
-		},
 		{
 			"name": "user create",
 			"request": {
 				"auth": {
 					"type": "basic",
 					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
+						"username": "{{personify-scim-server-user}}",
+						"password": "{{personify-scim-server-password}}"
 					}
 				},
-				"url": "{{protocol}}://{{host}}/scim/v2/Users",
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Users",
 				"method": "POST",
 				"header": [
 					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
-					},
-					{
 						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
+						"value": "application/json"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"schemas\": [\n        \"urn:ietf:params:scim:schemas:core:2.0:User\"\n    ],\n    \"id\" : \"b18fd14b-3d68-4dd7-a22a-b0434c1f755d\",\n    \"name\": {\n        \"familyName\": \"Simpson\",\n        \"givenName\": \"Homer\"\n    },\n    \"userName\": \"simpsonh\",\n    \"password\": \"changeit\",\n    \"externalId\": \"homers\",\n    \"emails\": [\n        {\n            \"value\": \"homer@personify.be\",\n            \"type\": \"work\"\n        }\n    ]\n}"
-				},
-				"description": "create a user according to the scim schema"
-			},
-			"response": []
+					"raw": "{\n    \"schemas\": [\n        \"urn:ietf:params:scim:schemas:core:2.0:User\"\n    ],\n    \"id\" : \"b18fd14b-3d68-4dd7-a22a-b0434c1f755d\",\n    \"name\": {\n        \"familyName\": \"Simpson\",\n        \"givenName\": \"Homer\"\n    },\n    \"userName\": \"simpsonh\",\n    \"password\": \"{{personify-scim-server-password}}\",\n    \"externalId\": \"homers\",\n    \"emails\": [\n        {\n            \"value\": \"homer@personify.be\",\n            \"type\": \"work\"\n        }\n    ]\n}"
+				}
+			}
 		},
 		{
 			"name": "user get",
@@ -81,38 +37,19 @@
 				"auth": {
 					"type": "basic",
 					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
+						"username": "{{personify-scim-server-user}}",
+						"password": "{{personify-scim-server-password}}"
 					}
 				},
-				"url": "{{protocol}}://{{host}}/scim/v2/Users",
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
 				"method": "GET",
 				"header": [
 					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
-					},
-					{
 						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					},
-					{
-						"key": "Forwarded",
-						"value": "by=https://www.personify.be",
-						"description": ""
+						"value": "application/json"
 					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
-				},
-				"description": ""
-			},
-			"response": []
+				]
+			}
 		},
 		{
 			"name": "user search",
@@ -120,19 +57,15 @@
 				"auth": {
 					"type": "basic",
 					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
+						"username": "{{personify-scim-server-user}}",
+						"password": "{{personify-scim-server-password}}"
 					}
 				},
 				"url": {
-					"raw": "{{protocol}}://{{host}}/scim/v2/Users?startIndex=1&count=10",
-					"protocol": "http",
+					"protocol": "{{personify-scim-server-protocol}}",
 					"host": [
-						"localhost"
+						"{{personify-scim-server-host}}"
 					],
-					"port": "9029",
 					"path": [
 						"scim",
 						"v2",
@@ -142,38 +75,23 @@
 						{
 							"key": "startIndex",
 							"value": "1",
-							"equals": true,
-							"description": ""
+							"equals": true
 						},
 						{
 							"key": "count",
 							"value": "10",
-							"equals": true,
-							"description": ""
+							"equals": true
 						}
-					],
-					"variable": []
+					]
 				},
 				"method": "GET",
 				"header": [
 					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
-					},
-					{
 						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
+						"value": "application/json"
 					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
-				},
-				"description": null
-			},
-			"response": []
+				]
+			}
 		},
 		{
 			"name": "user update",
@@ -181,33 +99,23 @@
 				"auth": {
 					"type": "basic",
 					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
+						"username": "{{personify-scim-server-user}}",
+						"password": "{{personify-scim-server-password}}"
 					}
 				},
-				"url": "{{protocol}}://{{host}}/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
 				"method": "PUT",
 				"header": [
 					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
-					},
-					{
 						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
+						"value": "application/json"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"schemas\": [\n        \"urn:ietf:params:scim:schemas:core:2.0:User\"\n    ],\n    \"name\": {\n        \"familyName\": \"Simpson\",\n        \"givenName\": \"Homer\"\n    },\n    \"userName\": \"simpsonh\",\n    \"password\": \"changeit\",\n    \"externalId\": \"homers\",\n    \"emails\": [\n        {\n            \"value\": \"homer.simpson@personify.be\",\n            \"type\": \"work\"\n        }\n    ],\n    \"id\": \"b18fd14b-3d68-4dd7-a22a-b0434c1f755d\"\n}"
-				},
-				"description": "create a user according to the scim schema"
-			},
-			"response": []
+					"raw": "{\n    \"schemas\": [\n        \"urn:ietf:params:scim:schemas:core:2.0:User\"\n    ],\n    \"name\": {\n        \"familyName\": \"Simpson\",\n        \"givenName\": \"Homer\"\n    },\n    \"userName\": \"simpsonh\",\n    \"password\": \"{{personify-scim-server-password}}\",\n    \"externalId\": \"homers\",\n    \"emails\": [\n        {\n            \"value\": \"homer.simpson@personify.be\",\n            \"type\": \"work\"\n        }\n    ],\n    \"id\": \"b18fd14b-3d68-4dd7-a22a-b0434c1f755d\"\n}"
+				}
+			}
 		},
 		{
 			"name": "user patch",
@@ -215,19 +123,13 @@
 				"auth": {
 					"type": "basic",
 					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
+						"username": "{{personify-scim-server-user}}",
+						"password": "{{personify-scim-server-password}}"
 					}
 				},
-				"url": "{{protocol}}://{{host}}/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
 				"method": "PATCH",
 				"header": [
-					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0"
-					},
 					{
 						"key": "Content-Type",
 						"value": "application/json"
@@ -236,10 +138,8 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"schemas\": [\n        \"urn:ietf:params:scim:schemas:core:2.0:User\"\n    ],\n    \"emails\": [\n        {\n            \"value\": \"homer.simpson@personify.be\",\n            \"type\": \"home\"\n        }\n    ],\n    \"id\": \"b18fd14b-3d68-4dd7-a22a-b0434c1f755d\"\n}"
-				},
-				"description": "create a user according to the scim schema"
-			},
-			"response": []
+				}
+			}
 		},
 		{
 			"name": "user delete",
@@ -247,33 +147,19 @@
 				"auth": {
 					"type": "basic",
 					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
+						"username": "{{personify-scim-server-user}}",
+						"password": "{{personify-scim-server-password}}"
 					}
 				},
-				"url": "{{protocol}}://{{host}}/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
 				"method": "DELETE",
 				"header": [
 					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
-					},
-					{
 						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
+						"value": "application/json"
 					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
-				},
-				"description": null
-			},
-			"response": []
+				]
+			}
 		},
 		{
 			"name": "group create",
@@ -281,33 +167,23 @@
 				"auth": {
 					"type": "basic",
 					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
+						"username": "{{personify-scim-server-user}}",
+						"password": "{{personify-scim-server-password}}"
 					}
 				},
-				"url": "{{protocol}}://{{host}}/scim/v2/Groups",
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Groups",
 				"method": "POST",
 				"header": [
 					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
-					},
-					{
 						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
+						"value": "application/json"
 					}
 				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n  \"schemas\": [\"urn:ietf:params:scim:schemas:core:2.0:Group\"],\n  \"displayName\": \"Springfield Inhabitants\",\n  \"members\":[\n    {\n      \"value\": \"570f6a4c-e2b7-4618-83c6-59a4e65fc1cd\",\n      \"$ref\": \"http://localhost:9029/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d\",\n      \"type\": \"User\"\n    }\n  ]\n}"
-				},
-				"description": null
-			},
-			"response": []
+				}
+			}
 		},
 		{
 			"name": "group get",
@@ -315,33 +191,20 @@
 				"auth": {
 					"type": "basic",
 					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
+						"username": "{{personify-scim-server-user}}",
+						"password": "{{personify-scim-server-password}}"
 					}
 				},
-				"url": "{{protocol}}://{{host}}/scim/v2/Groups/e98b6d2a-efdd-4e0a-a66f-80f3041a56b2",
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Groups/e98b6d2a-efdd-4e0a-a66f-80f3041a56b2",
 				"method": "GET",
 				"header": [
-					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
-					},
 					{
 						"key": "Content-Type",
 						"value": "application/json",
 						"description": ""
 					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
-				},
-				"description": null
-			},
-			"response": []
+				]
+			}
 		},
 		{
 			"name": "group update",
@@ -349,19 +212,13 @@
 				"auth": {
 					"type": "basic",
 					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
+						"username": "{{personify-scim-server-user}}",
+						"password": "{{personify-scim-server-password}}"
 					}
 				},
-				"url": "{{protocol}}://{{host}}/scim/v2/Groups/e98b6d2a-efdd-4e0a-a66f-80f3041a56b2",
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Groups/e98b6d2a-efdd-4e0a-a66f-80f3041a56b2",
 				"method": "PUT",
 				"header": [
-					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0"
-					},
 					{
 						"key": "Content-Type",
 						"value": "application/json"
@@ -370,10 +227,8 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\n  \"schemas\": [\"urn:ietf:params:scim:schemas:core:2.0:Group\"],\n  \"displayName\": \"Springfield Powerplant Employees\",\n  \"members\":[\n    {\n      \"value\": \"570f6a4c-e2b7-4618-83c6-59a4e65fc1cd\",\n      \"$ref\": \"http://localhost:9029/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d\",\n      \"type\": \"User\"\n    }\n  ],\n  \"id\": \"e98b6d2a-efdd-4e0a-a66f-80f3041a56b2\"\n}"
-				},
-				"description": null
-			},
-			"response": []
+				}
+			}
 		},
 		{
 			"name": "group search",
@@ -381,14 +236,12 @@
 				"auth": {
 					"type": "basic",
 					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
+						"username": "{{personify-scim-server-user}}",
+						"password": "{{personify-scim-server-password}}"
 					}
 				},
 				"url": {
-					"raw": "{{protocol}}://{{host}}/scim/v2/Groups?startIndex=1&count=10",
+					"raw": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Groups?startIndex=1&count=10",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -414,21 +267,11 @@
 				"method": "GET",
 				"header": [
 					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0"
-					},
-					{
 						"key": "Content-Type",
 						"value": "application/json"
 					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
-				},
-				"description": "search groups"
-			},
-			"response": []
+				]
+			}
 		},
 		{
 			"name": "group delete",
@@ -436,135 +279,83 @@
 				"auth": {
 					"type": "basic",
 					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
+						"username": "{{personify-scim-server-user}}",
+						"password": "{{personify-scim-server-password}}"
 					}
 				},
-				"url": "{{protocol}}://{{host}}/scim/v2/Groups/e98b6d2a-efdd-4e0a-a66f-80f3041a56b2",
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Groups/e98b6d2a-efdd-4e0a-a66f-80f3041a56b2",
 				"method": "DELETE",
 				"header": [
-					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
-					},
 					{
 						"key": "Content-Type",
 						"value": "application/json",
 						"description": ""
 					}
+				]
+			}
+		},
+		{
+			"name": "bulk operations",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "{{personify-scim-server-user}}",
+						"password": "{{personify-scim-server-password}}"
+					}
+				},
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Bulk",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
-				},
-				"description": null
-			},
-			"response": []
+					"raw": "{\n     \"schemas\": [\"urn:ietf:params:scim:api:messages:2.0:BulkRequest\"],\n     \"Operations\": [\n       {\n         \"method\": \"POST\",\n         \"path\": \"/Users\",\n         \"bulkId\": \"qwerty\",\n         \"data\": {\n           \"schemas\": [\"urn:ietf:params:scim:schemas:core:2.0:User\"],\n           \"userName\": \"Alice\",\n           \"externalId\": \"aliw\"\n         }\n       },\n       {\n         \"method\": \"POST\",\n         \"path\": \"/Groups\",\n         \"bulkId\": \"ytrewq\",\n         \"data\": {\n           \"schemas\": [\"urn:ietf:params:scim:schemas:core:2.0:Group\"],\n           \"displayName\": \"Tour Guides\",\n           \"members\": [\n             {\n               \"type\": \"User\",\n               \"value\": \"bulkId:qwerty\"\n             }\n           ]\n         }\n       }\n     ]\n   }\n"
+				}
+			}
 		},
 		{
 			"name": "Discovery : ServiceProviderConfig",
 			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
-					}
-				},
-				"url": "{{protocol}}://{{host}}/scim/v2/ServiceProviderConfig",
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/ServiceProviderConfig",
 				"method": "GET",
 				"header": [
 					{
 						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					},
-					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
+						"value": "application/json"
 					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
-				},
-				"description": null
-			},
-			"response": []
+				]
+			}
 		},
 		{
 			"name": "Discovery : ResourceTypes",
 			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
-					}
-				},
-				"url": "{{protocol}}://{{host}}/scim/v2/ResourceTypes",
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/ResourceTypes",
 				"method": "GET",
 				"header": [
 					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
-					},
-					{
 						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
+						"value": "application/json"
 					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
-				},
-				"description": null
-			},
-			"response": []
+				]
+			}
 		},
 		{
 			"name": "Discovery : Schemas",
 			"request": {
-				"auth": {
-					"type": "basic",
-					"basic": {
-						"username": "scim-user",
-						"password": "changeit",
-						"saveHelperData": true,
-						"showPassword": false
-					}
-				},
-				"url": "{{protocol}}://{{host}}/scim/v2/Schemas",
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Schemas",
 				"method": "GET",
 				"header": [
 					{
-						"key": "Authorization",
-						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
-						"description": ""
-					},
-					{
 						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
+						"value": "application/json"
 					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"schemas\":[],\n  \"name\":{\"familyName\":\"jayawardana\",\"givenName\":\"vindula\"},\n  \"userName\":\"vindula\",\n  \"password\":\"vindula\",\n  \"emails\":[{\"value\":\"vindula@work.com\",\"type\":\"work\"}]\n}"
-				},
-				"description": null
-			},
-			"response": []
+				]
+			}
 		}
 	]
 }
