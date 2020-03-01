@@ -59,6 +59,8 @@ public class Constants {
 	
 	public static final String tempDir = System.getProperty("java.io.tmpdir");
 	
+	public static final String HTTP_METHOD_POST = "POST";
+	
 	
 
 }

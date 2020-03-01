@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import be.personify.iam.scim.util.Constants;
 
 /**
- * Discovery mappings
+ * Discovery controller
+ * @author wouter
+ *
  */
 @RestController
 public class DiscoveryController extends Controller {

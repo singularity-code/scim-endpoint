@@ -54,22 +54,29 @@ public class BulkController extends Controller {
 	
 	
 	protected ResponseEntity<Map<String, Object>> postBulk(Map<String, Object> bulk, HttpServletRequest request, HttpServletResponse response) {
+		
 		long start = System.currentTimeMillis();
 		List<Map<String,Object>> operations = (List<Map<String,Object>>)bulk.get(Constants.KEY_OPERATIONS);
 		List<Map<String,Object>> resultOperations = new ArrayList<Map<String,Object>>();
+		
+		String method = null;
+		String bulkId = null;
+		String path = null;
+
+		
 		for ( Map<String,Object> operation : operations ) {
 			Map<String,Object> entity = (Map<String,Object>)operation.get(Constants.KEY_DATA);
 			List<String> schemas = extractSchemas(entity);
-			String method = (String)operation.get(Constants.KEY_METHOD);
-			String bulkId = (String)operation.get(Constants.KEY_BULKID);
-			String path = (String)operation.get(Constants.KEY_PATH); 
+			Schema schema = SchemaReader.getInstance().getSchema(schemas.get(0));
+			method = (String)operation.get(Constants.KEY_METHOD);
+			bulkId = (String)operation.get(Constants.KEY_BULKID);
+			path = (String)operation.get(Constants.KEY_PATH); 
 			logger.info("operation {} {} {}", method, path, bulkId);
 			
 			Map<String,Object> operationResult = new HashMap<String, Object>();
 			
-			Schema schema = SchemaReader.getInstance().getSchema(schemas.get(0));
 			
-			if ( method.equalsIgnoreCase("POST")) {
+			if ( method.equalsIgnoreCase(Constants.HTTP_METHOD_POST)) {
 				try {
 					SchemaReader.getInstance().validate(schema,entity, true);
 					String id = createId(entity);

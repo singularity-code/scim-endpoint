@@ -14,7 +14,7 @@ basic server implementation.
 - schema validation
 - paging
 - uniqueness constraint validation
-- bulk ( ongoing )
+- bulk
 
 **on the list :**
 

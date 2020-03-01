@@ -22,7 +22,9 @@ import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaReader;
 
 /**
- * Scim mappings
+ * Schema controller
+ * @author wouter
+ *
  */
 @RestController
 public class SchemaController extends Controller {
