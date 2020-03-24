@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.util.ScimErrorType;
 
 /**
  * Schema controller
@@ -56,7 +57,7 @@ public class SchemaController extends Controller {
 				return post(entity, request, response, schema);
 			}
 		}
-		return new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
+		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
 	}
 
 
@@ -88,7 +89,7 @@ public class SchemaController extends Controller {
 				return put(id, entity, request, response, schema);
 			}
 		}
-		return new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
+		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
 	}
 
 
@@ -117,7 +118,7 @@ public class SchemaController extends Controller {
 			}
 			return invalidSchemaForResource(schemas, resourceType);
 		}
-		return new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
+		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
 	}
 
 
@@ -140,7 +141,7 @@ public class SchemaController extends Controller {
 		if ( schema != null ) {
 			return get(id, request, response, schema);
 		}
-		return new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
+		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
 	}
 
 
@@ -167,12 +168,12 @@ public class SchemaController extends Controller {
 		if (schema != null ) {
 			return search(startIndex, count, schema);
 		}
-		return new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
+		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
 	}
 
 
 
-	
+
 	
 	/**
 	 * DELETEs the entity
@@ -186,7 +187,7 @@ public class SchemaController extends Controller {
 		if (schema != null ) {
 			return delete(id, schema);
 		}
-		return new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
+		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
 	}
 	
 	
