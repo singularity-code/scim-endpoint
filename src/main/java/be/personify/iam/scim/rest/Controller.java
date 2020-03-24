@@ -176,7 +176,7 @@ public class Controller {
 			response.addHeader(Constants.HEADER_LOCATION, UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString());
 		}
 		else {
-			result = new ResponseEntity<Map<String,Object>>(HttpStatus.NOT_FOUND);
+			return showError(HttpStatus.NOT_FOUND.value(), "the resource with id " + id + " is not found", null);
 		}
 		logger.info("resource of type {} with id {} fetched in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 		return result;
@@ -231,7 +231,7 @@ public class Controller {
 			}
 		}
 		else {
-			result = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return showError(HttpStatus.NOT_FOUND.value(), "the resource with id " + id + " is not found", null);
 		}
 		logger.info("resource of type {} with id {} deleted in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 		
