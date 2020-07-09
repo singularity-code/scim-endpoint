@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaReader;
-import be.personify.iam.scim.util.ScimErrorType;
 
 /**
  * Schema controller
