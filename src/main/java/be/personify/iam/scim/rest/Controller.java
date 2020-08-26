@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import be.personify.iam.scim.schema.Schema;
@@ -25,6 +26,8 @@ import be.personify.iam.scim.schema.SchemaAttribute;
 import be.personify.iam.scim.schema.SchemaException;
 import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.storage.ConstraintViolationException;
+import be.personify.iam.scim.storage.SearchCriteria;
+import be.personify.iam.scim.storage.SearchCriterium;
 import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.ScimErrorType;
@@ -185,10 +188,13 @@ public class Controller {
 	
 	
 	
-	protected ResponseEntity<Map<String, Object>> search(Integer startIndex, Integer count, Schema schema ) {
+	protected ResponseEntity<Map<String, Object>> search(Integer startIndex, Integer count, Schema schema, String filter, String sortBy, String sortOrder ) {
 		long start = System.currentTimeMillis();
+		
+		SearchCriteria searchCriteria = composeSearchCriteria(filter,sortBy,sortOrder);
+		
 				
-		List<Map<String,Object>> dataFetched = storageImplementationFactory.getStorageImplementation(schema).getAll();
+		List<Map<String,Object>> dataFetched = storageImplementationFactory.getStorageImplementation(schema).search(searchCriteria);
 		List<Map<String,Object>> data = new ArrayList<>();
 		for ( Map<String,Object> entity : dataFetched) {
 			data.add(filterResponse(schema, entity));
@@ -215,6 +221,22 @@ public class Controller {
 	
 	
 	
+	private SearchCriteria composeSearchCriteria(String filter, String sortBy, String sortOrder) {
+		SearchCriteria searchCriteria = new SearchCriteria();
+		if ( !StringUtils.isEmpty(filter)) {
+			String[] filterParts = filter.split(" ");
+			if ( filterParts.length != 3 ) {
+				throw new RuntimeException("simple filter is only supported : userName eq wang");
+			}
+			searchCriteria.getCriteria().add(new SearchCriterium(filterParts[0], filterParts[2]));
+		}
+		return searchCriteria;
+	}
+
+
+
+
+
 	protected ResponseEntity<?> delete(String id, Schema schema ) {
 		long start = System.currentTimeMillis();
 		

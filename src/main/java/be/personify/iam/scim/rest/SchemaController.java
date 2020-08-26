@@ -162,10 +162,12 @@ public class SchemaController extends Controller {
 			@RequestParam(required = false, name = "startIndex", defaultValue = "1") Integer startIndex, 
 			@RequestParam(required = false, name="count", defaultValue = "200") Integer count, 
 			@RequestParam(required = false, name="filter") String filter,
+			@RequestParam(required = false, name="sortBy") String sortBy,
+			@RequestParam(required = false, name="sortOrder") String sortOrder,
 			HttpServletRequest request, HttpServletResponse response ) {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
 		if (schema != null ) {
-			return search(startIndex, count, schema);
+			return search(startIndex, count, schema, filter, sortBy, sortOrder);
 		}
 		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
 	}

@@ -81,11 +81,11 @@ public class MemoryStorageImpl implements Storage {
 		if ( searchCriteria == null || searchCriteria.getCriteria() == null || searchCriteria.getCriteria().size() == 0){
 			return getAll();
 		}
+		logger.info("searchCriteria {}", searchCriteria);
 		List<Map<String,Object>> result = new ArrayList<Map<String,Object>>();
 		for( Map<String,Object> object : getAll() ){
 			for ( SearchCriterium criterium : searchCriteria.getCriteria() ) {
-				BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(object);
-				Object value = wrapper.getPropertyValue( criterium.getKey());
+				Object value = object.get( criterium.getKey());
 				if ( value.toString().equals(criterium.getValue())) {
 					result.add(object);
 				}
