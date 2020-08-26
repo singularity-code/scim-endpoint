@@ -20,7 +20,7 @@ public interface Storage {
 	
 	public List<Map<String,Object>> getAll();
 	
-	public List<Map<String,Object>> search(SearchCriteria searchCriteria);
+	public List<Map<String,Object>> search(SearchCriteria searchCriteria, String sortBy, String sortOrder);
 	
 	public void flush();
 	

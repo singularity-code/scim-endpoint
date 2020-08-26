@@ -28,6 +28,7 @@ import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.storage.ConstraintViolationException;
 import be.personify.iam.scim.storage.SearchCriteria;
 import be.personify.iam.scim.storage.SearchCriterium;
+import be.personify.iam.scim.storage.SearchOperation;
 import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.ScimErrorType;
@@ -191,46 +192,72 @@ public class Controller {
 	protected ResponseEntity<Map<String, Object>> search(Integer startIndex, Integer count, Schema schema, String filter, String sortBy, String sortOrder ) {
 		long start = System.currentTimeMillis();
 		
-		SearchCriteria searchCriteria = composeSearchCriteria(filter,sortBy,sortOrder);
-		
+		try {
+			SearchCriteria searchCriteria = composeSearchCriteria(filter,sortBy,sortOrder);
 				
-		List<Map<String,Object>> dataFetched = storageImplementationFactory.getStorageImplementation(schema).search(searchCriteria);
-		List<Map<String,Object>> data = new ArrayList<>();
-		for ( Map<String,Object> entity : dataFetched) {
-			data.add(filterResponse(schema, entity));
+			List<Map<String,Object>> dataFetched = storageImplementationFactory.getStorageImplementation(schema).search(searchCriteria, sortBy,sortOrder);
+			List<Map<String,Object>> data = new ArrayList<>();
+			for ( Map<String,Object> entity : dataFetched) {
+				data.add(filterResponse(schema, entity));
+			}
+			
+			ResponseEntity<Map<String,Object>> result = null;
+			
+			Map<String,Object> responseObject = new HashMap<>();
+			responseObject.put(Constants.KEY_SCHEMAS, new String[] {Constants.SCHEMA_LISTRESPONSE});
+			responseObject.put(Constants.KEY_STARTINDEX, startIndex);
+			responseObject.put(Constants.KEY_ITEMSPERPAGE, count);
+			
+			count = count > data.size() ? data.size() : count;
+			List<Map<String,Object>> sublist = data.subList(startIndex -1, count);
+			responseObject.put(Constants.KEY_TOTALRESULTS, data.size());
+			responseObject.put(Constants.KEY_RESOURCES, sublist);
+			
+			result = new ResponseEntity<>(responseObject, HttpStatus.OK);
+			
+			logger.info("resources of type {} fetched in {} ms", schema.getName(), ( System.currentTimeMillis() -start));
+			
+			return result;
 		}
-		
-		ResponseEntity<Map<String,Object>> result = null;
-		
-		Map<String,Object> responseObject = new HashMap<>();
-		responseObject.put(Constants.KEY_SCHEMAS, new String[] {Constants.SCHEMA_LISTRESPONSE});
-		responseObject.put(Constants.KEY_STARTINDEX, startIndex);
-		responseObject.put(Constants.KEY_ITEMSPERPAGE, count);
-		
-		count = count > data.size() ? data.size() : count;
-		List<Map<String,Object>> sublist = data.subList(startIndex -1, count);
-		responseObject.put(Constants.KEY_TOTALRESULTS, data.size());
-		responseObject.put(Constants.KEY_RESOURCES, sublist);
-		
-		result = new ResponseEntity<>(responseObject, HttpStatus.OK);
-		
-		logger.info("resources of type {} fetched in {} ms", schema.getName(), ( System.currentTimeMillis() -start));
-		
-		return result;
+		catch ( InvalidFilterException ife ) {
+			return showError(HttpStatus.BAD_REQUEST.value(), "the filter with " + filter + " is not correct : " + ife.getMessage(), ScimErrorType.invalidSyntax);
+		}
 	}
 	
 	
 	
-	private SearchCriteria composeSearchCriteria(String filter, String sortBy, String sortOrder) {
+	private SearchCriteria composeSearchCriteria(String filter, String sortBy, String sortOrder) throws InvalidFilterException {
 		SearchCriteria searchCriteria = new SearchCriteria();
 		if ( !StringUtils.isEmpty(filter)) {
-			String[] filterParts = filter.split(" ");
-			if ( filterParts.length != 3 ) {
-				throw new RuntimeException("simple filter is only supported : userName eq wang");
+			if ( filter.contains(Constants.AND_WITH_SPACES)) {
+				String[] filterComponent = filter.split(Constants.AND_WITH_SPACES);
+				for ( String c : filterComponent) {
+					searchCriteria.getCriteria().add(extractCriteriumFromString(c, searchCriteria));
+				}
 			}
-			searchCriteria.getCriteria().add(new SearchCriterium(filterParts[0], filterParts[2]));
+			else {
+				searchCriteria.getCriteria().add(extractCriteriumFromString(filter, searchCriteria));
+			}
 		}
 		return searchCriteria;
+	}
+
+
+
+
+
+	private SearchCriterium extractCriteriumFromString(String filter, SearchCriteria searchCriteria)
+			throws InvalidFilterException {
+		String[] filterParts = filter.split(Constants.SPACE);
+		if ( filterParts.length != 3 ) {
+			throw new InvalidFilterException("simple filter is only supported : userName eq wang");
+		}
+		SearchOperation operation = SearchOperation.operationFromString(filterParts[1]);
+		if ( operation == null ) {
+			throw new InvalidFilterException("no valid operator found for [" + filterParts[1] + "]");
+		}
+		String value = filterParts[2].replaceAll("\"", Constants.EMPTY);
+		return new SearchCriterium(filterParts[0], value, operation);
 	}
 
 

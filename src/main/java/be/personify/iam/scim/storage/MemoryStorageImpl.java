@@ -10,8 +10,6 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.util.StringUtils;
 
 import be.personify.iam.scim.util.Constants;
@@ -77,18 +75,44 @@ public class MemoryStorageImpl implements Storage {
 	}
 	
 	@Override
-	public List<Map<String,Object>> search(SearchCriteria searchCriteria) {
+	public List<Map<String,Object>> search(SearchCriteria searchCriteria, String sortBy, String sortOrder) {
 		if ( searchCriteria == null || searchCriteria.getCriteria() == null || searchCriteria.getCriteria().size() == 0){
 			return getAll();
 		}
 		logger.info("searchCriteria {}", searchCriteria);
 		List<Map<String,Object>> result = new ArrayList<Map<String,Object>>();
 		for( Map<String,Object> object : getAll() ){
+			int count = 0;
 			for ( SearchCriterium criterium : searchCriteria.getCriteria() ) {
 				Object value = object.get( criterium.getKey());
-				if ( value.toString().equals(criterium.getValue())) {
-					result.add(object);
+				if ( criterium.getSearchOperation() == SearchOperation.EQUALS) {
+					if ( value.toString().equals(criterium.getValue())) {
+						count++;
+					}
 				}
+				else if ( criterium.getSearchOperation() == SearchOperation.NOT_EQUALS) {
+					if ( !value.toString().equals(criterium.getValue())) {
+						count++;
+					}
+				}
+				else if ( criterium.getSearchOperation() == SearchOperation.STARTS_WITH) {
+					if ( value.toString().startsWith((String)criterium.getValue())) {
+						count++;
+					}
+				}
+				else if ( criterium.getSearchOperation() == SearchOperation.CONTAINS) {
+					if ( value.toString().contains((String)criterium.getValue())) {
+						count++;
+					}
+				}
+				else if ( criterium.getSearchOperation() == SearchOperation.ENDS_WITH) {
+					if ( value.toString().endsWith((String)criterium.getValue())) {
+						count++;
+					}
+				}
+			}
+			if ( count == searchCriteria.getCriteria().size()) {
+				result.add(object);
 			}
 		}
 		return result;

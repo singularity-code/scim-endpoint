@@ -50,6 +50,7 @@ public class Constants {
 	public static final String EMPTY = "";
 	public static final String SPACE = " ";
 	public static final String COMMA = ",";
+	public static final String AND_WITH_SPACES = " and ";
 	
 	public static final String ID = "id";
 
