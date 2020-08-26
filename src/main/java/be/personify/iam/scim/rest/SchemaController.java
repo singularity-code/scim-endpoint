@@ -147,7 +147,7 @@ public class SchemaController extends Controller {
 	
 	
 	/**
-	 * Searches teh entity
+	 * Searches the entity
 	 * @param resourceType the resourcetype of the entities to be found
 	 * @param startIndex the starindex ( default 1 )
 	 * @param count the count of the entities to be returned

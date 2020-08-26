@@ -110,6 +110,11 @@ public class MemoryStorageImpl implements Storage {
 						count++;
 					}
 				}
+				else if ( criterium.getSearchOperation() == SearchOperation.PRESENT) {
+					if ( value != null) {
+						count++;
+					}
+				}
 			}
 			if ( count == searchCriteria.getCriteria().size()) {
 				result.add(object);

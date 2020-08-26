@@ -220,7 +220,7 @@ public class Controller {
 			return result;
 		}
 		catch ( InvalidFilterException ife ) {
-			return showError(HttpStatus.BAD_REQUEST.value(), "the filter with " + filter + " is not correct : " + ife.getMessage(), ScimErrorType.invalidSyntax);
+			return showError(HttpStatus.BAD_REQUEST.value(), "the filter [" + filter + "] is not correct : " + ife.getMessage(), ScimErrorType.invalidSyntax);
 		}
 	}
 	
@@ -249,15 +249,32 @@ public class Controller {
 	private SearchCriterium extractCriteriumFromString(String filter, SearchCriteria searchCriteria)
 			throws InvalidFilterException {
 		String[] filterParts = filter.split(Constants.SPACE);
+		SearchOperation operation = null;
 		if ( filterParts.length != 3 ) {
-			throw new InvalidFilterException("simple filter is only supported : userName eq wang");
+			if ( filterParts.length == 2 ) {
+				operation = SearchOperation.operationFromString(filterParts[1]);
+				if ( operation != SearchOperation.PRESENT ) {
+					throw new InvalidFilterException("when a filterpart consists out of 2 parts, the present operator (pr) has to be used");
+				}
+			}
+			else {
+				throw new InvalidFilterException("a filterpart should consist out of 3 parts separated by a space or 2 parts if present operator (pr) is used");
+			}
 		}
-		SearchOperation operation = SearchOperation.operationFromString(filterParts[1]);
+		else {
+			operation = SearchOperation.operationFromString(filterParts[1]);
+		}
 		if ( operation == null ) {
 			throw new InvalidFilterException("no valid operator found for [" + filterParts[1] + "]");
 		}
-		String value = filterParts[2].replaceAll("\"", Constants.EMPTY);
-		return new SearchCriterium(filterParts[0], value, operation);
+		if ( filterParts.length == 3 ) {
+			String value = filterParts[2].replaceAll("\"", Constants.EMPTY);
+			return new SearchCriterium(filterParts[0], value, operation);
+		}
+		else {
+			return new SearchCriterium(filterParts[0], null, operation);
+		}
+		
 	}
 
 
