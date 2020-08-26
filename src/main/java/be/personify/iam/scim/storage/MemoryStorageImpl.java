@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,57 +77,100 @@ public class MemoryStorageImpl implements Storage {
 	}
 	
 	@Override
-	public List<Map<String,Object>> search(SearchCriteria searchCriteria, String sortBy, String sortOrder) {
+	public List<Map<String,Object>> search(SearchCriteria searchCriteria, String sortBy, String sortOrderString) {
+		List<Map<String,Object>> result = null;
 		if ( searchCriteria == null || searchCriteria.getCriteria() == null || searchCriteria.getCriteria().size() == 0){
-			return getAll();
+			result = getAll();
 		}
-		logger.info("searchCriteria {}", searchCriteria);
-		List<Map<String,Object>> result = new ArrayList<Map<String,Object>>();
-		for( Map<String,Object> object : getAll() ){
-			int count = 0;
-			for ( SearchCriterium criterium : searchCriteria.getCriteria() ) {
-				Object value = object.get( criterium.getKey());
-				if ( criterium.getSearchOperation() == SearchOperation.EQUALS) {
-					if ( value.toString().equals(criterium.getValue())) {
-						count++;
+		else {
+			logger.info("{}", searchCriteria);
+			result = new ArrayList<Map<String,Object>>();
+			for( Map<String,Object> object : getAll() ){
+				int count = 0;
+				for ( SearchCriterium criterium : searchCriteria.getCriteria() ) {
+					Object value = object.get( criterium.getKey());
+					if ( criterium.getSearchOperation() == SearchOperation.EQUALS) {
+						if ( value.toString().equals(criterium.getValue())) {
+							count++;
+						}
+					}
+					else if ( criterium.getSearchOperation() == SearchOperation.NOT_EQUALS) {
+						if ( !value.toString().equals(criterium.getValue())) {
+							count++;
+						}
+					}
+					else if ( criterium.getSearchOperation() == SearchOperation.STARTS_WITH) {
+						if ( value.toString().startsWith((String)criterium.getValue())) {
+							count++;
+						}
+					}
+					else if ( criterium.getSearchOperation() == SearchOperation.CONTAINS) {
+						if ( value.toString().contains((String)criterium.getValue())) {
+							count++;
+						}
+					}
+					else if ( criterium.getSearchOperation() == SearchOperation.ENDS_WITH) {
+						if ( value.toString().endsWith((String)criterium.getValue())) {
+							count++;
+						}
+					}
+					else if ( criterium.getSearchOperation() == SearchOperation.PRESENT) {
+						if ( value != null) {
+							count++;
+						}
 					}
 				}
-				else if ( criterium.getSearchOperation() == SearchOperation.NOT_EQUALS) {
-					if ( !value.toString().equals(criterium.getValue())) {
-						count++;
-					}
-				}
-				else if ( criterium.getSearchOperation() == SearchOperation.STARTS_WITH) {
-					if ( value.toString().startsWith((String)criterium.getValue())) {
-						count++;
-					}
-				}
-				else if ( criterium.getSearchOperation() == SearchOperation.CONTAINS) {
-					if ( value.toString().contains((String)criterium.getValue())) {
-						count++;
-					}
-				}
-				else if ( criterium.getSearchOperation() == SearchOperation.ENDS_WITH) {
-					if ( value.toString().endsWith((String)criterium.getValue())) {
-						count++;
-					}
-				}
-				else if ( criterium.getSearchOperation() == SearchOperation.PRESENT) {
-					if ( value != null) {
-						count++;
-					}
+				if ( count == searchCriteria.getCriteria().size()) {
+					result.add(object);
 				}
 			}
-			if ( count == searchCriteria.getCriteria().size()) {
-				result.add(object);
-			}
 		}
+		
+		if ( StringUtils.isEmpty(sortOrderString)) {
+			sortOrderString = SortOrder.ascending.name();
+			logger.info("defaulting to sortorder {}", sortOrderString);
+		}
+		SortOrder sortOrder = SortOrder.valueOf(sortOrderString);
+		
+		result = sort( result, sortBy, sortOrder);
+		
 		return result;
 	}
 	
 	
 	
 	
+	private List<Map<String, Object>> sort(List<Map<String, Object>> result, String sortBy, SortOrder sortOrder) {
+		
+		if ( !StringUtils.isEmpty(sortBy)) {
+			
+			Collections.sort(result, new Comparator<Map<String, Object>>() {
+
+				@Override
+				public int compare(Map<String, Object> arg0, Map<String, Object> arg1) {
+					
+					Object value0 = arg0.get(sortBy);
+					Object value1 = arg1.get(sortBy);
+					
+					if ( value0 instanceof String && value1 instanceof String) {
+						
+						if ( sortOrder == SortOrder.ascending) {
+							return ((String)value0).compareTo(((String)value1));
+						}
+						else {
+							return ((String)value1).compareTo(((String)value0));
+						}
+					}
+					
+					return 0;
+				}
+			});
+		}
+		return result;
+	}
+	
+	
+
 	@Override
 	public void initialize(String type) {
 		this.type = type;

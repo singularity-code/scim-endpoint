@@ -148,13 +148,15 @@ public class SchemaController extends Controller {
 	
 	/**
 	 * Searches the entity
-	 * @param resourceType the resourcetype of the entities to be found
-	 * @param startIndex the starindex ( default 1 )
-	 * @param count the count of the entities to be returned
-	 * @param filter the filter to be used
+	 * @param resourceType the resource type
+	 * @param startIndex the index to start from
+	 * @param count the number of records to return
+	 * @param filter the filter to apply
+	 * @param sortBy the sortby attribute
+	 * @param sortOrder the sortorder
 	 * @param request the HttpServletRequest
-	 * @param response the HttpSevletResponse
-	 * @return the entities found
+	 * @param response the HttpServletResponse
+	 * @return
 	 */
 	@GetMapping(path="/scim/v2/{resourceType}s", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String,Object>> search( 

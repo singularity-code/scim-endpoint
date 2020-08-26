@@ -15,10 +15,11 @@ basic server implementation.
 - paging
 - uniqueness constraint validation
 - bulk
+- simple filtering : basic operators, and, sort
 
 **on the list :**
 
-- filtering : simple '?filter=userName eq wang' supported
+- filtering : complete specification
 - JWT
 
 
@@ -63,4 +64,14 @@ create a environment in postman containing host and protocol.
 ## configuration
 
 pimp the application.properties file included
+
+## issues
+
+if you find any issues or have enhancement requests, please [create a issue](https://bitbucket.org/wouter29/personify-scim-server/issues/new)
+it will be looked at.
+
+
+
+
+
 
