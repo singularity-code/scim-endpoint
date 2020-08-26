@@ -18,7 +18,7 @@ basic server implementation.
 
 **on the list :**
 
-- filtering
+- filtering : simple '?filter=userName eq wang' supported
 - JWT
 
 
@@ -30,7 +30,7 @@ You can either choose to download the binaries or clone the project.
 
 For spinning up a scim server from the [downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/) : 
 
-> java -jar personify-scim-server-1.0.5.RELEASE.jar
+> java -jar personify-scim-server-1.0.8.RELEASE.jar
 
 When port 8080 is already taken or other problems occur, edit the jar -> find application.properties and adapt the server.port or other settings.
 SSL can also be configured this way ( see spring-boot documentation for this ).
@@ -51,7 +51,7 @@ use the integrated [postman collection](https://bitbucket.org/wouter29/personify
 a storage implementation is included, tune or implement other storages
 
 if you **really** do not want to build anything : spin up the [docker image](https://hub.docker.com/r/personify/personify-scim-server)
-> docker run -p 8080:8080 personify/personify-scim-server:1.0.5.RELEASE
+> docker run -p 8080:8080 personify/personify-scim-server:1.0.8.RELEASE
  
 
 if you **really really** do not want to build or run it yourself : point the [postman collection ](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json)
