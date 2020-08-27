@@ -29,7 +29,7 @@ basic server implementation.
 
 You can either choose to download the binaries or clone the project.
 
-\
+<br/>
 
 For spinning up a scim server from the [downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/) : 
 
@@ -38,7 +38,7 @@ For spinning up a scim server from the [downloaded binary](https://bitbucket.org
 When port 8080 is already taken or other problems occur, edit the jar -> find application.properties and adapt the server.port or other settings.
 SSL can also be configured this way ( see spring-boot documentation for this ).
 
-\
+<br/>
 
 When you clone the project, you can build the binary from source.
 
