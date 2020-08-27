@@ -27,9 +27,9 @@ basic server implementation.
 
 ## usage
 
-You can either choose to download the binaries or clone the project.
+You can either choose to **download the binaries or clone the project**.
 
-  
+
 
 For spinning up a scim server from the [downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/) : 
 
