@@ -1,6 +1,7 @@
 # personify-scim-server
 
 Spring Boot Java SCIM server implementation with pluggable persistence layer.
+
 If you need to expose your identities using the SCIM protocol, you only need to write the storage layer in JAVA.
 
 ## intro
@@ -38,7 +39,8 @@ For spinning up a scim server from the [downloaded binary](https://bitbucket.org
 > java -jar personify-scim-server-1.0.9.RELEASE.jar
 
 When port 8080 is already taken or other problems occur, edit the jar -> find application.properties and adapt the server.port or other settings.
-SSL can also be configured this way ( see spring-boot documentation for this ).
+
+SSL can also be configured this way ( see spring-boot documentation and sample in application.properties for this ).
 
 ##    
 
@@ -73,7 +75,7 @@ create a environment in postman containing host and protocol.
 
 pimp the application.properties file included.
 the storage implementation class can be changed to the one you implemented.
-ssl can be configured.
+
 
 
 
