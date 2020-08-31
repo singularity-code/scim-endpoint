@@ -52,7 +52,15 @@ public class MemoryStorageImpl implements Storage {
 	
 
 	@Override
-	public void put(String id, final Map<String,Object> object) throws ConstraintViolationException {
+	public void create(String id, final Map<String,Object> object) throws ConstraintViolationException {
+		checkConstraints(id, object);
+		storage.put(id, object);
+		updateConstraints(id,object);
+	}
+	
+	
+	@Override
+	public void update(String id, final Map<String,Object> object) throws ConstraintViolationException {
 		checkConstraints(id, object);
 		storage.put(id, object);
 		updateConstraints(id,object);

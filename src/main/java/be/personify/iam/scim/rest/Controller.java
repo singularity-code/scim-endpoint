@@ -63,7 +63,7 @@ public class Controller {
 			response.addHeader(Constants.HEADER_LOCATION, location);
 			
 			//store and return
-			storageImplementationFactory.getStorageImplementation(schema).put(id, entity);
+			storageImplementationFactory.getStorageImplementation(schema).create(id, entity);
 			logger.info("resource of type {} with id {} created in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 			return new ResponseEntity<>(filterResponse(schema, entity), HttpStatus.CREATED);
 			
@@ -107,7 +107,7 @@ public class Controller {
 			response.addHeader(Constants.HEADER_LOCATION, location);
 			
 			//store
-			storageImplementationFactory.getStorageImplementation(schema).put(id, entity);
+			storageImplementationFactory.getStorageImplementation(schema).update(id, entity);
 			logger.info("resource of type {} with id {} updated in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 			return new ResponseEntity<>(filterResponse(schema, entity), HttpStatus.OK);
 			
@@ -157,7 +157,7 @@ public class Controller {
 			}
 			
 			createMeta( new Date(), id, existingEntity, schema.getName(), location);
-			storageImplementationFactory.getStorageImplementation(schema).put(id, existingEntity);
+			storageImplementationFactory.getStorageImplementation(schema).update(id, existingEntity);
 			
 			logger.info("resource of type {} with id {} patched in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 			return new ResponseEntity<>(filterResponse(schema, existingEntity), HttpStatus.OK);
