@@ -2,7 +2,10 @@ package be.personify.iam.scim.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -16,18 +19,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.StringUtils;
 
 @Component
 @Order(1)
 public class BasicAuthenticationFilter implements Filter {
 	
+	private static final String ROLE_READ = "read";
+	private static final String ROLE_WRITE = "write";
+
 	private static final Logger logger = LogManager.getLogger(BasicAuthenticationFilter.class);
 	
 	private static final String BASIC = "Basic";
 	
-	private List<String> basicAuthCredentials = null;
+	private Map<String,List<String>> basicAuthCredentials = null;
 	
 	private static Object lock = new Object();
 
@@ -35,6 +43,7 @@ public class BasicAuthenticationFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		
 		HttpServletRequest req = (HttpServletRequest) request;
+
 		String header = req.getHeader(HttpHeaders.AUTHORIZATION);
 		boolean filtered = false;
 		if ( header != null ) {
@@ -42,10 +51,23 @@ public class BasicAuthenticationFilter implements Filter {
 			if ( auth.length == 2) {
 				if ( auth[0].equalsIgnoreCase(BASIC)) {
 					String credential = new String(Base64Utils.decode(auth[1].getBytes()));
-					List<String> users =  getBasicAuthList();
-					if ( users != null && users.contains(credential)) {
-						chain.doFilter(request, response);
-						filtered = true;
+					Map<String,List<String>> users =  getBasicAuthList();
+					if ( users != null && users.containsKey(credential)) {
+						//check roles
+						String method = req.getMethod();
+						if ( method.equals(HttpMethod.GET.name()) ) {
+							if ( users.get(credential).contains(ROLE_READ)) {
+								chain.doFilter(request, response);
+								filtered = true;
+							}
+						}
+						else {
+							if ( users.get(credential).contains(ROLE_WRITE)) {
+								chain.doFilter(request, response);
+								filtered = true;
+							}
+						}
+
 					}
 				}
 			}
@@ -66,16 +88,21 @@ public class BasicAuthenticationFilter implements Filter {
 	 * Initializes the credential list
 	 * @return
 	 */
-	private List<String> getBasicAuthList(){
+	private Map<String,List<String>> getBasicAuthList(){
 		if ( basicAuthCredentials == null ) {
 			logger.info("initializing basic auth users");
 			try {
 				synchronized (lock) {
-					basicAuthCredentials = new ArrayList<String>();
+					basicAuthCredentials = new HashMap<String,List<String>>();
 					int count = 1;
 					String user = null;
 					while ( (user = PropertyFactory.getInstance().getProperty("scim.authentication.method.basic.user." + count)) != null) {
-						basicAuthCredentials.add(user);
+						String rolesString = PropertyFactory.getInstance().getProperty("scim.authentication.method.basic.user." + count + ".roles");
+						List<String> roles = new ArrayList<String>();
+						if ( !StringUtils.isEmpty(rolesString)) {
+							roles = Arrays.asList(rolesString.split(Constants.COMMA));
+						}
+						basicAuthCredentials.put(user,roles);
 						count++;
 					}
 				}
