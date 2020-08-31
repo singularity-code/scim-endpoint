@@ -16,7 +16,8 @@ public class SpringConfig{
 	@Bean
 	public FilterRegistrationBean<BasicAuthenticationFilter> authenticationFilters(){
 	    FilterRegistrationBean<BasicAuthenticationFilter> registrationBean = new FilterRegistrationBean<>();     
-	    registrationBean.setFilter(new BasicAuthenticationFilter());
+	    BasicAuthenticationFilter authenticationFilter = new BasicAuthenticationFilter();
+	    registrationBean.setFilter(authenticationFilter);
 	    return registrationBean;    
 	}
     

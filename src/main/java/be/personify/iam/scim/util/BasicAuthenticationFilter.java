@@ -17,15 +17,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 
-@Component
-@Order(1)
+//@Component
+//@Order(1)
 public class BasicAuthenticationFilter implements Filter {
 	
 	private static final String ROLE_READ = "read";
