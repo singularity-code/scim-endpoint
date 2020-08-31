@@ -16,6 +16,7 @@ basic server implementation.
 - uniqueness constraint validation
 - bulk
 - simple filtering : basic operators, and, sort
+- roles (read/write) on basic authentication
 
 **on the list :**
 
@@ -23,7 +24,7 @@ basic server implementation.
 - JWT
 
 
-
+##  
 
 ## usage
 
@@ -65,19 +66,18 @@ if you **really really** do not want to build or run it yourself : point the [po
 towards https://www.personify.be/scim/v2/Users ( 401 means unauthorized, so use correct basic auth credentials : scim-user/changeit )
 create a environment in postman containing host and protocol.
 
-
+##  
 
 ## configuration
 
 pimp the application.properties file included
 
+##  
+
 ## issues
 
 if you find any issues or have enhancement requests, please [create a issue](https://bitbucket.org/wouter29/personify-scim-server/issues/new)
 it will be looked at.
-
-
-
 
 
 

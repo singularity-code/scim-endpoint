@@ -96,9 +96,11 @@ public class BasicAuthenticationFilter implements Filter {
 					basicAuthCredentials = new HashMap<String,List<String>>();
 					int count = 1;
 					String user = null;
+					List<String> roles = null;
 					while ( (user = PropertyFactory.getInstance().getProperty("scim.authentication.method.basic.user." + count)) != null) {
 						String rolesString = PropertyFactory.getInstance().getProperty("scim.authentication.method.basic.user." + count + ".roles");
-						List<String> roles = new ArrayList<String>();
+						logger.info("adding basic auth user {} with roles {}", user.split(Constants.COLON)[0], rolesString);
+						roles = new ArrayList<String>();
 						if ( !StringUtils.isEmpty(rolesString)) {
 							roles = Arrays.asList(rolesString.split(Constants.COMMA));
 						}

@@ -1,4 +1,4 @@
-package be.personify.iam.scim.storage;
+package be.personify.iam.scim.storage.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +14,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.StringUtils;
 
+import be.personify.iam.scim.storage.ConstraintViolationException;
+import be.personify.iam.scim.storage.SearchCriteria;
+import be.personify.iam.scim.storage.SearchCriterium;
+import be.personify.iam.scim.storage.SearchOperation;
+import be.personify.iam.scim.storage.SortOrder;
+import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.PropertyFactory;
 
@@ -271,7 +277,7 @@ public class MemoryStorageImpl implements Storage {
 
 	@Override
 	public void flush() {
-		Boolean flush = Boolean.valueOf(PropertyFactory.getInstance().getProperty("scim.storage.memory.flushToFile"));
+		Boolean flush = Boolean.valueOf(PropertyFactory.getInstance().getProperty("scim.storage.flush"));
 		if ( flush ) {
 			logger.debug("flushing");
 			

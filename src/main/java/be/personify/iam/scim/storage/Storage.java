@@ -5,6 +5,12 @@ import java.util.Map;
 
 public interface Storage {
 
+	/**
+	 * Bootstrap your storage here
+	 * @param type
+	 */
+	public void initialize(String type);
+	
 	
 	public Map<String,Object> get(String id);
 	
@@ -22,11 +28,22 @@ public interface Storage {
 	
 	public List<Map<String,Object>> getAll();
 	
+	/**
+	 * Searches by criteria and sort order
+	 * @param searchCriteria
+	 * @param sortBy
+	 * @param sortOrder
+	 * @return
+	 */
 	public List<Map<String,Object>> search(SearchCriteria searchCriteria, String sortBy, String sortOrder);
 	
+	
+	/**
+	 * Optional to implement : persist 
+	 */
 	public void flush();
 	
-	public void initialize(String type);
+	
 	
 	
 }

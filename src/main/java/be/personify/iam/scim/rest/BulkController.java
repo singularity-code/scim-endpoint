@@ -106,6 +106,7 @@ public class BulkController extends Controller {
 		result.put(Constants.KEY_SCHEMAS, new String[] { Constants.SCHEMA_BULKRESPONSE });
 		result.put(Constants.KEY_OPERATIONS, resultOperations);
 		
+		logger.info("operation {} {} {} completed in [{}ms]", method, path, bulkId, System.currentTimeMillis() - start);
 		
 		return new ResponseEntity<Map<String,Object>>(result, HttpStatus.OK);
 	}
