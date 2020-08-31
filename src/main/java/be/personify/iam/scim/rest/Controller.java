@@ -26,6 +26,7 @@ import be.personify.iam.scim.schema.SchemaAttribute;
 import be.personify.iam.scim.schema.SchemaException;
 import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.storage.ConstraintViolationException;
+import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.SearchCriteria;
 import be.personify.iam.scim.storage.SearchCriterium;
 import be.personify.iam.scim.storage.SearchOperation;
@@ -75,6 +76,9 @@ public class Controller {
 			logger.error("constraint violation in {} ms : {}", ( System.currentTimeMillis() -start), e.getMessage());
 			return showError( 409, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.uniqueness );
 		}
+		catch( DataException e) {
+			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ScimErrorType.bad_data);
+		}
 	}
 	
 	
@@ -115,6 +119,9 @@ public class Controller {
 		catch ( ConstraintViolationException e) {
 			logger.error("constraint violation", e);
 			return showError( 409, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.uniqueness );
+		}
+		catch( DataException e) {
+			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ScimErrorType.bad_data);
 		}
 	}
 	
@@ -164,6 +171,9 @@ public class Controller {
 			logger.error("constraint violation", e);
 			return showError( 409, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.uniqueness );
 		}
+		catch( DataException e) {
+			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ScimErrorType.bad_data);
+		}
 	}
 	
 	
@@ -171,19 +181,24 @@ public class Controller {
 	
 	protected ResponseEntity<Map<String, Object>> get(String id, HttpServletRequest request, HttpServletResponse response, Schema schema) {
 		long start = System.currentTimeMillis();
-		Map<String,Object> user = storageImplementationFactory.getStorageImplementation(schema).get(id);
+		try {
+			Map<String,Object> user = storageImplementationFactory.getStorageImplementation(schema).get(id);
 		
-		ResponseEntity<Map<String,Object>> result = null;
-		if ( user != null ) {
-			user = filterResponse(schema, user);
-			result = new ResponseEntity<>(user, HttpStatus.OK);
-			response.addHeader(Constants.HEADER_LOCATION, UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString());
+			ResponseEntity<Map<String,Object>> result = null;
+			if ( user != null ) {
+				user = filterResponse(schema, user);
+				result = new ResponseEntity<>(user, HttpStatus.OK);
+				response.addHeader(Constants.HEADER_LOCATION, UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString());
+			}
+			else {
+				return showError(HttpStatus.NOT_FOUND.value(), "the resource with id " + id + " is not found", null);
+			}
+			logger.info("resource of type {} with id {} fetched in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
+			return result;
 		}
-		else {
-			return showError(HttpStatus.NOT_FOUND.value(), "the resource with id " + id + " is not found", null);
+		catch( DataException e) {
+			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ScimErrorType.bad_data);
 		}
-		logger.info("resource of type {} with id {} fetched in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
-		return result;
 	}
 	
 	
@@ -221,6 +236,9 @@ public class Controller {
 		}
 		catch ( InvalidFilterException ife ) {
 			return showError(HttpStatus.BAD_REQUEST.value(), "the filter [" + filter + "] is not correct : " + ife.getMessage(), ScimErrorType.invalidSyntax);
+		}
+		catch( DataException e) {
+			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ScimErrorType.bad_data);
 		}
 	}
 	
