@@ -373,7 +373,6 @@ public class Controller {
 		List<String> includeList = getListFromString(attributes);
 		List<String> excludeList = getListFromString(excludedAttributes);
 		for ( SchemaAttribute attribute : schema.getAttributes()) {
-			logger.info("name {} returned {} ", attribute.getName(), attribute.getReturned());
 			if ( attribute.getReturned().equalsIgnoreCase(Constants.RETURNED_NEVER)) {
 				copy.remove(attribute.getName());
 			}
