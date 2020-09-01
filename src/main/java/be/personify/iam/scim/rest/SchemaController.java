@@ -22,7 +22,7 @@ import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaReader;
 
 /**
- * Schema controller
+ * Schema controller for the SCIM server implementation
  * @author wouter
  *
  */
@@ -41,6 +41,8 @@ public class SchemaController extends Controller {
 	@PostMapping(path="/scim/v2/{resourceType}s", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String, Object>> post(@PathVariable String resourceType, 
 													@RequestBody Map<String,Object> entity, 
+													@RequestParam(required = false, name="attributes") String attributes,
+													@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
 													HttpServletRequest request, 
 													HttpServletResponse response ) {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
@@ -48,12 +50,12 @@ public class SchemaController extends Controller {
 			List<String> schemas = extractSchemas(entity);
 			if ( schemas != null && schemas.size() > 0) {
 				if ( schemas.contains(schema.getId())) {
-					return post(entity, request, response, schema);
+					return post(entity, request, response, schema, attributes, excludedAttributes);
 				}
 				return invalidSchemaForResource(schemas, resourceType);
 			}
 			else {
-				return post(entity, request, response, schema);
+				return post(entity, request, response, schema, attributes, excludedAttributes);
 			}
 		}
 		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
@@ -73,6 +75,8 @@ public class SchemaController extends Controller {
 	public ResponseEntity<Map<String, Object>> put(@PathVariable String resourceType,
 													@PathVariable String id , 
 													@RequestBody Map<String,Object> entity, 
+													@RequestParam(required = false, name="attributes") String attributes,
+													@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
 													HttpServletRequest request, 
 													HttpServletResponse response ) {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
@@ -80,12 +84,12 @@ public class SchemaController extends Controller {
 			List<String> schemas = extractSchemas(entity);
 			if ( schemas != null && schemas.size() > 0) {
 				if ( schemas.contains(schema.getId())) {
-					return put(id, entity, request, response, schema);
+					return put(id, entity, request, response, schema, attributes, excludedAttributes);
 				}
 				return invalidSchemaForResource(schemas, resourceType);
 			}
 			else {
-				return put(id, entity, request, response, schema);
+				return put(id, entity, request, response, schema, attributes, excludedAttributes);
 			}
 		}
 		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
@@ -106,14 +110,16 @@ public class SchemaController extends Controller {
 	@PatchMapping(path="/scim/v2/{resourceType}s/{id}", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String, Object>> patch(@PathVariable String resourceType,
 														@PathVariable String id , 
-														@RequestBody Map<String,Object> entity, 
+														@RequestBody Map<String,Object> entity,
+														@RequestParam(required = false, name="attributes") String attributes,
+														@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
 														HttpServletRequest request, 
 														HttpServletResponse response ) {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
 		if ( schema != null ) {
 			List<String> schemas = extractSchemas(entity);
 			if ( schemas.contains(schema.getId())) {
-				return patch(id, entity, request, response, schema);
+				return patch(id, entity, request, response, schema, attributes, excludedAttributes);
 			}
 			return invalidSchemaForResource(schemas, resourceType);
 		}
@@ -134,11 +140,13 @@ public class SchemaController extends Controller {
 	@GetMapping(path="/scim/v2/{resourceType}s/{id}", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String,Object>> get(@PathVariable String resourceType, 
 													@PathVariable String id , 
+													@RequestParam(required = false, name="attributes") String attributes,
+													@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
 													HttpServletRequest request, 
 													HttpServletResponse response ) {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
 		if ( schema != null ) {
-			return get(id, request, response, schema);
+			return get(id, request, response, schema, attributes, excludedAttributes);
 		}
 		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
 	}
@@ -166,10 +174,12 @@ public class SchemaController extends Controller {
 			@RequestParam(required = false, name="filter") String filter,
 			@RequestParam(required = false, name="sortBy") String sortBy,
 			@RequestParam(required = false, name="sortOrder") String sortOrder,
+			@RequestParam(required = false, name="attributes") String attributes,
+			@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response ) {
 		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
 		if (schema != null ) {
-			return search(startIndex, count, schema, filter, sortBy, sortOrder);
+			return search(startIndex, count, schema, filter, sortBy, sortOrder, attributes, excludedAttributes);
 		}
 		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
 	}

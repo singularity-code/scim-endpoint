@@ -10,15 +10,16 @@ basic server implementation.
 
 **currently implemented :**
 
-- create, get, put, delete, search, patch
+- create, get, put, delete, search, patch ( with attributes and excludedAttributes )
+- bulk with circular reference processing, maxOperations and maxPayloadSize 
+- paging
+- filtering (all operators,and,sort)
 - discovery
 - basic authentication
 - schema validation
-- paging
 - uniqueness constraint validation
-- bulk
-- simple filtering : basic operators, and, sort
 - roles (read/write) on basic authentication
+ 
 
 **on the list :**
 
@@ -36,7 +37,7 @@ You can either choose to **download the binaries or clone the project**.
 
 For spinning up a scim server from the [downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/) : 
 
-> java -jar personify-scim-server-1.0.9.RELEASE.jar
+> java -jar personify-scim-server-1.1.0.RELEASE.jar
 
 When port 8080 is already taken or other problems occur, edit the jar -> find application.properties and adapt the server.port or other settings.
 
@@ -61,7 +62,7 @@ a storage implementation is included, tune or implement other storages
 ##   
 
 if you **really** do not want to build anything : spin up the [docker image](https://hub.docker.com/r/personify/personify-scim-server)
-> docker run -p 8080:8080 personify/personify-scim-server:1.0.9.RELEASE
+> docker run -p 8080:8080 personify/personify-scim-server:1.1.0.RELEASE
  
 ##   
 

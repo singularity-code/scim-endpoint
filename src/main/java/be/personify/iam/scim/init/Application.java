@@ -5,6 +5,11 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
+/**
+ * Main spring-boot application for the JAVA SCIM server implementation
+ * @author wouter
+ *
+ */
 @SpringBootApplication
 @ComponentScan( basePackages = { "be.personify.iam.scim"} )
 @EnableAutoConfiguration

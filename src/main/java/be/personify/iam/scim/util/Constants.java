@@ -55,7 +55,10 @@ public class Constants {
 	
 	public static final String ID = "id";
 
-	public static final String NEVER = "never";
+	public static final String RETURNED_NEVER = "never";
+	public static final String RETURNED_DEFAULT = "default";
+	public static final String RETURNED_ALWAYS = "always";
+	public static final String RETURNED_REQUEST = "request";
 	
 	public static final String HEADER_LOCATION = "Location";
 	

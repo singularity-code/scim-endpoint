@@ -2,6 +2,7 @@ package be.personify.iam.scim.rest;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +36,7 @@ import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.ScimErrorType;
 
 /**
- * Mappings
+ * Main controller class for the SCIM operations
  * @author vanderw
  *
  */
@@ -49,7 +50,7 @@ public class Controller {
 	private StorageImplementationFactory storageImplementationFactory;
 	
 	
-	protected ResponseEntity<Map<String, Object>> post(Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema ) {
+	protected ResponseEntity<Map<String, Object>> post(Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes ) {
 		long start = System.currentTimeMillis();
 		try {
 			//validate
@@ -65,7 +66,7 @@ public class Controller {
 			//store and return
 			storageImplementationFactory.getStorageImplementation(schema).create(id, entity);
 			logger.info("resource of type {} with id {} created in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
-			return new ResponseEntity<>(filterResponse(schema, entity), HttpStatus.CREATED);
+			return new ResponseEntity<>(filterAttributes(schema, entity, attributes, excludedAttributes), HttpStatus.CREATED);
 			
 		} 
 		catch (SchemaException e) { 
@@ -85,7 +86,7 @@ public class Controller {
 	
 	
 	
-	protected ResponseEntity<Map<String, Object>> put(String id, Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema ) {
+	protected ResponseEntity<Map<String, Object>> put(String id, Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes ) {
 		long start = System.currentTimeMillis();
 		try {
 			//validate
@@ -109,7 +110,7 @@ public class Controller {
 			//store
 			storageImplementationFactory.getStorageImplementation(schema).update(id, entity);
 			logger.info("resource of type {} with id {} updated in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
-			return new ResponseEntity<>(filterResponse(schema, entity), HttpStatus.OK);
+			return new ResponseEntity<>(filterAttributes(schema, entity, attributes, excludedAttributes), HttpStatus.OK);
 			
 		} 
 		catch (SchemaException e) {
@@ -129,7 +130,7 @@ public class Controller {
 	
 	
 	
-	protected ResponseEntity<Map<String, Object>> patch(String id, Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema ) {
+	protected ResponseEntity<Map<String, Object>> patch(String id, Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes ) {
 		long start = System.currentTimeMillis();
 		try {
 			//validate
@@ -160,7 +161,7 @@ public class Controller {
 			storageImplementationFactory.getStorageImplementation(schema).update(id, existingEntity);
 			
 			logger.info("resource of type {} with id {} patched in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
-			return new ResponseEntity<>(filterResponse(schema, existingEntity), HttpStatus.OK);
+			return new ResponseEntity<>(filterAttributes(schema, existingEntity, attributes, excludedAttributes), HttpStatus.OK);
 			
 		} 
 		catch (SchemaException e) {
@@ -179,14 +180,14 @@ public class Controller {
 	
 	
 	
-	protected ResponseEntity<Map<String, Object>> get(String id, HttpServletRequest request, HttpServletResponse response, Schema schema) {
+	protected ResponseEntity<Map<String, Object>> get(String id, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes) {
 		long start = System.currentTimeMillis();
 		try {
 			Map<String,Object> user = storageImplementationFactory.getStorageImplementation(schema).get(id);
 		
 			ResponseEntity<Map<String,Object>> result = null;
 			if ( user != null ) {
-				user = filterResponse(schema, user);
+				user = filterAttributes(schema, user, attributes, excludedAttributes);
 				result = new ResponseEntity<>(user, HttpStatus.OK);
 				response.addHeader(Constants.HEADER_LOCATION, UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString());
 			}
@@ -204,7 +205,7 @@ public class Controller {
 	
 	
 	
-	protected ResponseEntity<Map<String, Object>> search(Integer startIndex, Integer count, Schema schema, String filter, String sortBy, String sortOrder ) {
+	protected ResponseEntity<Map<String, Object>> search(Integer startIndex, Integer count, Schema schema, String filter, String sortBy, String sortOrder, String attributes, String excludedAttributes ) {
 		long start = System.currentTimeMillis();
 		
 		try {
@@ -213,7 +214,7 @@ public class Controller {
 			List<Map<String,Object>> dataFetched = storageImplementationFactory.getStorageImplementation(schema).search(searchCriteria, sortBy,sortOrder);
 			List<Map<String,Object>> data = new ArrayList<>();
 			for ( Map<String,Object> entity : dataFetched) {
-				data.add(filterResponse(schema, entity));
+				data.add(filterAttributes(schema, entity, attributes, excludedAttributes));
 			}
 			
 			ResponseEntity<Map<String,Object>> result = null;
@@ -235,7 +236,7 @@ public class Controller {
 			return result;
 		}
 		catch ( InvalidFilterException ife ) {
-			return showError(HttpStatus.BAD_REQUEST.value(), "the filter [" + filter + "] is not correct : " + ife.getMessage(), ScimErrorType.invalidSyntax);
+			return showError(HttpStatus.BAD_REQUEST.value(), "the filter [" + filter + "] is not correct : " + ife.getMessage(), ScimErrorType.invalidFilter);
 		}
 		catch( DataException e) {
 			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ScimErrorType.bad_data);
@@ -366,19 +367,58 @@ public class Controller {
 	
 	
 
-	protected Map<String, Object> filterResponse(Schema schema, Map<String, Object> entity) {
+	protected Map<String, Object> filterAttributes(Schema schema, Map<String, Object> entity, String attributes, String excludedAttributes) {
 		Map<String,Object> copy = new HashMap<>();
 		copy.putAll(entity);
+		List<String> includeList = getListFromString(attributes);
+		List<String> excludeList = getListFromString(excludedAttributes);
 		for ( SchemaAttribute attribute : schema.getAttributes()) {
-			if ( attribute.getReturned().equalsIgnoreCase(Constants.NEVER)) {
+			logger.info("name {} returned {} ", attribute.getName(), attribute.getReturned());
+			if ( attribute.getReturned().equalsIgnoreCase(Constants.RETURNED_NEVER)) {
 				copy.remove(attribute.getName());
 			}
+			if ( includeList != null && includeList.size() > 0) {
+				if (!attribute.getReturned().equalsIgnoreCase(Constants.RETURNED_ALWAYS) && !includeList.contains(attribute.getName())) {
+					copy.remove(attribute.getName());
+				}
+			}
+			else if ( excludeList != null && excludeList.size() > 0){
+				if (!attribute.getReturned().equalsIgnoreCase(Constants.RETURNED_ALWAYS) && excludeList.contains(attribute.getName())) {
+					copy.remove(attribute.getName());
+				}
+			}
 		}
+		
+		
+		//meta is not in the schema?
+		if ( includeList != null && includeList.size() > 0) {
+			if (!includeList.contains(Constants.KEY_META)) {
+				copy.remove(Constants.KEY_META);
+			}
+		}
+		else if ( excludeList != null && excludeList.size() > 0){
+			if ( excludeList.contains(Constants.KEY_META)) {
+				copy.remove(Constants.KEY_META);
+			}
+		}
+		
+		
 		return copy;
 	}
 	
 	
 	
+	private List<String> getListFromString(String attributes) {
+		if ( !StringUtils.isEmpty(attributes)) {
+			return Arrays.asList(attributes.split(Constants.COMMA));
+		}
+		return null;
+	}
+
+
+
+
+
 	protected String createId(Map<String, Object> user) {
 		Object id = user.get(Constants.ID);
 		return id != null ? id.toString() : UUID.randomUUID().toString();

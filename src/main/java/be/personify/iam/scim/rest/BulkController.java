@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -28,7 +29,10 @@ import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
 
 /**
- * Controller managing bulk operations
+ * Controller managing bulk operations with circular reference processing, maxPayloadSize and maxOperations
+ * 
+ * @see https://tools.ietf.org/html/rfc7644#section-3.7
+ * 
  */
 @RestController
 public class BulkController extends Controller {
@@ -39,16 +43,29 @@ public class BulkController extends Controller {
 	
 	@Autowired
 	private StorageImplementationFactory storageImplementationFactory;
+	
+	@Value("${scim.bulk.maxPayloadSize:1048576}")
+	private int maxPayloadSize;
+	
+	@Value("${scim.bulk.maxOperations:1000}")
+	private int maxOperations;
 
 	
 	@PostMapping(path="/scim/v2/Bulk", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String, Object>> post(@RequestBody Map<String,Object> objects, HttpServletRequest request, HttpServletResponse response ) {
+		
+		//check the maximum payload
+		long contentLenth = request.getContentLength();
+		if ( contentLenth > maxPayloadSize ) {
+			return showError(HttpStatus.PAYLOAD_TOO_LARGE.value(), "The size of the bulk operation (" + contentLenth + ") exceeds the maxPayloadSize (" + maxPayloadSize + ")", null);
+		}
+		
 		List<String> schemas = extractSchemas(objects);
 		if ( schemas.contains(SCHEMA)) {
 			return postBulk(objects, request, response);
 		}
 		return invalidSchemaForResource(schemas, null);
-	} 
+	}
 	
 	
 	
@@ -57,17 +74,25 @@ public class BulkController extends Controller {
 		
 		long start = System.currentTimeMillis();
 		List<Map<String,Object>> operations = (List<Map<String,Object>>)bulk.get(Constants.KEY_OPERATIONS);
+		
+		if ( operations.size() > maxOperations ) {
+			return showError(HttpStatus.PAYLOAD_TOO_LARGE.value(), "The number of bulk operations (" + operations.size() + ") exceeds the maxOperations (" + maxOperations + ")", null);
+		}
+		
 		List<Map<String,Object>> resultOperations = new ArrayList<Map<String,Object>>();
 		
 		String method = null;
 		String bulkId = null;
 		String path = null;
 
+		Map<String,Object> entity = null;
+		
+		SchemaReader schemaReader = SchemaReader.getInstance();
 		
 		for ( Map<String,Object> operation : operations ) {
-			Map<String,Object> entity = (Map<String,Object>)operation.get(Constants.KEY_DATA);
+			entity = (Map<String,Object>)operation.get(Constants.KEY_DATA);
 			List<String> schemas = extractSchemas(entity);
-			Schema schema = SchemaReader.getInstance().getSchema(schemas.get(0));
+			Schema schema = schemaReader.getSchema(schemas.get(0));
 			method = (String)operation.get(Constants.KEY_METHOD);
 			bulkId = (String)operation.get(Constants.KEY_BULKID);
 			path = (String)operation.get(Constants.KEY_PATH); 
@@ -78,7 +103,7 @@ public class BulkController extends Controller {
 			
 			if ( method.equalsIgnoreCase(Constants.HTTP_METHOD_POST)) {
 				try {
-					SchemaReader.getInstance().validate(schema,entity, true);
+					schemaReader.validate(schema,entity, true);
 					String id = createId(entity);
 					entity.put(Constants.ID, id);
 					String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + Constants.SLASH + id;

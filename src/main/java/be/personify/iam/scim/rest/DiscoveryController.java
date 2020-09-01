@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import be.personify.iam.scim.util.Constants;
 
 /**
- * Discovery controller
+ * Discovery controller for the SCIM server
  * @author wouter
  *
  */
