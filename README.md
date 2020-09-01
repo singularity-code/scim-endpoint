@@ -1,6 +1,6 @@
 # personify-scim-server
 
-Open source Spring Boot Java SCIM server implementation with pluggable persistence layer.
+Lean and mean Open source Spring Boot Java SCIM server implementation with pluggable persistence layer.
 
 If you need to expose your identities using the SCIM protocol, you only need to write the storage layer in JAVA.
 
