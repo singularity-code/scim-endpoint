@@ -78,7 +78,7 @@ public class Controller {
 			return showError( 409, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.uniqueness );
 		}
 		catch( DataException e) {
-			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ScimErrorType.bad_data);
+			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 		}
 	}
 	
@@ -92,14 +92,14 @@ public class Controller {
 			//validate
 			SchemaReader.getInstance().validate(schema, entity, true);
 			if ( !entity.get(Constants.ID).equals(id)){
-				return showError( 400, "id [" + entity.get(Constants.ID) + "] given in the data does not match the one in the url [" + id + "]", null );
+				return showError( 400, "id [" + entity.get(Constants.ID) + "] given in the data does not match the one in the url [" + id + "]");
 			};
 			Map<String,Object> existingUser = storageImplementationFactory.getStorageImplementation(schema).get(id);
 			if ( existingUser != null ) {
 				entity.put(Constants.KEY_META, existingUser.get(Constants.KEY_META));
 			}
 			else {
-				return showError( 404, "resource of type " + schema.getName() + " with id " + id + " can not be updated", null );
+				return showError( 404, "resource of type " + schema.getName() + " with id " + id + " can not be updated");
 			}
 			
 			//prepare
@@ -122,7 +122,7 @@ public class Controller {
 			return showError( 409, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.uniqueness );
 		}
 		catch( DataException e) {
-			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ScimErrorType.bad_data);
+			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 		}
 	}
 	
@@ -136,7 +136,7 @@ public class Controller {
 			//validate
 			SchemaReader.getInstance().validate(schema, entity, false);
 			if ( !entity.get(Constants.ID).equals(id)){
-				return showError( 400, "invalid id given in the patch request", null );
+				return showError( 400, "invalid id given in the patch request");
 			};
 			String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
 			
@@ -146,7 +146,7 @@ public class Controller {
 				entity.put(Constants.KEY_META, existingEntity.get(Constants.KEY_META));
 			}
 			else {
-				return showError( 404, "resource of type " + schema.getName() + " with id " + id + " can not be updated", null );
+				return showError( 404, "resource of type " + schema.getName() + " with id " + id + " can not be updated");
 			}
 		
 			response.addHeader(Constants.HEADER_LOCATION, location);
@@ -173,7 +173,7 @@ public class Controller {
 			return showError( 409, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.uniqueness );
 		}
 		catch( DataException e) {
-			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ScimErrorType.bad_data);
+			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 		}
 	}
 	
@@ -192,13 +192,13 @@ public class Controller {
 				response.addHeader(Constants.HEADER_LOCATION, UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString());
 			}
 			else {
-				return showError(HttpStatus.NOT_FOUND.value(), "the resource with id " + id + " is not found", null);
+				return showError(HttpStatus.NOT_FOUND.value(), "the resource with id " + id + " is not found");
 			}
 			logger.info("resource of type {} with id {} fetched in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 			return result;
 		}
 		catch( DataException e) {
-			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ScimErrorType.bad_data);
+			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 		}
 	}
 	
@@ -239,7 +239,7 @@ public class Controller {
 			return showError(HttpStatus.BAD_REQUEST.value(), "the filter [" + filter + "] is not correct : " + ife.getMessage(), ScimErrorType.invalidFilter);
 		}
 		catch( DataException e) {
-			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ScimErrorType.bad_data);
+			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage() );
 		}
 	}
 	
@@ -312,11 +312,11 @@ public class Controller {
 				result = new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 			}
 			else {
-				return showError( 400, "could not delete resource of type " + schema.getName() + " with id " + id, null );
+				return showError( 400, "could not delete resource of type " + schema.getName() + " with id " + id);
 			}
 		}
 		else {
-			return showError(HttpStatus.NOT_FOUND.value(), "the resource with id " + id + " is not found", null);
+			return showError(HttpStatus.NOT_FOUND.value(), "the resource with id " + id + " is not found");
 		}
 		logger.info("resource of type {} with id {} deleted in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 		
@@ -352,6 +352,9 @@ public class Controller {
 	}
 
 
+	protected ResponseEntity<Map<String, Object>> showError(int status, String detail ) {
+		return showError(status, detail, null);
+	}
 
 	protected ResponseEntity<Map<String, Object>> showError(int status, String detail, ScimErrorType scimType) {
 		Map<String,Object> error = new HashMap<>();
