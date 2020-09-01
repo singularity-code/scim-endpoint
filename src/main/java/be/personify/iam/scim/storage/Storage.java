@@ -7,7 +7,7 @@ public interface Storage {
 
 	/**
 	 * Bootstrap your storage here
-	 * @param type
+	 * @param type the type
 	 */
 	public void initialize(String type);
 	
@@ -30,10 +30,10 @@ public interface Storage {
 	
 	/**
 	 * Searches by criteria and sort order
-	 * @param searchCriteria
-	 * @param sortBy
-	 * @param sortOrder
-	 * @return
+	 * @param searchCriteria the searchcriteria
+	 * @param sortBy the comma separated list of attributes to sort by
+	 * @param sortOrder the sortorder
+	 * @return list containing the result
 	 */
 	public List<Map<String,Object>> search(SearchCriteria searchCriteria, String sortBy, String sortOrder);
 	

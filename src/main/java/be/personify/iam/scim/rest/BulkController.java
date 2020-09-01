@@ -31,7 +31,7 @@ import be.personify.iam.scim.util.Constants;
 /**
  * Controller managing bulk operations with circular reference processing, maxPayloadSize and maxOperations
  * 
- * @see https://tools.ietf.org/html/rfc7644#section-3.7
+ * https://tools.ietf.org/html/rfc7644#section-3.7
  * 
  */
 @RestController

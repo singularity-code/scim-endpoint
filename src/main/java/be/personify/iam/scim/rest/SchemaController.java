@@ -34,6 +34,8 @@ public class SchemaController extends Controller {
 	 * POST of a entity
 	 * @param resourceType the resourcetype for which to POST
 	 * @param entity the entity to post
+	 * @param attributes the attributes to be included from the response
+	 * @param excludedAttributes the attributes to be excluded from the response
 	 * @param request the HttpServletRequest
 	 * @param response the HttpServletResponse
 	 * @return the map as a ResponseEntity
@@ -67,6 +69,8 @@ public class SchemaController extends Controller {
 	 * @param resourceType the resourcetype of the entity to PUT
 	 * @param id the id of the entity of the given resourcetype
 	 * @param entity the entity itself as a map
+ 	 * @param attributes the attributes to be included from the response
+	 * @param excludedAttributes the attributes to be excluded from the response
 	 * @param request the HttpServletRequest
 	 * @param response the HttpServletResponse
 	 * @return the map as a ResponseEntity
@@ -103,6 +107,8 @@ public class SchemaController extends Controller {
 	 * @param resourceType the resourcetype of the entity to PATCH
 	 * @param id the id of the entity
 	 * @param entity the entity
+	 * @param attributes the attributes to be included from the response
+	 * @param excludedAttributes the attributes to be excluded from the response
 	 * @param request the HttpServletRequest
 	 * @param response the HttpServletResponse
 	 * @return the map as a ResponseEntity
@@ -133,6 +139,8 @@ public class SchemaController extends Controller {
 	 * GETs the entity
 	 * @param resourceType the resourceType of the entity
 	 * @param id the id of the entity
+	 * @param attributes the attributes to be included from the response
+	 * @param excludedAttributes the attributes to be excluded from the response
 	 * @param request the HttpServletRequest
 	 * @param response the HttpServletResponse
 	 * @return the map containing the entity
@@ -162,6 +170,8 @@ public class SchemaController extends Controller {
 	 * @param filter the filter to apply
 	 * @param sortBy the sortby attribute
 	 * @param sortOrder the sortorder
+	 * @param attributes the attributes to be included from the response
+	 * @param excludedAttributes the attributes to be excluded from the response
 	 * @param request the HttpServletRequest
 	 * @param response the HttpServletResponse
 	 * @return
