@@ -31,7 +31,7 @@ basic server implementation.
 
 ## usage
 
-You can either choose to **download the binaries or clone the project**.
+You can either choose to **download the binaries** or **clone the project** or **use the docker image**.
 
 ##  
 
