@@ -29,7 +29,7 @@ public class AuthenticationUtils {
 			List<String> roles = null;
 			while ( (user = PropertyFactory.getInstance().getProperty("scim.authentication.method." + authenticationType + ".user." + count)) != null) {
 				String rolesString = PropertyFactory.getInstance().getProperty("scim.authentication.method." + authenticationType + ".user." + count + ".roles");
-				logger.info("adding basic auth user {} with roles {}", user.split(Constants.COLON)[0], rolesString);
+				logger.info("adding user {} with roles {}", user.split(Constants.COLON)[0], rolesString);
 				roles = new ArrayList<String>();
 				if ( !StringUtils.isEmpty(rolesString)) {
 					roles = Arrays.asList(rolesString.split(Constants.COMMA));
