@@ -66,6 +66,12 @@ public class Constants {
 	
 	public static final String HTTP_METHOD_POST = "POST";
 	
+	public static final String BASIC = "Basic";
+	public static final String BEARER = "Bearer";
+	
+	public static final String CLIENT_ID = "client_id";
+	public static final String CLIENT_SECRET = "client_secret";
+	
 	
 
 }

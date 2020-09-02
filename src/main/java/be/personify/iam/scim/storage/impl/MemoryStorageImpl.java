@@ -142,7 +142,7 @@ public class MemoryStorageImpl implements Storage {
 		
 		if ( StringUtils.isEmpty(sortOrderString)) {
 			sortOrderString = SortOrder.ascending.name();
-			logger.info("defaulting to sortorder {}", sortOrderString);
+			logger.debug("defaulting to sortorder {}", sortOrderString);
 		}
 		SortOrder sortOrder = SortOrder.valueOf(sortOrderString);
 		

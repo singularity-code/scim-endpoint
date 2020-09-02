@@ -6,7 +6,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import be.personify.iam.scim.util.BasicAuthenticationFilter;
+import be.personify.iam.scim.util.AuthenticationFilter;
+import be.personify.iam.scim.util.CryptUtils;
+import be.personify.iam.scim.util.TokenUtils;
 
 @Configuration
 @EnableScheduling
@@ -14,12 +16,23 @@ import be.personify.iam.scim.util.BasicAuthenticationFilter;
 public class SpringConfig{
 
 	@Bean
-	public FilterRegistrationBean<BasicAuthenticationFilter> authenticationFilters(){
-	    FilterRegistrationBean<BasicAuthenticationFilter> registrationBean = new FilterRegistrationBean<>();     
-	    BasicAuthenticationFilter authenticationFilter = new BasicAuthenticationFilter();
+	public FilterRegistrationBean<AuthenticationFilter> authenticationFilters(){
+	    FilterRegistrationBean<AuthenticationFilter> registrationBean = new FilterRegistrationBean<>();     
+	    AuthenticationFilter authenticationFilter = new AuthenticationFilter();
+	    authenticationFilter.setTokenUtils(tokenUtils());
 	    registrationBean.setFilter(authenticationFilter);
 	    return registrationBean;    
 	}
-    
+	
+	
+	@Bean
+	public CryptUtils cryptUtils(){
+		return new CryptUtils();
+	}
+	
+	@Bean
+	public TokenUtils tokenUtils(){
+		return new TokenUtils();
+	}
     
 }

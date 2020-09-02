@@ -19,12 +19,13 @@ basic server implementation.
 - schema validation
 - uniqueness constraint validation
 - roles (read/write) on basic authentication
+- JWT: token endpoint created and verified with forgerock IDM connector
  
 
 **on the list :**
 
 - filtering : complete specification
-- JWT
+
 
 
 ##  
@@ -37,7 +38,7 @@ You can either choose to **download the binaries or clone the project**.
 
 For spinning up a scim server from the [downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/) : 
 
-> java -jar personify-scim-server-1.1.0.RELEASE.jar
+> java -jar -Dserver.port=8080 personify-scim-server-1.1.1.RELEASE.jar
 
 When port 8080 is already taken or other problems occur, edit the jar -> find application.properties and adapt the server.port or other settings.
 
@@ -55,18 +56,18 @@ For running the maven project :
 
 
 
-use the integrated [postman collection](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json) to test.
+Use the integrated [postman collection](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json) to test.
 
 a storage implementation is included, tune or implement other storages
 
 ##   
 
-if you **really** do not want to build anything : spin up the [docker image](https://hub.docker.com/r/personify/personify-scim-server)
-> docker run -p 8080:8080 personify/personify-scim-server:1.1.0.RELEASE
+If you **really** do not want to build anything : spin up the [docker image](https://hub.docker.com/r/personify/personify-scim-server)
+> docker run -p 8080:8080 personify/personify-scim-server:1.1.1.RELEASE
  
 ##   
 
-if you **really really** do not want to build or run it yourself : point the [postman collection ](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json)
+If you **really really** do not want to build or run it yourself : point the [postman collection ](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json)
 towards https://www.personify.be/scim/v2/Users ( 401 means unauthorized, so use correct basic auth credentials : scim-user/changeit )
 create a environment in postman containing host and protocol.
 
@@ -74,10 +75,11 @@ create a environment in postman containing host and protocol.
 
 ## configuration
 
-pimp the application.properties file included.
-the storage implementation class can be changed to the one you implemented.
+Pimp the application.properties file included.
 
+The storage implementation class can be changed to the one you implemented.
 
+For the JWT on forgerock openidm, just point the endpoint to http://localhost:8090/scim/v2/token and use the credentials from the application.properties.
 
 
 
