@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.util.AuthenticationFilter;
 import be.personify.iam.scim.util.CryptUtils;
 import be.personify.iam.scim.util.TokenUtils;
@@ -34,5 +35,5 @@ public class SpringConfig{
 	public TokenUtils tokenUtils(){
 		return new TokenUtils();
 	}
-    
+	
 }

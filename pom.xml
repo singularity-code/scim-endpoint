@@ -67,13 +67,13 @@
 			<artifactId>spring-boot-starter-log4j2</artifactId>
 			<version>${spring-boot-starter-version}</version>
 		</dependency>
-		
+
 		<dependency>
-    		<groupId>org.springframework.security</groupId>
-    		<artifactId>spring-security-crypto</artifactId>
-    		<version>5.3.4.RELEASE</version>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-crypto</artifactId>
+			<version>5.3.4.RELEASE</version>
 		</dependency>
-		
+
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -81,8 +81,8 @@
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
-		
+
+
 
 	</dependencies>
 
@@ -92,6 +92,9 @@
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
+
+
+
 
 	<build>
 		<plugins>
@@ -179,28 +182,51 @@
 					</execution>
 				</executions>
 			</plugin>
-			
-<!-- 			<plugin> -->
-<!-- 				<groupId>com.spotify</groupId> -->
-<!-- 				<artifactId>dockerfile-maven-plugin</artifactId> -->
-<!-- 				<version>1.4.13</version> -->
-<!-- 				<executions> -->
-<!-- 					<execution> -->
-<!-- 						<id>default</id> -->
-<!-- 						<goals> -->
-<!-- 							<goal>build</goal> -->
-<!-- 							<goal>push</goal> -->
-<!-- 						</goals> -->
-<!-- 					</execution> -->
-<!-- 				</executions> -->
-<!-- 				<configuration> -->
-<!-- 					<repository>personify/${project.artifactId}</repository> -->
-<!-- 					<tag>${project.version}</tag> -->
-<!-- 					<buildArgs> -->
-<!-- 						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE> -->
-<!-- 					</buildArgs> -->
-<!-- 				</configuration> -->
-<!-- 			</plugin> -->
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.1.1</version>
+				<executions>
+					<execution>
+						<phase>test</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>be.personify.iam.scim.util.LoadTest</mainClass>
+							<arguments>
+								<argument>http:/localhbost:8080/scim/v2/</argument>
+								<argument>scim-user</argument>
+								<argument>changeit</argument>
+								<argument>5</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- <plugin> -->
+			<!-- <groupId>com.spotify</groupId> -->
+			<!-- <artifactId>dockerfile-maven-plugin</artifactId> -->
+			<!-- <version>1.4.13</version> -->
+			<!-- <executions> -->
+			<!-- <execution> -->
+			<!-- <id>default</id> -->
+			<!-- <goals> -->
+			<!-- <goal>build</goal> -->
+			<!-- <goal>push</goal> -->
+			<!-- </goals> -->
+			<!-- </execution> -->
+			<!-- </executions> -->
+			<!-- <configuration> -->
+			<!-- <repository>personify/${project.artifactId}</repository> -->
+			<!-- <tag>${project.version}</tag> -->
+			<!-- <buildArgs> -->
+			<!-- <JAR_FILE>${project.build.finalName}.jar</JAR_FILE> -->
+			<!-- </buildArgs> -->
+			<!-- </configuration> -->
+			<!-- </plugin> -->
 
 		</plugins>
 	</build>

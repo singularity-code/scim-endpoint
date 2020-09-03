@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 
 import be.personify.iam.scim.storage.ConstraintViolationException;
@@ -38,6 +39,7 @@ public class MemoryStorageImpl implements Storage {
 	private Map<String,Map<Object,Object>> uniqueConstraints = null;
 	
 	private String type;
+	
 	
 	
 	

@@ -8,6 +8,38 @@
 	},
 	"item": [
 		{
+			"name": "token",
+			"request": {
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/token",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic c2NpbS1hcHBsaWNhdGlvbi1hZG1pbjpjaGFuZ2VpdA==",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
 			"name": "user create",
 			"request": {
 				"auth": {
