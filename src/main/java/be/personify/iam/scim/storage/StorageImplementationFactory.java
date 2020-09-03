@@ -45,7 +45,7 @@ public class StorageImplementationFactory implements ApplicationContextAware {
 				storage = (Storage)c.newInstance();
 				AutowireCapableBeanFactory factory = applicationContext.getAutowireCapableBeanFactory();
 				factory.autowireBean( storage );
-				factory.initializeBean( storage, "storage" );
+				factory.initializeBean( storage, "storage" + resourceType );
 				storage.initialize(resourceType);
 				storageMap.put(resourceType, storage);
 				logger.info("storage for type {} initialized", resourceType);
