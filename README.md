@@ -1,8 +1,11 @@
 # personify-scim-server
 
-Lean and mean Open source Spring Boot Java SCIM server implementation with pluggable persistence layer.
+Lean and mean and high performant open source Spring Boot Java SCIM server implementation with pluggable persistence layer.
 
-If you need to expose your identities using the SCIM protocol, you only need to write the storage layer in JAVA.
+Usefull for exposing a company's identities using the SCIM protocol and target point for your provisioning engine., you only need to write the storage layer in JAVA.
+
+You can reuse the integrated storage layer or write a custom java implementation and wire it via configuration.
+
 
 ## intro
 
@@ -15,16 +18,17 @@ basic server implementation.
 - paging
 - filtering (all operators,and,sort)
 - discovery
-- basic authentication
 - schema validation
 - uniqueness constraint validation
-- roles (read/write) on basic authentication
-- JWT: token endpoint created and verified with forgerock IDM connector
- 
+- authentication : basic and token ( with roles )
+- token endpoint created and verified with forgerock IDM connector
+
+
 
 **on the list :**
 
 - filtering : complete specification
+- /Me endpoint
 
 
 
@@ -40,7 +44,7 @@ For spinning up a scim server from the [downloaded binary](https://bitbucket.org
 
 > java -jar -Dserver.port=8080 personify-scim-server-1.1.1.RELEASE.jar
 
-When port 8080 is already taken or other problems occur, edit the jar -> find application.properties and adapt the server.port or other settings.
+When port 8080 is already taken or other problems occur, adapt the server.port via the commandline.
 
 SSL can also be configured this way ( see spring-boot documentation and sample in application.properties for this ).
 
@@ -54,11 +58,28 @@ For running the maven project :
 
 > mvn spring-boot:run
 
-
+##  
 
 Use the integrated [postman collection](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json) to test.
 
-a storage implementation is included, tune or implement other storages
+##  
+
+A load test is also runnable :
+
+##  
+
+```
+mvn exec:java -Dexec.mainClass=be.personify.iam.scim.util.LoadTest -Dexec.args="http://localhost:8080/scim/v2 scim-user changeit 4"
+[INFO] --- exec-maven-plugin:1.1.1:java (default-cli) @ personify-scim-server ---
+starting load test to http://localhost:8080/scim/v2 with 4 threads
+thread [1] 1000 records processed in 4567
+thread [2] 1000 records processed in 4574
+thread [3] 1000 records processed in 4585
+thread [0] 1000 records processed in 4600
+4000 records processed in 4645
+1000 per second
+```
+
 
 ##   
 
@@ -79,7 +100,7 @@ Pimp the application.properties file included.
 
 The storage implementation class can be changed to the one you implemented.
 
-For the JWT on forgerock openidm, just point the endpoint to http://localhost:8090/scim/v2/token and use the credentials from the application.properties.
+For the token/JWT on forgerock openidm, just point the endpoint to http://localhost:8090/scim/v2/token and use the credentials from the application.properties.
 
 
 
