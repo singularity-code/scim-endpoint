@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -41,7 +42,10 @@ public class StorageImplementationFactory implements ApplicationContextAware {
 			logger.info("initializing storage for type {}", resourceType);
 			try {
 				Class<?> c = Class.forName(storageImplementation);
-				storage = (Storage) applicationContext.getBean(c);
+				storage = (Storage)c.newInstance();
+				AutowireCapableBeanFactory factory = applicationContext.getAutowireCapableBeanFactory();
+				factory.autowireBean( storage );
+				factory.initializeBean( storage, "storage" );
 				storage.initialize(resourceType);
 				storageMap.put(resourceType, storage);
 				logger.info("storage for type {} initialized", resourceType);
