@@ -69,7 +69,8 @@ A **load test** is also runnable :
 ##  
 
 ```
-mvn exec:java -Dexec.mainClass=be.personify.iam.scim.util.LoadTest -Dexec.args="http://localhost:8080/scim/v2 scim-user changeit 4 2000"
+>mvn exec:java -Dexec.mainClass=be.personify.iam.scim.util.LoadTest -Dexec.args="http://localhost:8080/scim/v2 scim-user changeit 4 2000"
+...
 [INFO] --- exec-maven-plugin:1.1.1:java (default-cli) @ personify-scim-server ---
 starting load test to http://localhost:8080/scim/v2 with 4 threads
 thread [3] 2000 records processed in 11108
