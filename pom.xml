@@ -183,28 +183,7 @@
 				</executions>
 			</plugin>
 
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.1.1</version>
-				<executions>
-					<execution>
-						<phase>test</phase>
-						<goals>
-							<goal>java</goal>
-						</goals>
-						<configuration>
-							<mainClass>be.personify.iam.scim.util.LoadTest</mainClass>
-							<arguments>
-								<argument>http:/localhbost:8080/scim/v2/</argument>
-								<argument>scim-user</argument>
-								<argument>changeit</argument>
-								<argument>5</argument>
-							</arguments>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+			
 
 			<!-- <plugin> -->
 			<!-- <groupId>com.spotify</groupId> -->
