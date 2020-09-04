@@ -99,8 +99,9 @@ create a environment in postman containing host and protocol.
 Pimp the application.properties file included.
 
 The storage implementation class can be changed to the one you implemented.
-- memory storage implementation : basic fast access with flushing to a file
-- mongo storage implementation
+
+* memory storage implementation : basic fast access with flushing to a file
+* mongo storage implementation
 
 For the token/JWT on forgerock openidm, just point the endpoint to http://localhost:8090/scim/v2/token and use the credentials from the application.properties.
 
@@ -118,7 +119,7 @@ it will be looked at.
 
 ## thanks
 
-- jingzhou wang : logging various issues and writing the mongo storage implementation
+* jingzhou wang : logging various issues and writing the mongo storage implementation
 
 
 
