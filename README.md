@@ -69,15 +69,28 @@ A **load test** is also runnable :
 ##  
 
 ```
-mvn exec:java -Dexec.mainClass=be.personify.iam.scim.util.LoadTest -Dexec.args="http://localhost:8080/scim/v2 scim-user changeit 4"
+mvn exec:java -Dexec.mainClass=be.personify.iam.scim.util.LoadTest -Dexec.args="http://localhost:8080/scim/v2 scim-user changeit 4 2000"
 [INFO] --- exec-maven-plugin:1.1.1:java (default-cli) @ personify-scim-server ---
 starting load test to http://localhost:8080/scim/v2 with 4 threads
-thread [1] 1000 records processed in 4567
-thread [2] 1000 records processed in 4574
-thread [3] 1000 records processed in 4585
-thread [0] 1000 records processed in 4600
-4000 records processed in 4645
-1000 per second
+thread [3] 2000 records processed in 11108
+thread [1] 2000 records processed in 11486
+thread [2] 2000 records processed in 11599
+thread [0] 2000 records processed in 11634
+8000 records processed in 11737 ms
+loadTestCreate() 727 per second
+thread [3] 2000 records processed in 14089
+thread [2] 2000 records processed in 14191
+thread [0] 2000 records processed in 14216
+thread [1] 2000 records processed in 14222
+8000 records processed in 14318 ms
+loadTestDelete() 571 per second
+user created with id b18fd14b-3d68-4dd7-a22a-b0434c1f755c
+thread [0] 2000 records processed in 5322
+thread [1] 2000 records processed in 5331
+thread [3] 2000 records processed in 5380
+thread [2] 2000 records processed in 5436
+8000 records processed in 5519 ms
+loadTestGet() 1600 per second
 ```
 
 
