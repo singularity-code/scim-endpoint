@@ -69,29 +69,28 @@ A **load test** is also runnable :
 ##  
 
 ```
->mvn exec:java -Dexec.mainClass=be.personify.iam.scim.util.LoadTest -Dexec.args="http://localhost:8080/scim/v2 scim-user changeit 4 2000"
+>mvn exec:java -Dexec.mainClass=be.personify.iam.scim.util.LoadTest -Dexec.args="http://localhost:8080/scim/v2 scim-user changeit 4 5000"
 ...
 [INFO] --- exec-maven-plugin:1.1.1:java (default-cli) @ personify-scim-server ---
-starting load test to http://localhost:8080/scim/v2 with 4 threads
-thread [3] 2000 records processed in 11108
-thread [1] 2000 records processed in 11486
-thread [2] 2000 records processed in 11599
-thread [0] 2000 records processed in 11634
-8000 records processed in 11737 ms
-loadTestCreate() 727 per second
-thread [3] 2000 records processed in 14089
-thread [2] 2000 records processed in 14191
-thread [0] 2000 records processed in 14216
-thread [1] 2000 records processed in 14222
-8000 records processed in 14318 ms
-loadTestDelete() 571 per second
-user created with id b18fd14b-3d68-4dd7-a22a-b0434c1f755c
-thread [0] 2000 records processed in 5322
-thread [1] 2000 records processed in 5331
-thread [3] 2000 records processed in 5380
-thread [2] 2000 records processed in 5436
-8000 records processed in 5519 ms
-loadTestGet() 1600 per second
+starting load test to http://localhost:8080/scim/v2 with 4 threads and 5000 requests....
+thread [1] 5000 records processed in 21617
+thread [2] 5000 records processed in 21723
+thread [0] 5000 records processed in 21778
+thread [3] 5000 records processed in 21855
+20000 records processed in 22032 ms
+--------------- loadTestCreate() --- 907.77 req/sec
+thread [2] 5000 records processed in 10968
+thread [0] 5000 records processed in 11044
+thread [1] 5000 records processed in 11052
+thread [3] 5000 records processed in 11184
+20000 records processed in 11213 ms
+--------------- loadTestGet()    --- 1783.64 req/sec
+thread [1] 5000 records processed in 147731
+thread [0] 5000 records processed in 148067
+thread [3] 5000 records processed in 148258
+thread [2] 5000 records processed in 148718
+20000 records processed in 148734 ms
+--------------- loadTestDelete() --- 134.47 req/sec
 ```
 
 
