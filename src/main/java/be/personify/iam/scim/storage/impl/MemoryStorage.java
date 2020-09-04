@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 
 import be.personify.iam.scim.storage.ConstraintViolationException;
@@ -29,9 +28,9 @@ import be.personify.iam.scim.util.PropertyFactory;
  * @author vanderw
  *
  */
-public class MemoryStorageImpl implements Storage {
+public class MemoryStorage implements Storage {
 	
-	private static final Logger logger = LogManager.getLogger(MemoryStorageImpl.class);
+	private static final Logger logger = LogManager.getLogger(MemoryStorage.class);
 
 	private Map<String,Map<String,Object>> storage = null;
 	
