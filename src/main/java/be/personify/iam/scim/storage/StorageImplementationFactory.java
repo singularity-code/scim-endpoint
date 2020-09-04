@@ -22,7 +22,7 @@ public class StorageImplementationFactory implements ApplicationContextAware {
 	
 	private static final Logger logger = LogManager.getLogger(StorageImplementationFactory.class);
 	
-	@Value("${scim.storage.implementation:be.personify.iam.scim.storage.impl.MemoryStorage}")
+	@Value("${scim.storage.implementation}")
 	private String storageImplementation;
 	
 	private Map<String,Storage> storageMap = new HashMap<String, Storage>();
@@ -35,7 +35,7 @@ public class StorageImplementationFactory implements ApplicationContextAware {
 	 * @param schema the schema
 	 * @return the storage
 	 */
-	public Storage getStorageImplementation( Schema schema ) {
+	public synchronized Storage getStorageImplementation( Schema schema ) {
 		String resourceType = schema.getName();
 		Storage storage = storageMap.get(resourceType);
 		if ( storage == null ) {

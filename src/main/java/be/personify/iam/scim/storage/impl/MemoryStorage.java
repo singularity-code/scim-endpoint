@@ -259,7 +259,7 @@ public class MemoryStorage implements Storage {
 		}
 	}
 	
-	private void removeConstraints(String id) {
+	private synchronized void removeConstraints(String id) {
 		for ( String constraint : uniqueConstraintsList) {
 			 Map<Object,Object> c = uniqueConstraints.get(constraint);
 			 if ( c.containsValue(id)) {

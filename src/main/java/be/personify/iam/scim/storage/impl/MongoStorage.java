@@ -54,7 +54,6 @@ public class MongoStorage implements Storage {
 
     @Override
     public Map<String, Object> get(String id) {
-
         Document query = new Document(oid, new BsonBinary(UUID.fromString(id)));
         Document doc = col.find(query).first();
         if (doc != null) {
@@ -64,10 +63,11 @@ public class MongoStorage implements Storage {
         return doc;
     }
 
+    
+    
     @Override
     public Map<String, Object> get(String id, String version) {
-        Document query = new Document(oid, new BsonBinary(UUID.fromString(id)))
-                .append(Constants.KEY_META, new Document(Constants.KEY_VERSION, version));
+        Document query = new Document(oid, new BsonBinary(UUID.fromString(id))).append(Constants.KEY_META, new Document(Constants.KEY_VERSION, version));
         Document doc = col.find(query).first();
         if (doc != null) {
             doc.remove(oid);
@@ -76,6 +76,8 @@ public class MongoStorage implements Storage {
         return doc;
     }
 
+    
+    
     @Override
     public List<String> getVersions(String id) {
         List<String> vs = new ArrayList<>();
@@ -86,12 +88,15 @@ public class MongoStorage implements Storage {
         }
         return vs;
     }
+    
 
     @Override
     public boolean delete(String id) {
         Document query = new Document(oid, new BsonBinary(UUID.fromString(id)));
         return col.findOneAndDelete(query) != null;
     }
+    
+    
 
     @Override
     public boolean deleteAll() {
@@ -99,6 +104,7 @@ public class MongoStorage implements Storage {
         return true;
     }
 
+    
     @Override
     public void create(String id, Map<String, Object> object) throws ConstraintViolationException {
         Document doc = new Document(object);
@@ -115,6 +121,9 @@ public class MongoStorage implements Storage {
         doc.put(oid, objId);
         col.insertOne(doc);
     }
+    
+    
+    
 
     @Override
     public void update(String id, Map<String, Object> object) {
@@ -126,20 +135,27 @@ public class MongoStorage implements Storage {
         col.findOneAndUpdate(query, new Document($set, doc));
     }
 
+    
+    
     @Override
     public List<Map<String, Object>> getAll() {
         List<Map<String, Object>> all = new ArrayList<>();
+        String id = null;
         for (Map<String, Object> doc : col.find()) {
-            String id = ((UUID) doc.remove(oid)).toString();
+            id = ((UUID) doc.remove(oid)).toString();
             doc.put(Constants.ID, id);
             all.add(doc);
         }
         return all;
     }
 
+    
+    
+    
     @Override
     public List<Map<String, Object>> search(SearchCriteria searchCriteria, String sortBy, String sortOrder) {
         if (searchCriteria == null || searchCriteria.getCriteria() == null || searchCriteria.getCriteria().size() == 0) {
+        	//TODO also sort
             return getAll();
         }
 
@@ -165,6 +181,9 @@ public class MongoStorage implements Storage {
         return all;
     }
 
+    
+    
+    
     private void genQuery(Document query, SearchCriterium sc) {
         if (sc != null) {
             SearchOperation op = sc.getSearchOperation();
