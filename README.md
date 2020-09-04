@@ -111,7 +111,8 @@ create a environment in postman containing host and protocol.
 
 Pimp the application.properties file included.
 
-The storage implementation class can be changed to the one you implemented.
+
+Two storage implementations are developed but if neede, you can implemented and wire your own implementation.
 
 * memory storage implementation : basic fast access with flushing to a file
 * mongo storage implementation
