@@ -45,7 +45,13 @@ public class LoadTest {
 					long start = System.currentTimeMillis();
 					for ( int j = 0; j < nrOfRequests; j++) {
 						RestTemplate restTemplate = new RestTemplate();
-						ResponseEntity<Object> response  = restTemplate.exchange(endpoint + "/Users/9ebc9a44-e983-4234-a96e-d8cc03098d17",HttpMethod.GET,entity, Object.class );
+						try {
+							ResponseEntity<Object> response  = restTemplate.exchange(endpoint + "/Users/9ebc9a44-e983-4234-a96e-d8cc03098d17",HttpMethod.GET,entity, Object.class );
+						}
+						catch( Exception e ) {
+							e.printStackTrace();
+							break;
+						}
 					}
 					System.out.println("thread [" + zz + "] " + nrOfRequests + " records processed in " + (System.currentTimeMillis() - start));
 					finished++;
