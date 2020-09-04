@@ -64,7 +64,7 @@ Use the integrated [postman collection](https://bitbucket.org/wouter29/personify
 
 ##  
 
-A **load test** is also runnable :
+A **load test** is also runnable, below the response of a single instance :
 
 ##  
 
