@@ -103,7 +103,9 @@ The storage implementation class can be changed to the one you implemented.
 * memory storage implementation : basic fast access with flushing to a file
 * mongo storage implementation
 
-For the token/JWT on forgerock openidm, just point the endpoint to http://localhost:8090/scim/v2/token and use the credentials from the application.properties.
+For using a OAUTH bearer token on forgerock openidm and other products, just point the endpoint to http://localhost:{8090}/scim/v2/token and use the credentials from the application.properties.
+
+Custom schemas can also be configured simply by defining it in a file.
 
 
 
