@@ -25,6 +25,15 @@
     },
     "authenticationSchemes": [
       {
+        "name": "OAuth Bearer Token",
+        "description":
+          "Authentication scheme using the OAuth Bearer Token Standard",
+        "specUri": "http://www.rfc-editor.org/info/rfc6750",
+        "documentationUri": "http://example.com/help/oauth.html",
+        "type": "oauthbearertoken",
+        "primary": true
+      },
+      {
         "name": "HTTP Basic",
         "description":
           "Authentication scheme using the HTTP Basic Standard",
