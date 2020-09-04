@@ -1,6 +1,6 @@
 # personify-scim-server
 
-Lean and mean and high performant open source Spring Boot Java SCIM server implementation with pluggable persistence layer.
+Lean, mean and high performant open source Spring Boot Java SCIM server implementation with pluggable persistence layer.
 
 Usefull for exposing a company's identities using the SCIM protocol and target point for your provisioning engine., you only need to write the storage layer in JAVA.
 
@@ -64,7 +64,7 @@ Use the integrated [postman collection](https://bitbucket.org/wouter29/personify
 
 ##  
 
-A load test is also runnable :
+A **load test** is also runnable :
 
 ##  
 
@@ -103,7 +103,9 @@ The storage implementation class can be changed to the one you implemented.
 * memory storage implementation : basic fast access with flushing to a file
 * mongo storage implementation
 
-For the token/JWT on forgerock openidm, just point the endpoint to http://localhost:8090/scim/v2/token and use the credentials from the application.properties.
+For using a OAUTH bearer token on forgerock openidm and other products, just point the endpoint to http://localhost:{8090}/scim/v2/token and use the credentials from the application.properties.
+
+Custom schemas can also be configured simply by defining it in a file.
 
 
 
