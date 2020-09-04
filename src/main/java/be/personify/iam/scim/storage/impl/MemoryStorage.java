@@ -238,12 +238,14 @@ public class MemoryStorage implements Storage {
 	}
 	
 	private void checkConstraints(String id, Map<String, Object> object) throws ConstraintViolationException {
-		for ( String constraint : uniqueConstraintsList) {
-			Object valueFromEntity = object.get(constraint);
-			Object valueFromConstraintCache = uniqueConstraints.get(constraint).get(valueFromEntity);
-			if ( valueFromConstraintCache != null ){
-				if ( !valueFromConstraintCache.equals(id) ) {
-					throw new ConstraintViolationException("the value " + valueFromEntity + " is already existing for the attribute " + constraint);
+		synchronized (uniqueConstraints) {
+			for ( String constraint : uniqueConstraintsList) {
+				Object valueFromEntity = object.get(constraint);
+				Object valueFromConstraintCache = uniqueConstraints.get(constraint).get(valueFromEntity);
+				if ( valueFromConstraintCache != null ){
+					if ( !valueFromConstraintCache.equals(id) ) {
+						throw new ConstraintViolationException("the value " + valueFromEntity + " is already existing for the attribute " + constraint);
+					}
 				}
 			}
 		}
@@ -251,33 +253,38 @@ public class MemoryStorage implements Storage {
 	
 	
 	private void updateConstraints(String id, Map<String, Object> object) {
-		for ( String constraint : uniqueConstraintsList) {
-			Object valueFromEntity = object.get(constraint);
-			if ( valueFromEntity != null ) {
-				uniqueConstraints.get(constraint).put(valueFromEntity, id);
+		synchronized (uniqueConstraints) {
+			for ( String constraint : uniqueConstraintsList) {
+				Object valueFromEntity = object.get(constraint);
+				if ( valueFromEntity != null ) {
+					uniqueConstraints.get(constraint).put(valueFromEntity, id);
+				}
 			}
 		}
 	}
 	
-	private synchronized void removeConstraints(String id) {
-		for ( String constraint : uniqueConstraintsList) {
-			 Map<Object,Object> c = uniqueConstraints.get(constraint);
-			 if ( c.containsValue(id)) {
-				 Map<Object,Object> newMap = new HashMap<Object, Object>();
-				 for (Object o : c.keySet()) {
-					 if ( !c.get(o).equals(id)) {
-						 newMap.put(o, c.get(o));
+	private void removeConstraints(String id) {
+		synchronized (uniqueConstraints) {
+			for ( String constraint : uniqueConstraintsList) {
+				 Map<Object,Object> c = uniqueConstraints.get(constraint);
+				 if ( c.containsValue(id)) {
+					 Map<Object,Object> newMap = new HashMap<Object, Object>();
+					 for (Object o : c.keySet()) {
+						 if ( !c.get(o).equals(id)) {
+							 newMap.put(o, c.get(o));
+						 }
 					 }
+					 uniqueConstraints.put(constraint, newMap);
 				 }
-				 uniqueConstraints.put(constraint, newMap);
-			 }
-			
+				
+			}
 		}
+		
 	}
 
 
 	@Override
-	public void flush() {
+	public synchronized void flush() {
 		Boolean flush = Boolean.valueOf(PropertyFactory.getInstance().getProperty("scim.storage.flush"));
 		if ( flush ) {
 			logger.debug("flushing");

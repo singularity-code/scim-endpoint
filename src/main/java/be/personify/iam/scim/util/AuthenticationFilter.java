@@ -30,6 +30,7 @@ public class AuthenticationFilter implements Filter {
 	private TokenUtils tokenUtils;
 	
 	private Map<String,List<String>> basicAuthUsers = AuthenticationUtils.getUserList(Constants.BASIC.toLowerCase());
+	private Map<String,List<String>> bearerAuthUsers = AuthenticationUtils.getUserList(Constants.BEARER.toLowerCase());
 	
 	
 	private static final List<String> PUBLIC_ENDPOINTS = Arrays.asList(new String[] {"/scim/v2/token"});
