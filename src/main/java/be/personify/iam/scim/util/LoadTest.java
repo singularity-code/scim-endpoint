@@ -46,7 +46,7 @@ public class LoadTest {
 					for ( int j = 0; j < nrOfRequests; j++) {
 						RestTemplate restTemplate = new RestTemplate();
 						try {
-							ResponseEntity<Object> response  = restTemplate.exchange(endpoint + "/Users/9ebc9a44-e983-4234-a96e-d8cc03098d17",HttpMethod.GET,entity, Object.class );
+							ResponseEntity<Object> response  = restTemplate.exchange(endpoint + "/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",HttpMethod.GET,entity, Object.class );
 						}
 						catch( Exception e ) {
 							e.printStackTrace();
