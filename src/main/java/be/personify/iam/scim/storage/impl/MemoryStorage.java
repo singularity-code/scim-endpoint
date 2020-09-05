@@ -84,11 +84,12 @@ public class MemoryStorage implements Storage {
 	
 	@Override
 	public boolean delete(String id) {
-		if (storage.remove(id) == null ) {
-			return false;
+		boolean removed = false;
+		synchronized (storage) {
+			 removed = storage.remove(id) == null ? false : true;
 		}
 		removeConstraints(id);
-		return true;
+		return removed;
 	}
 	
 	@Override
@@ -265,21 +266,12 @@ public class MemoryStorage implements Storage {
 	
 	private void removeConstraints(String id) {
 		for ( String constraint : uniqueConstraintsList) {
-			 Map<Object,Object> c = uniqueConstraints.get(constraint);
-			 if ( c.containsValue(id)) {
-				 Map<Object,Object> newMap = new HashMap<Object, Object>();
-				 for (Object o : c.keySet()) {
-					 if ( !c.get(o).equals(id)) {
-						 newMap.put(o, c.get(o));
-					 }
-				 }
-				 synchronized (uniqueConstraints) {
-					 uniqueConstraints.put(constraint, newMap);
-				 }
-			 }
-			
+			if (uniqueConstraints.get(constraint).containsValue(id) ) {
+				synchronized (uniqueConstraints) { 
+					uniqueConstraints.get(constraint).values().remove(id);
+				}
+			}
 		}
-		
 	}
 
 
