@@ -16,6 +16,7 @@ public interface Storage {
 	
 	public Map<String,Object> get(String id, String version);
 	
+
 	public List<String> getVersions(String id);
 	
 	public boolean delete(String id);
@@ -26,7 +27,6 @@ public interface Storage {
 	
 	public void update( String id, final Map<String,Object> object) throws ConstraintViolationException;
 	
-	public List<Map<String,Object>> getAll();
 	
 	/**
 	 * Searches by criteria and sort order
@@ -37,6 +37,7 @@ public interface Storage {
 	 */
 	public List<Map<String,Object>> search(SearchCriteria searchCriteria, String sortBy, String sortOrder);
 	
+	public List<Map<String,Object>> getAll(String sortBy, String sortOrder);
 	
 	/**
 	 * Optional to implement : persist 

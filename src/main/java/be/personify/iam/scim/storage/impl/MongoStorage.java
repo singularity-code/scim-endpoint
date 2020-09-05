@@ -138,7 +138,7 @@ public class MongoStorage implements Storage {
     
     
     @Override
-    public List<Map<String, Object>> getAll() {
+    public List<Map<String, Object>> getAll( String sortBy, String sortOrder ) {
         List<Map<String, Object>> all = new ArrayList<>();
         String id = null;
         for (Map<String, Object> doc : col.find()) {

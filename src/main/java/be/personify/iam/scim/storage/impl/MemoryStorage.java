@@ -78,7 +78,7 @@ public class MemoryStorage implements Storage {
 	
 
 	@Override
-	public List<Map<String,Object>> getAll() {
+	public List<Map<String,Object>> getAll(String sortBy, String sortOrder) {
 		return new ArrayList<Map<String,Object>>(storage.values());
 	}
 	
