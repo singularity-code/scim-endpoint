@@ -156,7 +156,7 @@ public class MongoStorage implements Storage {
     public List<Map<String, Object>> search(SearchCriteria searchCriteria, String sortBy, String sortOrder) {
         if (searchCriteria == null || searchCriteria.getCriteria() == null || searchCriteria.getCriteria().size() == 0) {
         	//TODO also sort
-            return getAll();
+            return getAll(sortBy, sortOrder);
         }
 
         Document query = new Document();

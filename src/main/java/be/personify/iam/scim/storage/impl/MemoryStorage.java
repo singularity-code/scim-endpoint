@@ -96,12 +96,12 @@ public class MemoryStorage implements Storage {
 	public List<Map<String,Object>> search(SearchCriteria searchCriteria, String sortBy, String sortOrderString) {
 		List<Map<String,Object>> result = null;
 		if ( searchCriteria == null || searchCriteria.getCriteria() == null || searchCriteria.getCriteria().size() == 0){
-			result = getAll();
+			result = getAll(sortBy, sortOrderString);
 		}
 		else {
 			logger.info("{}", searchCriteria);
 			result = new ArrayList<Map<String,Object>>();
-			for( Map<String,Object> object : getAll() ){
+			for( Map<String,Object> object : getAll(sortBy, sortOrderString)){
 				int count = 0;
 				for ( SearchCriterium criterium : searchCriteria.getCriteria() ) {
 					Object value = object.get( criterium.getKey());
