@@ -76,12 +76,6 @@ public class MemoryStorage implements Storage {
 	
 
 	
-
-	@Override
-	public List<Map<String,Object>> getAll(String sortBy, String sortOrder) {
-		return new ArrayList<Map<String,Object>>(storage.values());
-	}
-	
 	@Override
 	public boolean delete(String id) {
 		boolean removed = false;
@@ -92,54 +86,17 @@ public class MemoryStorage implements Storage {
 		return removed;
 	}
 	
+	
+	
 	@Override
-	public List<Map<String,Object>> search(SearchCriteria searchCriteria, String sortBy, String sortOrderString) {
+	public List<Map<String,Object>> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString) {
 		List<Map<String,Object>> result = null;
 		if ( searchCriteria == null || searchCriteria.getCriteria() == null || searchCriteria.getCriteria().size() == 0){
-			result = getAll(sortBy, sortOrderString);
+			result = new ArrayList<Map<String,Object>>(storage.values());
 		}
 		else {
-			logger.info("{}", searchCriteria);
-			result = new ArrayList<Map<String,Object>>();
-			for( Map<String,Object> object : getAll(sortBy, sortOrderString)){
-				int count = 0;
-				for ( SearchCriterium criterium : searchCriteria.getCriteria() ) {
-					Object value = object.get( criterium.getKey());
-					if ( criterium.getSearchOperation() == SearchOperation.EQUALS) {
-						if ( value.toString().equals(criterium.getValue())) {
-							count++;
-						}
-					}
-					else if ( criterium.getSearchOperation() == SearchOperation.NOT_EQUALS) {
-						if ( !value.toString().equals(criterium.getValue())) {
-							count++;
-						}
-					}
-					else if ( criterium.getSearchOperation() == SearchOperation.STARTS_WITH) {
-						if ( value.toString().startsWith((String)criterium.getValue())) {
-							count++;
-						}
-					}
-					else if ( criterium.getSearchOperation() == SearchOperation.CONTAINS) {
-						if ( value.toString().contains((String)criterium.getValue())) {
-							count++;
-						}
-					}
-					else if ( criterium.getSearchOperation() == SearchOperation.ENDS_WITH) {
-						if ( value.toString().endsWith((String)criterium.getValue())) {
-							count++;
-						}
-					}
-					else if ( criterium.getSearchOperation() == SearchOperation.PRESENT) {
-						if ( value != null) {
-							count++;
-						}
-					}
-				}
-				if ( count == searchCriteria.getCriteria().size()) {
-					result.add(object);
-				}
-			}
+			logger.debug("{}", searchCriteria);
+			result = filterOnSearchCriteria(searchCriteria);
 		}
 		
 		if ( StringUtils.isEmpty(sortOrderString)) {
@@ -150,8 +107,69 @@ public class MemoryStorage implements Storage {
 		
 		result = sort( result, sortBy, sortOrder);
 		
+		count = count > result.size() ? result.size() : count;
+		logger.debug("count {} start {}", count, start);
+		int newStart = (start -1) * count;
+		List<Map<String,Object>> sublist = result.subList(newStart , newStart + count);
+		
+		return sublist;
+	}
+	
+	
+	@Override
+	public long count(SearchCriteria searchCriteria) {
+		return Long.valueOf(filterOnSearchCriteria(searchCriteria).size());
+	}
+
+	
+	
+	private List<Map<String, Object>> filterOnSearchCriteria(SearchCriteria searchCriteria) {
+		List<Map<String, Object>> result;
+		result = new ArrayList<Map<String,Object>>();
+		for( Map<String,Object> object : storage.values()){
+			int criteriaCount = 0;
+			for ( SearchCriterium criterium : searchCriteria.getCriteria() ) {
+				Object value = object.get( criterium.getKey());
+				if ( criterium.getSearchOperation() == SearchOperation.EQUALS) {
+					if ( value.toString().equals(criterium.getValue())) {
+						criteriaCount++;
+					}
+				}
+				else if ( criterium.getSearchOperation() == SearchOperation.NOT_EQUALS) {
+					if ( !value.toString().equals(criterium.getValue())) {
+						criteriaCount++;
+					}
+				}
+				else if ( criterium.getSearchOperation() == SearchOperation.STARTS_WITH) {
+					if ( value.toString().startsWith((String)criterium.getValue())) {
+						criteriaCount++;
+					}
+				}
+				else if ( criterium.getSearchOperation() == SearchOperation.CONTAINS) {
+					if ( value.toString().contains((String)criterium.getValue())) {
+						criteriaCount++;
+					}
+				}
+				else if ( criterium.getSearchOperation() == SearchOperation.ENDS_WITH) {
+					if ( value.toString().endsWith((String)criterium.getValue())) {
+						criteriaCount++;
+					}
+				}
+				else if ( criterium.getSearchOperation() == SearchOperation.PRESENT) {
+					if ( value != null) {
+						criteriaCount++;
+					}
+				}
+			}
+			if ( criteriaCount == searchCriteria.getCriteria().size()) {
+				result.add(object);
+			}
+		}
 		return result;
 	}
+	
+	
+	
 	
 	
 	

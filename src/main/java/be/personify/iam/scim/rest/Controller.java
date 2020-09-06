@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -31,6 +32,7 @@ import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.SearchCriteria;
 import be.personify.iam.scim.storage.SearchCriterium;
 import be.personify.iam.scim.storage.SearchOperation;
+import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.ScimErrorType;
@@ -45,6 +47,9 @@ public class Controller {
 	private static final String SCHEMA_VALIDATION = "schema validation : ";
 
 	private static final Logger logger = LogManager.getLogger(Controller.class);
+	
+	@Value("${scim.allowIdOnCreate:true}")
+	private boolean allowIdOnCreate;
 	
 	@Autowired
 	private StorageImplementationFactory storageImplementationFactory;
@@ -210,8 +215,9 @@ public class Controller {
 		
 		try {
 			SearchCriteria searchCriteria = composeSearchCriteria(filter,sortBy,sortOrder);
-				
-			List<Map<String,Object>> dataFetched = storageImplementationFactory.getStorageImplementation(schema).search(searchCriteria, sortBy,sortOrder);
+			Storage storage = storageImplementationFactory.getStorageImplementation(schema);	
+			
+			List<Map<String,Object>> dataFetched = storage.search(searchCriteria, startIndex, count, sortBy,sortOrder);
 			List<Map<String,Object>> data = new ArrayList<>();
 			for ( Map<String,Object> entity : dataFetched) {
 				data.add(filterAttributes(schema, entity, attributes, excludedAttributes));
@@ -224,10 +230,8 @@ public class Controller {
 			responseObject.put(Constants.KEY_STARTINDEX, startIndex);
 			responseObject.put(Constants.KEY_ITEMSPERPAGE, count);
 			
-			count = count > data.size() ? data.size() : count;
-			List<Map<String,Object>> sublist = data.subList(startIndex -1, count);
-			responseObject.put(Constants.KEY_TOTALRESULTS, data.size());
-			responseObject.put(Constants.KEY_RESOURCES, sublist);
+			responseObject.put(Constants.KEY_TOTALRESULTS,storage.count(searchCriteria) );
+			responseObject.put(Constants.KEY_RESOURCES, data);
 			
 			result = new ResponseEntity<>(responseObject, HttpStatus.OK);
 			
@@ -423,7 +427,12 @@ public class Controller {
 
 	protected String createId(Map<String, Object> user) {
 		Object id = user.get(Constants.ID);
-		return id != null ? id.toString() : UUID.randomUUID().toString();
+		if ( allowIdOnCreate) {
+			return id != null ? id.toString() : UUID.randomUUID().toString();
+		}
+		else {
+			return UUID.randomUUID().toString();
+		}
 	}
 	
 	

@@ -71,27 +71,45 @@ A **load test** is also runnable, below the response of a single instance :
 ```
 >mvn exec:java -Dexec.mainClass=be.personify.iam.scim.util.LoadTest -Dexec.args="http://localhost:8080/scim/v2 scim-user changeit 4 5000"
 ...
-[INFO] --- exec-maven-plugin:1.1.1:java (default-cli) @ personify-scim-server ---
 starting load test to http://localhost:8080/scim/v2 with 4 threads and 5000 requests....
-thread [1] 5000 records processed in 21617
-thread [2] 5000 records processed in 21723
-thread [0] 5000 records processed in 21778
-thread [3] 5000 records processed in 21855
-20000 records processed in 22032 ms
---------------- loadTestCreate() --- 907.77 req/sec
-thread [2] 5000 records processed in 10968
-thread [0] 5000 records processed in 11044
-thread [1] 5000 records processed in 11052
-thread [3] 5000 records processed in 11184
-20000 records processed in 11213 ms
---------------- loadTestGet()    --- 1783.64 req/sec
-thread [1] 5000 records processed in 147731
-thread [0] 5000 records processed in 148067
-thread [3] 5000 records processed in 148258
-thread [2] 5000 records processed in 148718
-20000 records processed in 148734 ms
---------------- loadTestDelete() --- 134.47 req/sec
+thread [1] 5000 records processed in 22377
+thread [0] 5000 records processed in 22499
+thread [2] 5000 records processed in 22542
+thread [3] 5000 records processed in 22545
+20000 records processed in 22658 ms
+--------------- loadTestCreate() --- 882.69 req/sec
+thread [3] 5000 records processed in 12351
+thread [0] 5000 records processed in 12392
+thread [1] 5000 records processed in 12418
+thread [2] 5000 records processed in 12426
+20000 records processed in 12428 ms
+--------------- loadTestGet()    --- 1609.27 req/sec
+thread [1] 5000 records processed in 124684
+thread [2] 5000 records processed in 124864
+thread [3] 5000 records processed in 125226
+thread [0] 5000 records processed in 125238
+20000 records processed in 125241 ms
+--------------- loadTestSearch()    --- 159.69 req/sec
+thread [1] 5000 records processed in 18547
+thread [2] 5000 records processed in 18862
+thread [0] 5000 records processed in 19441
+thread [3] 5000 records processed in 20076
+20000 records processed in 20126 ms
+--------------- loadTestDelete() --- 993.74 req/sec
+
 ```
+##  
+
+The current benchmark can give you already an idea about the througput.
+
+Executed on a AMD® Ryzen 3 2200g with the application consuming approximately 250MB for 4 threads and 5000 requests per thread.
+
+| request | MEMORY     | MONGO      |
+|---------|------------|------------|
+| create  | 882  req/s | 225  req/s |
+| get     | 1609 req/s | 1997 req/s | 
+| search  | 159  req/s | 1446 req/s |
+| delete  | 993  req/s | 2015 req/s |
 
 
 ##   

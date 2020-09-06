@@ -52,6 +52,7 @@ public class MongoStorage implements Storage {
     
     private MongoCollection<Document> col;
 
+    
     @Override
     public Map<String, Object> get(String id) {
         Document query = new Document(oid, new BsonBinary(UUID.fromString(id)));
@@ -90,6 +91,8 @@ public class MongoStorage implements Storage {
     }
     
 
+    
+   
     @Override
     public boolean delete(String id) {
         Document query = new Document(oid, new BsonBinary(UUID.fromString(id)));
@@ -105,6 +108,7 @@ public class MongoStorage implements Storage {
     }
 
     
+ 
     @Override
     public void create(String id, Map<String, Object> object) throws ConstraintViolationException {
         Document doc = new Document(object);
@@ -136,32 +140,18 @@ public class MongoStorage implements Storage {
     }
 
     
-    
-    @Override
-    public List<Map<String, Object>> getAll( String sortBy, String sortOrder ) {
-        List<Map<String, Object>> all = new ArrayList<>();
-        String id = null;
-        for (Map<String, Object> doc : col.find()) {
-            id = ((UUID) doc.remove(oid)).toString();
-            doc.put(Constants.ID, id);
-            all.add(doc);
-        }
-        return all;
-    }
-
-    
+   
     
     
     @Override
-    public List<Map<String, Object>> search(SearchCriteria searchCriteria, String sortBy, String sortOrder) {
-        if (searchCriteria == null || searchCriteria.getCriteria() == null || searchCriteria.getCriteria().size() == 0) {
-        	//TODO also sort
-            return getAll(sortBy, sortOrder);
-        }
+    public List<Map<String, Object>> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder) {
 
         Document query = new Document();
-        searchCriteria.getCriteria().forEach(sc -> genQuery(query, sc));
-        FindIterable<Document> finds = col.find(query);
+        if (searchCriteria != null && searchCriteria.getCriteria() != null && searchCriteria.getCriteria().size() > 0) {
+        	searchCriteria.getCriteria().forEach(sc -> genQuery(query, sc));
+        }
+        
+        FindIterable<Document> finds = col.find(query).skip(start -1 * count).limit(count);
         if (sortBy != null) {
             int order = 1;
             if (sortOrder != null) {
@@ -173,13 +163,26 @@ public class MongoStorage implements Storage {
             finds.sort(sort);
         }
         List<Map<String, Object>> all = new ArrayList<>();
+        String id = null;
         for (Document doc : finds) {
-            String id = ((UUID) doc.remove(oid)).toString();
+            id = ((UUID) doc.remove(oid)).toString();
             doc.put(Constants.ID, id);
             all.add(doc);
         }
         return all;
     }
+    
+    
+    
+    
+    @Override
+	public long count(SearchCriteria searchCriteria) {
+    	Document query = new Document();
+    	if (searchCriteria != null && searchCriteria.getCriteria() != null && searchCriteria.getCriteria().size() > 0) {
+        	searchCriteria.getCriteria().forEach(sc -> genQuery(query, sc));
+        }
+        return col.countDocuments(query);
+	}
 
     
     
@@ -259,5 +262,9 @@ public class MongoStorage implements Storage {
         col = client.getDatabase(database).getCollection(collection);
         col.createIndex(Indexes.descending(userName), new IndexOptions().background(true).unique(true));
     }
+
+
+
+	
 
 }
