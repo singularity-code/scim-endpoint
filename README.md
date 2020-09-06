@@ -42,7 +42,7 @@ You can either choose to **download the binaries** or **clone the project** or *
 
 For spinning up a scim server from the [downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/) : 
 
-> java -jar -Dserver.port=8080 personify-scim-server-1.1.1.RELEASE.jar
+> java -jar -Dserver.port=8080 personify-scim-server-1.1.2.RELEASE.jar
 
 When port 8080 is already taken or other problems occur, adapt the server.port via the commandline.
 
@@ -115,7 +115,7 @@ Executed on a AMD® Ryzen 3 2200g with the application consuming approximately 2
 ##   
 
 If you **really** do not want to build anything : spin up the [docker image](https://hub.docker.com/r/personify/personify-scim-server)
-> docker run -p 8080:8080 personify/personify-scim-server:1.1.1.RELEASE
+> docker run -p 8080:8080 personify/personify-scim-server:1.1.2.RELEASE
  
 ##   
 
