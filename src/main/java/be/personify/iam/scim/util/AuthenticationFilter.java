@@ -53,31 +53,19 @@ public class AuthenticationFilter implements Filter {
 			if ( header != null ) {
 				String[] auth = header.split(Constants.SPACE);
 				if ( auth.length == 2) {
+					String method = req.getMethod();
 					if ( auth[0].equalsIgnoreCase(Constants.BASIC)) {
 						String credential = new String(Base64Utils.decode(auth[1].getBytes()));
 						if ( basicAuthUsers != null && basicAuthUsers.containsKey(credential)) {
 							//check roles 
-							String method = req.getMethod();
-							if ( method.equals(HttpMethod.GET.name()) ) {
-								if ( basicAuthUsers.get(credential).contains(ROLE_READ)) {
-									chain.doFilter(request, response);
-									filtered = true;
-								}
-							}
-							else {
-								if ( basicAuthUsers.get(credential).contains(ROLE_WRITE)) {
-									chain.doFilter(request, response);
-									filtered = true;
-								}
-							}
+							filtered = checkRole(request, response, chain, filtered, credential, method);
 						}
 					}
 					else if (auth[0].equalsIgnoreCase(Constants.BEARER)) {
 						String token = auth[1];
 						logger.debug("token {}", token);
 						if ( tokenUtils.isValid(token)) {
-							chain.doFilter(request, response);
-							filtered = true;
+							filtered = checkRole(request, response, chain, filtered, token, method);
 						}
 					}
 				}
@@ -91,6 +79,23 @@ public class AuthenticationFilter implements Filter {
 		    resp.flushBuffer();
 		}
 		
+	}
+
+	private boolean checkRole(ServletRequest request, ServletResponse response, FilterChain chain, boolean filtered,
+			String credential, String method) throws IOException, ServletException {
+		if ( method.equals(HttpMethod.GET.name()) ) {
+			if ( basicAuthUsers.get(credential).contains(ROLE_READ)) {
+				chain.doFilter(request, response);
+				filtered = true;
+			}
+		}
+		else {
+			if ( basicAuthUsers.get(credential).contains(ROLE_WRITE)) {
+				chain.doFilter(request, response);
+				filtered = true;
+			}
+		}
+		return filtered;
 	}
 
 	public void setTokenUtils(TokenUtils tokenUtils) {
