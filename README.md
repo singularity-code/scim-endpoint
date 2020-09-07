@@ -130,14 +130,14 @@ create a environment in postman containing host and protocol.
 Pimp the application.properties file included.
 
 
-Two storage implementations are developed but if neede, you can implemented and wire your own implementation.
+Two storage implementations are developed but if needed, you can implemented and wire your own implementation.
 
-* memory storage implementation : basic fast access with flushing to a file
-* mongo storage implementation
+* memory storage implementation : basic fast access with flushing to a file, choose this for development or show case, demo testing, trial.
+* mongo storage implementation : should be fine and scalable for development and production.
 
 For using a OAUTH bearer token on forgerock openidm and other products, just point the endpoint to http://localhost:{8090}/scim/v2/token and use the credentials from the application.properties.
 
-Custom schemas can also be configured simply by defining it in a file.
+Custom schemas can also be configured simply by defining it in a file. Not tested yet, but give it a whirl and throw some feedback!
 
 
 
