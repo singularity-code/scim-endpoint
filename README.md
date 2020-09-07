@@ -2,7 +2,7 @@
 
 Lean, mean and high performant open source Spring Boot Java SCIM server implementation with pluggable persistence layer.
 
-Usefull for exposing a company's identities using the SCIM protocol and target point for your provisioning engine., you only need to write the storage layer in JAVA.
+Usefull for exposing a company's identities using the SCIM protocol and target point for your provisioning engine.
 
 You can reuse the integrated storage layer or write a custom java implementation and wire it via configuration.
 
@@ -152,6 +152,9 @@ it will be looked at.
 ##
 
 ## thanks
+
+feel free to contribute, we can all make life more easy for each other and SCIM on!
+
 
 * jingzhou wang : logging various issues and writing the mongo storage implementation
 
