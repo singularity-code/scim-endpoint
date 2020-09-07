@@ -20,8 +20,8 @@ basic server implementation.
 - discovery
 - schema validation
 - uniqueness constraint validation
-- authentication : basic and token ( with roles )
-- token endpoint created and verified with forgerock IDM connector
+- authentication : basic and OAUTH bearer token ( with roles )
+- bearer token endpoint created and verified with forgerock IDM connector
 
 
 
@@ -100,9 +100,9 @@ thread [3] 5000 records processed in 20076
 ```
 ##  
 
-The current benchmark can give you already an idea about the througput.
+The current benchmark can give you already an idea about the throughput.
 
-Executed on a AMD® Ryzen 3 2200g with the application consuming approximately 250MB for 4 threads and 5000 requests per thread.
+Executed on a single AMD® Ryzen 3 2200g with the application consuming approximately 250MB for 4 threads and 5000 requests per thread.
 
 | request | MEMORY     | MONGO      |
 |---------|------------|------------|

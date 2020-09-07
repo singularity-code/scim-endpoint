@@ -210,11 +210,18 @@ public class Controller {
 	
 	
 	
+	
+	protected ResponseEntity<Map<String, Object>> search(Integer startIndex, Integer count, Schema schema, String filter ) {
+		return search(startIndex, count, schema, filter, null, null, null, null);
+	}
+	
+	
+	
 	protected ResponseEntity<Map<String, Object>> search(Integer startIndex, Integer count, Schema schema, String filter, String sortBy, String sortOrder, String attributes, String excludedAttributes ) {
 		long start = System.currentTimeMillis();
 		
 		try {
-			SearchCriteria searchCriteria = composeSearchCriteria(filter,sortBy,sortOrder);
+			SearchCriteria searchCriteria = composeSearchCriteria(filter);
 			Storage storage = storageImplementationFactory.getStorageImplementation(schema);	
 			
 			List<Map<String,Object>> dataFetched = storage.search(searchCriteria, startIndex, count, sortBy,sortOrder);
@@ -249,7 +256,7 @@ public class Controller {
 	
 	
 	
-	private SearchCriteria composeSearchCriteria(String filter, String sortBy, String sortOrder) throws InvalidFilterException {
+	private SearchCriteria composeSearchCriteria(String filter) throws InvalidFilterException {
 		SearchCriteria searchCriteria = new SearchCriteria();
 		if ( !StringUtils.isEmpty(filter)) {
 			if ( filter.contains(Constants.AND_WITH_SPACES)) {

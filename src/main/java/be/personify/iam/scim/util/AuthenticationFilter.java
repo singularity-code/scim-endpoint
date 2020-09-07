@@ -20,6 +20,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.Base64Utils;
 
 
+/**
+ * filter to check security
+ * 
+ * @author wouter
+ *
+ */
 public class AuthenticationFilter implements Filter {
 	
 	private static final String ROLE_READ = "read";
@@ -33,7 +39,7 @@ public class AuthenticationFilter implements Filter {
 	private Map<String,List<String>> bearerAuthUsers = AuthenticationUtils.getUserList(Constants.BEARER.toLowerCase());
 	
 	
-	private static final List<String> PUBLIC_ENDPOINTS = Arrays.asList(new String[] {"/scim/v2/token"});
+	private static final List<String> PUBLIC_ENDPOINTS = Arrays.asList(new String[] {"/scim/v2/token", "/scim/v2/Me"});
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -58,14 +64,14 @@ public class AuthenticationFilter implements Filter {
 						String credential = new String(Base64Utils.decode(auth[1].getBytes()));
 						if ( basicAuthUsers != null && basicAuthUsers.containsKey(credential)) {
 							//check roles 
-							filtered = checkRole(request, response, chain, filtered, credential, method);
+							filtered = checkRole(request, response, chain, filtered, credential, method, basicAuthUsers);
 						}
 					}
 					else if (auth[0].equalsIgnoreCase(Constants.BEARER)) {
 						String token = auth[1];
 						logger.debug("token {}", token);
 						if ( tokenUtils.isValid(token)) {
-							filtered = checkRole(request, response, chain, filtered, token, method);
+							filtered = checkRole(request, response, chain, filtered, token, method, bearerAuthUsers);
 						}
 					}
 				}
@@ -81,16 +87,18 @@ public class AuthenticationFilter implements Filter {
 		
 	}
 
-	private boolean checkRole(ServletRequest request, ServletResponse response, FilterChain chain, boolean filtered,
-			String credential, String method) throws IOException, ServletException {
+	
+	
+	
+	private boolean checkRole(ServletRequest request, ServletResponse response, FilterChain chain, boolean filtered, String credential, String method, Map<String,List<String>> users) throws IOException, ServletException {
 		if ( method.equals(HttpMethod.GET.name()) ) {
-			if ( basicAuthUsers.get(credential).contains(ROLE_READ)) {
+			if ( users.get(credential).contains(ROLE_READ)) {
 				chain.doFilter(request, response);
 				filtered = true;
 			}
 		}
 		else {
-			if ( basicAuthUsers.get(credential).contains(ROLE_WRITE)) {
+			if ( users.get(credential).contains(ROLE_WRITE)) {
 				chain.doFilter(request, response);
 				filtered = true;
 			}
@@ -98,6 +106,9 @@ public class AuthenticationFilter implements Filter {
 		return filtered;
 	}
 
+	
+	
+	
 	public void setTokenUtils(TokenUtils tokenUtils) {
 		this.tokenUtils = tokenUtils;
 	}
