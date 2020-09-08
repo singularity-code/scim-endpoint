@@ -2,7 +2,7 @@
 	"variables": [],
 	"info": {
 		"name": "scim",
-		"_postman_id": "ee1a650e-586f-d3fe-01bd-609b1b0a6588",
+		"_postman_id": "93e4e648-99b4-58fb-67ad-0f2b965ca86d",
 		"description": "Core SCIM server implementation requests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
@@ -193,7 +193,10 @@
 						"description": ""
 					}
 				],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"description": ""
 			},
 			"response": []
@@ -235,7 +238,10 @@
 						"description": ""
 					}
 				],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"description": ""
 			},
 			"response": []
@@ -277,7 +283,10 @@
 						"description": ""
 					}
 				],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"description": ""
 			},
 			"response": []
@@ -524,6 +533,58 @@
 			"response": []
 		},
 		{
+			"name": "me",
+			"request": {
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Me",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic c2ltcHNvbmg6Y2hhbmdlaXQ=",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "me update",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"username": "{{personify-scim-server-user}}",
+						"password": "{{personify-scim-server-password}}",
+						"showPassword": false
+					}
+				},
+				"url": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Users/b18fd14b-3d68-4dd7-a22a-b0434c1f755d",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"schemas\": [\n        \"urn:ietf:params:scim:schemas:core:2.0:User\"\n    ],\n    \"name\": {\n        \"familyName\": \"Simpson\",\n        \"givenName\": \"Homer\"\n    },\n    \"userName\": \"simpsonh\",\n    \"password\": \"{{personify-scim-server-password}}\",\n    \"externalId\": \"homers\",\n    \"emails\": [\n        {\n            \"value\": \"homer.simpson@personify.be\",\n            \"type\": \"work\"\n        }\n    ],\n    \"id\": \"b18fd14b-3d68-4dd7-a22a-b0434c1f755d\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
 			"name": "bulk operations",
 			"request": {
 				"auth": {
@@ -567,7 +628,10 @@
 						"description": ""
 					}
 				],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"description": ""
 			},
 			"response": []
@@ -589,7 +653,10 @@
 						"description": ""
 					}
 				],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"description": ""
 			},
 			"response": []
@@ -611,7 +678,10 @@
 						"description": ""
 					}
 				],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"description": ""
 			},
 			"response": []

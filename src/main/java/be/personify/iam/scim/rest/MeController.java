@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaReader;
@@ -35,9 +37,70 @@ import be.personify.iam.scim.util.Constants;
 @RestController
 public class MeController extends Controller {
 
-	private static final Logger logger = LogManager.getLogger(MeController.class);
 	
-	private static final Schema schema = SchemaReader.getInstance().getSchemaByResourceType("User");
+	private static final Schema schema = SchemaReader.getInstance().getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+
+	
+	@PutMapping(path="/scim/v2/Me", produces = {"application/scim+json","application/json"})
+	public ResponseEntity<Map<String, Object>> putMe(	@RequestBody Map<String,Object> entity, 
+													@RequestParam(required = false, name="attributes") String attributes,
+													@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
+													HttpServletRequest request, 
+													HttpServletResponse response ) {
+		Map<String,Object> result = getAndValidateUserName(request,schema );
+		if ( !StringUtils.isEmpty(result)) {
+			//perform update
+			if ( result.get(Constants.ID).equals(entity.get(Constants.ID))) {
+				return put(result.get(Constants.ID).toString(), entity, request, response, schema, attributes, excludedAttributes);
+			}
+			else {
+				return showError(HttpStatus.UNAUTHORIZED.value(), "not authorized to update user with id " +  entity.get(Constants.ID), null);
+			}
+		}
+		else {
+			return showError(HttpStatus.UNAUTHORIZED.value(), "no valid authorization subject found", null);
+		}
+	}
+
+
+	
+	@PatchMapping(path="/scim/v2/Me", produces = {"application/scim+json","application/json"})
+	public ResponseEntity<Map<String, Object>> patchMe( @RequestBody Map<String,Object> entity,
+														@RequestParam(required = false, name="attributes") String attributes,
+														@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
+														HttpServletRequest request, 
+														HttpServletResponse response ) {
+		return showError(HttpStatus.NOT_IMPLEMENTED.value(), "the patch against the /Me endpoint is not yet implemented", null);
+	}
+
+
+	
+	
+	@GetMapping(path="/scim/v2/Me", produces = {"application/scim+json","application/json"})
+	public ResponseEntity<Map<String,Object>> getMe( @RequestParam(required = false, name="attributes") String attributes,
+													@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
+													HttpServletRequest request, 
+													HttpServletResponse response ) {
+		Map<String,Object> result = getAndValidateUserName(request,schema);
+		if ( !StringUtils.isEmpty(result)) {
+			ResponseEntity<Map<String,Object>> responseEntity = new ResponseEntity<Map<String,Object>>(filterAttributes(schema, result, attributes, excludedAttributes), HttpStatus.OK);
+			String requestUrl = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
+			requestUrl = requestUrl.substring(0, requestUrl.lastIndexOf("/Me") + 1) + "Users/" + result.get(Constants.ID);
+			response.addHeader(Constants.HEADER_LOCATION, requestUrl);
+			return responseEntity;
+		}
+		else {
+			return showError(HttpStatus.UNAUTHORIZED.value(), "no valid authorization subject found", null);
+		}
+	}
+
+
+	
+
+	@DeleteMapping(path="/scim/v2/Me")
+	public ResponseEntity<?> delete(@PathVariable String resourceType, @PathVariable String id ) {
+		return showError(HttpStatus.NOT_IMPLEMENTED.value(), "the delete against the /Me endpoint is not yet implemented", null);
+	}
 	
 	
 	
@@ -49,59 +112,6 @@ public class MeController extends Controller {
 													HttpServletResponse response ) {	
 		return showError(HttpStatus.NOT_IMPLEMENTED.value(), "the post to the /Me endpoint is not yet implemented", null);
 	}
-
-
-	
-	@PutMapping(path="/scim/v2/Me", produces = {"application/scim+json","application/json"})
-	public ResponseEntity<Map<String, Object>> put(	@RequestBody Map<String,Object> entity, 
-													@RequestParam(required = false, name="attributes") String attributes,
-													@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
-													HttpServletRequest request, 
-													HttpServletResponse response ) {
-		return showError(HttpStatus.NOT_IMPLEMENTED.value(), "the put against the /Me endpoint is not yet implemented", null);
-	}
-
-
-	
-	@PatchMapping(path="/scim/v2/Me", produces = {"application/scim+json","application/json"})
-	public ResponseEntity<Map<String, Object>> patch( @RequestBody Map<String,Object> entity,
-														@RequestParam(required = false, name="attributes") String attributes,
-														@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
-														HttpServletRequest request, 
-														HttpServletResponse response ) {
-		return showError(HttpStatus.NOT_IMPLEMENTED.value(), "the patch against the /Me endpoint is not yet implemented", null);
-	}
-
-
-	
-	@GetMapping(path="/scim/v2/Me", produces = {"application/scim+json","application/json"})
-	public ResponseEntity<Map<String,Object>> get( @RequestParam(required = false, name="attributes") String attributes,
-													@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
-													HttpServletRequest request, 
-													HttpServletResponse response ) {
-		Map<String,Object> result = getAndValidateUserName(request,schema);
-		if ( !StringUtils.isEmpty(result)) {
-			ResponseEntity responseEntity = new ResponseEntity<>(result, HttpStatus.OK);
-			//responseEntity.getHeaders().add("Location", "zizi");
-			return responseEntity;
-		}
-		else {
-			return showError(HttpStatus.UNAUTHORIZED.value(), "no valid authorization subject found", null);
-		}
-	}
-
-
-
-	
-	
-
-
-
-	@DeleteMapping(path="/scim/v2/Me")
-	public ResponseEntity<?> delete(@PathVariable String resourceType, @PathVariable String id ) {
-		return showError(HttpStatus.NOT_IMPLEMENTED.value(), "the delete against the /Me endpoint is not yet implemented", null);
-	}
-	
 	
 	
 	
@@ -120,14 +130,11 @@ public class MeController extends Controller {
 					if ( parts.length == 2) {
 						String userName = parts[0];
 						String password = parts[1];
-						logger.info("userName {}", userName);
-						ResponseEntity<Map<String, Object>> result = search(1, 10, schema, "userName eq " + userName + " and password eq " + password);
-						if ( (Long)result.getBody().get("totalResults") == 1) {
-							logger.info("ok {}", result.getBody());
+						ResponseEntity<Map<String, Object>> result = search(1, 1, schema, "userName eq " + userName + " and password eq " + password);
+						if ( (Long)result.getBody().get(Constants.KEY_TOTALRESULTS) == 1) {
 							Map<String,Object> searchResult = result.getBody();
-							return (Map)((ArrayList)searchResult.get("Resources")).get(0);
+							return (Map)((ArrayList)searchResult.get(Constants.KEY_RESOURCES)).get(0);
 						}
-						logger.info("size {}", result.getBody().size());
 					}
 				}
 			}
