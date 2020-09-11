@@ -76,7 +76,7 @@ public interface Storage {
 	 * @param count the number of results to returm
 	 * @param sortBy the sortby attributes separated by a comma
 	 * @param sortOrder the sortorder ( ascending or descending )
-	 * @return
+	 * @return a list containing the entities
 	 */
 	public List<Map<String,Object>> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder);
 	

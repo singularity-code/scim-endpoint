@@ -174,7 +174,7 @@ public class SchemaController extends Controller {
 	 * @param excludedAttributes the attributes to be excluded from the response
 	 * @param request the HttpServletRequest
 	 * @param response the HttpServletResponse
-	 * @return
+	 * @return the response entity
 	 */
 	@GetMapping(path="/scim/v2/{resourceType}s", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String,Object>> search( 

@@ -18,7 +18,13 @@ public class AuthenticationUtils {
 
 	/**
 	 * Initializes the credential list
-	 * @return
+	 * @return a map containing the user+secret as a key and a list of roles as value
+	 */
+	
+	/**
+	 * Gets the userlist for a certain authentication type
+	 * @param authenticationType authenticationtype ( basic or bearer )
+	 * @return a map containing the user+secret as a key and a list of roles as value
 	 */
 	public static Map<String,List<String>> getUserList(String authenticationType){
 		logger.info("initializing users of type {}", authenticationType);
