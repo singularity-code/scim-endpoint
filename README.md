@@ -72,14 +72,18 @@ If you **really** do not want to build anything : spin up the **[docker image](h
 Or integrate it into your cloud environment.
 
 Different environment variables can be used to choose the storage implementation, configure the connections and tune the behaviour.
+
 In your docker container specify/override environment entries you find in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)
 
  
 ##   
 
 If you **really really** do not want to build or run it yourself : point the [postman collection ](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json)
-towards https://www.personify.be/scim/v2/Users ( 401 means unauthorized, so use correct basic auth credentials : scim-user/changeit )
-create a environment in postman containing host and protocol.
+towards https://www.personify.be/scim/v2/Users 
+
+401 means unauthorized, so use correct basic auth credentials : scim-user/changeit
+
+create a environment in postman containing host and protocol and import the collection.
 
 ##  
 
