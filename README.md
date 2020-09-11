@@ -118,6 +118,7 @@ If you **really** do not want to build anything : spin up the [docker image](htt
 > docker run -p 8080:8080 personify/personify-scim-server:1.1.2.RELEASE
 
 Different environment variables can be used to choose the storage implementation, configure the connections and tune the behaviour.
+In your docker container specify/override environment entries you find in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)
 
  
 ##   
