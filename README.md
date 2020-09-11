@@ -75,6 +75,8 @@ Different environment variables can be used to choose the storage implementation
 
 In your docker container specify/override environment entries you find in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)
 
+>docker run -p 8080:8080 -e scim.storage.implementation=... -e scim.storage.mongo.database=users personify/personify-scim-server:1.1.2.RELEASE
+
  
 ##   
 
