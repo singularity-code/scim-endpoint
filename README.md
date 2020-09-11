@@ -116,6 +116,9 @@ Executed on a single AMD® Ryzen 3 2200g with the application consuming approxim
 
 If you **really** do not want to build anything : spin up the [docker image](https://hub.docker.com/r/personify/personify-scim-server)
 > docker run -p 8080:8080 personify/personify-scim-server:1.1.2.RELEASE
+
+Different environment variables can be used to choose the storage implementation, configure the connections and tune the behaviour.
+
  
 ##   
 
