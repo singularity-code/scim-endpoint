@@ -38,9 +38,14 @@ basic server implementation.
 
 You can either choose to **download the binaries** or **clone the project** or **use the docker image**.
 
+## 
+
+Use the integrated [postman collection](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json) to test.
+
+
 ##  
 
-For spinning up a scim server from the [downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/) : 
+For spinning up a scim server from the **[downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/)**: 
 
 > java -jar -Dserver.port=8080 personify-scim-server-1.1.2.RELEASE.jar
 
@@ -59,10 +64,25 @@ For running the maven project :
 > mvn spring-boot:run
 
 ##  
+ 
 
-Use the integrated [postman collection](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json) to test.
+If you **really** do not want to build anything : spin up the **[docker image](https://hub.docker.com/r/personify/personify-scim-server)**
+> docker run -p 8080:8080 personify/personify-scim-server:1.1.2.RELEASE
+
+Or integrate it into your cloud environment.
+
+Different environment variables can be used to choose the storage implementation, configure the connections and tune the behaviour.
+In your docker container specify/override environment entries you find in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)
+
+ 
+##   
+
+If you **really really** do not want to build or run it yourself : point the [postman collection ](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json)
+towards https://www.personify.be/scim/v2/Users ( 401 means unauthorized, so use correct basic auth credentials : scim-user/changeit )
+create a environment in postman containing host and protocol.
 
 ##  
+
 
 A **load test** is also runnable, below the response of a single instance :
 
@@ -112,22 +132,8 @@ Executed on a single AMD® Ryzen 3 2200g with the application consuming approxim
 | delete  | 993  req/s | 2015 req/s |
 
 
-##   
-
-If you **really** do not want to build anything : spin up the [docker image](https://hub.docker.com/r/personify/personify-scim-server)
-> docker run -p 8080:8080 personify/personify-scim-server:1.1.2.RELEASE
-
-Different environment variables can be used to choose the storage implementation, configure the connections and tune the behaviour.
-In your docker container specify/override environment entries you find in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)
-
- 
-##   
-
-If you **really really** do not want to build or run it yourself : point the [postman collection ](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json)
-towards https://www.personify.be/scim/v2/Users ( 401 means unauthorized, so use correct basic auth credentials : scim-user/changeit )
-create a environment in postman containing host and protocol.
-
 ##  
+
 
 ## configuration
 
