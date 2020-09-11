@@ -6,8 +6,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +39,9 @@ public class MeController extends Controller {
 	private static final Schema schema = SchemaReader.getInstance().getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
 
 	
+	
+	
+	
 	@PutMapping(path="/scim/v2/Me", produces = {"application/scim+json","application/json"})
 	public ResponseEntity<Map<String, Object>> putMe(	@RequestBody Map<String,Object> entity, 
 													@RequestParam(required = false, name="attributes") String attributes,
@@ -64,14 +65,6 @@ public class MeController extends Controller {
 
 
 	
-	@PatchMapping(path="/scim/v2/Me", produces = {"application/scim+json","application/json"})
-	public ResponseEntity<Map<String, Object>> patchMe( @RequestBody Map<String,Object> entity,
-														@RequestParam(required = false, name="attributes") String attributes,
-														@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
-														HttpServletRequest request, 
-														HttpServletResponse response ) {
-		return showError(HttpStatus.NOT_IMPLEMENTED.value(), "the patch against the /Me endpoint is not yet implemented", null);
-	}
 
 
 	
@@ -99,6 +92,7 @@ public class MeController extends Controller {
 
 	@DeleteMapping(path="/scim/v2/Me")
 	public ResponseEntity<?> delete(@PathVariable String resourceType, @PathVariable String id ) {
+		//think this through before you implements this
 		return showError(HttpStatus.NOT_IMPLEMENTED.value(), "the delete against the /Me endpoint is not yet implemented", null);
 	}
 	
@@ -109,12 +103,21 @@ public class MeController extends Controller {
 													@RequestParam(required = false, name="attributes") String attributes,
 													@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
 													HttpServletRequest request, 
-													HttpServletResponse response ) {	
+													HttpServletResponse response ) {
+		//think this through before you implement this
 		return showError(HttpStatus.NOT_IMPLEMENTED.value(), "the post to the /Me endpoint is not yet implemented", null);
 	}
 	
 	
-	
+
+	@PatchMapping(path="/scim/v2/Me", produces = {"application/scim+json","application/json"})
+	public ResponseEntity<Map<String, Object>> patchMe( @RequestBody Map<String,Object> entity,
+														@RequestParam(required = false, name="attributes") String attributes,
+														@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
+														HttpServletRequest request, 
+														HttpServletResponse response ) {
+		return showError(HttpStatus.NOT_IMPLEMENTED.value(), "the patch against the /Me endpoint is not yet implemented", null);
+	}
 	
 	
 	

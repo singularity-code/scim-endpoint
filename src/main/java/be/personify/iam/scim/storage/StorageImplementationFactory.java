@@ -39,7 +39,8 @@ public class StorageImplementationFactory implements ApplicationContextAware {
 		String resourceType = schema.getName();
 		Storage storage = storageMap.get(resourceType);
 		if ( storage == null ) {
-			logger.info("initializing storage for type {}", resourceType);
+			logger.info("using environment variable [scim.storage.implementation]");
+			logger.info("initializing storage for type {} with implementation {}", resourceType, storageImplementation);
 			try {
 				Class<?> c = Class.forName(storageImplementation);
 				storage = (Storage)c.newInstance();
@@ -49,6 +50,10 @@ public class StorageImplementationFactory implements ApplicationContextAware {
 				storage.initialize(resourceType);
 				storageMap.put(resourceType, storage);
 				logger.info("storage for type {} initialized", resourceType);
+			}
+			catch ( ClassNotFoundException cnfe ) {
+				logger.error("error initializing storage implementation " + storageImplementation, cnfe);
+				throw new DataException("the storage implementation class [" + storageImplementation + "] is not found");
 			}
 			catch (Exception e) {
 				logger.error("error initializing storage for type " + resourceType, e);
