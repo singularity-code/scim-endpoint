@@ -54,6 +54,8 @@ public class MogoConnectorStorage extends MogoStorage {
 	private List<String> schemaList = null;
 
 	
+	
+	
 	@Override
 	public void create(String id, Map<String,Object> scimObject) throws ConstraintViolationException, DataException {
 		
