@@ -89,6 +89,23 @@ create a environment in postman containing host and protocol and import the coll
 
 ##  
 
+##  
+
+## configuration
+
+Pimp the application.properties file included.
+
+
+Three storage implementations are developed but if needed, you can implement and wire your own implementation (see again in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)).
+
+* memory storage implementation : basic fast access with flushing to a file, choose this for development or show case, demo testing, trial.
+* mongo storage implementation : should be fine and scalable for development and production.
+* ldap storage implementation (experimental) : tested with ForgedRock Directory Server 6.5, consider it as a easy **scim to ldap**.
+
+For using a OAUTH bearer token on forgerock openidm and other products, just point the endpoint to http://localhost:{8090}/scim/v2/token and use the credentials from the application.properties.
+
+Custom schemas can also be configured simply by defining it in a file. Not tested yet, but give it a whirl and throw some feedback!
+
 
 A **load test** is also runnable, below the response of a single instance :
 
@@ -146,23 +163,6 @@ Creation of objects is a weak point of the MongoDB compared to the others, proba
 ##  
 
 
-## configuration
-
-Pimp the application.properties file included.
-
-
-Three storage implementations are developed but if needed, you can implement and wire your own implementation (see again in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)).
-
-* memory storage implementation : basic fast access with flushing to a file, choose this for development or show case, demo testing, trial.
-* mongo storage implementation : should be fine and scalable for development and production.
-* ldap storage implementation : tested with ForgedRock Directory Server 6.5, consider it as a easy **scim to ldap**.
-
-For using a OAUTH bearer token on forgerock openidm and other products, just point the endpoint to http://localhost:{8090}/scim/v2/token and use the credentials from the application.properties.
-
-Custom schemas can also be configured simply by defining it in a file. Not tested yet, but give it a whirl and throw some feedback!
-
-
-
 ##  
 
 ## issues
@@ -173,6 +173,8 @@ it will be looked at.
 
 ##
 
+##  
+
 ## thanks
 
 feel free to contribute, we can all make life more easy for each other and SCIM on!
@@ -180,6 +182,10 @@ feel free to contribute, we can all make life more easy for each other and SCIM 
 
 * jingzhou wang : logging various issues and writing the mongo storage implementation
 
+
+##  
+
+##  
 
 
 
