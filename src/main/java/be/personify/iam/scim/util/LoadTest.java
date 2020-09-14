@@ -68,14 +68,14 @@ public class LoadTest {
 			System.out.println("get finished " + getFinished);
 			Thread.sleep(1000);
 		}
-		
-		test.loadTestSearch(endpoint, user, password, threadMap);
-		
-		while ( searchFinished != threads ) {
-			System.out.println("search finished " + getFinished);
-			Thread.sleep(1000);
-		}
-		
+//		
+//		test.loadTestSearch(endpoint, user, password, threadMap);
+//		
+//		while ( searchFinished != threads ) {
+//			System.out.println("search finished " + getFinished);
+//			Thread.sleep(1000);
+//		}
+//		
 		test.loadTestDelete(endpoint, user, password, threadMap);
 		
 		
@@ -84,7 +84,7 @@ public class LoadTest {
 			System.out.println("deleteFinished finished " + deleteFinished);
 			Thread.sleep(1000);
 		}
-		
+//		
 		
 		
 		

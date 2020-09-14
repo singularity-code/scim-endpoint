@@ -130,12 +130,15 @@ The current benchmark can give you already an idea about the throughput.
 
 Executed on a single AMD® Ryzen 3 2200g with the application consuming approximately 250MB for 4 threads and 5000 requests per thread.
 
-| request | MEMORY     | MONGO      |
-|---------|------------|------------|
-| create  | 882  req/s | 225  req/s |
-| get     | 1609 req/s | 1997 req/s | 
-| search  | 159  req/s | 1446 req/s |
-| delete  | 993  req/s | 2015 req/s |
+| request | MEM/FILE    | MONGO      | LDAP (FR DS) |
+|---------|-------------|------------|--------------|
+| create  | 882  req/s  | 225  req/s | 497  req/sec |
+| get     | 1609 req/s  | 1997 req/s | 1056 req/sec |
+| search  | 159  req/s  | 1446 req/s | ?            |
+| delete  | 993  req/s  | 2015 req/s | 756  req/sec |
+
+
+Mongo seems the fastest, although that the scaling and replication capabilites of the Forgerock Directory Server were not really utilized to the full extent.  Creation of objects is a weak point of the MongoDB compared to the others, probably the reason of the fast read.
 
 
 ##  
@@ -150,6 +153,7 @@ Two storage implementations are developed but if needed, you can implement and w
 
 * memory storage implementation : basic fast access with flushing to a file, choose this for development or show case, demo testing, trial.
 * mongo storage implementation : should be fine and scalable for development and production.
+* ldap storage implementation : tested with ForgedRock Directory Server 6.5, consider it as a easy **scim to ldap**.
 
 For using a OAUTH bearer token on forgerock openidm and other products, just point the endpoint to http://localhost:{8090}/scim/v2/token and use the credentials from the application.properties.
 

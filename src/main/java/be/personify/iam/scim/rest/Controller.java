@@ -27,6 +27,7 @@ import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaAttribute;
 import be.personify.iam.scim.schema.SchemaException;
 import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.storage.ConfigurationException;
 import be.personify.iam.scim.storage.ConstraintViolationException;
 import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.SearchCriteria;
@@ -82,7 +83,7 @@ public class Controller {
 			logger.error("constraint violation in {} ms : {}", ( System.currentTimeMillis() -start), e.getMessage());
 			return showError( 409, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.uniqueness );
 		}
-		catch( DataException e) {
+		catch( DataException | ConfigurationException e) {
 			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 		}
 	}
@@ -202,7 +203,7 @@ public class Controller {
 			logger.info("resource of type {} with id {} fetched in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 			return result;
 		}
-		catch( DataException e) {
+		catch( DataException | ConfigurationException e) {
 			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 		}
 	}

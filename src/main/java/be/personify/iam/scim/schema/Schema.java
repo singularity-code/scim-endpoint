@@ -55,6 +55,15 @@ public class Schema {
 		this.meta = meta;
 	}
 	
+	public SchemaAttribute getAttribute(String name) {
+		for ( SchemaAttribute attr : getAttributes()) {
+			if ( attr.getName().equals(name)) {
+				return attr;
+			}
+		}
+		return null;
+	}
+	
 	
 	
 }

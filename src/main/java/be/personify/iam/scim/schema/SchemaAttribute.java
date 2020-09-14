@@ -118,6 +118,16 @@ public class SchemaAttribute {
 	public void setCanonicalValues(String[] canonicalValues) {
 		this.canonicalValues = canonicalValues;
 	}
+	
+	
+	public SchemaAttribute getSubAttribute( String name ) {
+		for ( SchemaAttribute attr : getSubAttributes()) {
+			if ( attr.getName().equals(name)) {
+				return attr;
+			}
+		}
+		return null;
+	}
 
 	
 	
