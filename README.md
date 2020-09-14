@@ -138,7 +138,9 @@ Executed on a single AMD® Ryzen 3 2200g with the application consuming approxim
 | delete  | 993  req/s  | 2015 req/s | 756  req/sec |
 
 
-Mongo seems the fastest, although that the scaling and replication capabilites of the Forgerock Directory Server were not really utilized to the full extent.  Creation of objects is a weak point of the MongoDB compared to the others, probably the reason of the fast read.
+Mongo seems the fastest, although that the scaling and replication capabilites of the Forgerock Directory Server were not really utilized to the full extent.  
+
+Creation of objects is a weak point of the MongoDB compared to the others, probably the reason of the fast read.
 
 
 ##  
