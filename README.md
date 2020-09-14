@@ -151,7 +151,7 @@ Creation of objects is a weak point of the MongoDB compared to the others, proba
 Pimp the application.properties file included.
 
 
-Two storage implementations are developed but if needed, you can implement and wire your own implementation (see again in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)).
+Three storage implementations are developed but if needed, you can implement and wire your own implementation (see again in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)).
 
 * memory storage implementation : basic fast access with flushing to a file, choose this for development or show case, demo testing, trial.
 * mongo storage implementation : should be fine and scalable for development and production.
