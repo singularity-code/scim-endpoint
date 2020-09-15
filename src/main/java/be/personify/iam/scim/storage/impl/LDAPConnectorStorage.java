@@ -1,6 +1,8 @@
 package be.personify.iam.scim.storage.impl;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +10,9 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 import be.mogo.provisioning.ProvisionResult;
 import be.mogo.provisioning.ProvisionStatus;
@@ -22,7 +27,10 @@ import be.personify.iam.scim.storage.ConstraintViolationException;
 import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.SearchCriteria;
 import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.PropertyFactory;
 import be.personify.util.State;
+import be.personify.util.StringUtils;
+import be.personify.util.io.IOUtils;
 
 /**
  * Storage implementation that stores data into a LDAP
@@ -187,7 +195,8 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 	@Override
 	public void initialize(String type) {
 		try {
-			Map<String,Object> config = Constants.objectMapper.readValue(new File("src/main/resources/mogo_connector_ldap.json"), Map.class);
+			Map<String,Object> config = getConfigMap();
+			
 			final String targetSystemJson = Constants.objectMapper.writeValueAsString(config.get("targetSystem"));
 			targetSystem = Constants.objectMapper.readValue(targetSystemJson, TargetSystem.class);
 
@@ -213,6 +222,34 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 			logger.error("can not read/validate configuration for type {}", type, e);
 			throw new ConfigurationException(e.getMessage());
 		}
+	}
+
+
+	
+	
+	
+	private Map<String,Object> getConfigMap() throws JsonMappingException, JsonParseException, IOException  {
+		String configFile = PropertyFactory.getInstance().getProperty("scim.storage.ldap.configFile");
+		String fileContent = null;
+		if ( !StringUtils.isEmpty(configFile)) {
+			fileContent = new String(IOUtils.readFileAsBytes(new FileInputStream(new File(configFile))));
+		}
+		else {
+			fileContent = new String(IOUtils.readFileAsBytes(LDAPConnectorStorage.class.getResourceAsStream("/connector_ldap.json")));
+		}
+		
+		List<String> properties = PropertyFactory.getInstance().getPropertyKeysStartingWith("scim.storage.ldap.");
+		for ( String key : properties ) {
+			logger.debug("key {}", key);
+			String toReplace = "\\$\\{" + key + "\\}";
+			if ( fileContent.contains(key)) {
+				logger.debug("contains");
+				fileContent = fileContent.replaceAll(toReplace, PropertyFactory.getInstance().getProperty(key));
+			}
+		}
+
+		logger.debug("{}", fileContent);
+		return Constants.objectMapper.readValue(fileContent, Map.class);
 	}
 
 	

@@ -1,6 +1,8 @@
 package be.personify.iam.scim.util;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
@@ -38,6 +40,18 @@ public class PropertyFactory {
 	
 	public String getProperty( String key ) {
 		return properties.getProperty(key);
+	}
+	
+	
+	public List<String> getPropertyKeysStartingWith( String s ){
+		List<String> keys = new ArrayList<String>();
+		for ( Object k : properties.keySet()) {
+			String kk = (String)k;
+			if ( kk.startsWith(s)){
+				keys.add(kk);
+			}
+		}
+		return keys;
 	}
 	
 	

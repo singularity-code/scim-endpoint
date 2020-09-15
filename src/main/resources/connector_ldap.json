@@ -99,16 +99,16 @@
       "connectorImplementation" : {
         "className" : "be.mogo.provisioning.connectors.LdapConnector"
       },
-      "poolSize" : 4,
+      "poolSize" : ${scim.storage.ldap.poolSize},
       "configuration" : {
-        "password" : "azerty1234",
-        "port" : "1636",
-        "host" : "127.0.0.1",
-        "baseDn" : "ou=people,o=userstore",
-        "ssl" : "true",
-        "username" : "cn=Directory Manager",
-        "userObjectClasses" : "top,inetOrgPerson,organizationalPerson,person",
-        "groupObjectClasses" : "top,organizationalPerson,group"
+        "password" : "${scim.storage.ldap.password}",
+        "port" : "${scim.storage.ldap.port}",
+        "host" : "${scim.storage.ldap.host}",
+        "baseDn" : "${scim.storage.ldap.baseDn}",
+        "ssl" : "${scim.storage.ldap.ssl}",
+        "username" : "${scim.storage.ldap.username}",
+        "userObjectClasses" : "${scim.storage.ldap.userObjectClasses}",
+        "groupObjectClasses" : "${scim.storage.ldap.groupObjectClasses}"
       }
     }
   }
