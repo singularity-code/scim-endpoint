@@ -4,6 +4,7 @@
     "employeeNumber" : "userName",
     "displayName" : "lastName",
     "givenName" : "name.givenName",
+    "mail" : "emails.value",
     "sn" : "name.familyName",
     "createTimestamp" : "meta.created",
     "objectClass" : "objectClass",

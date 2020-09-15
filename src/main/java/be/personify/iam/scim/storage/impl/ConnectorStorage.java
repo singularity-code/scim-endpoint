@@ -1,5 +1,6 @@
 package be.personify.iam.scim.storage.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +66,7 @@ public abstract class ConnectorStorage implements Storage {
 	
 	
 	
-	protected Map<String, Object> convertNativeMap(Map<String, Object> nativeMap, Map<String,String> mapping, Map<String,String> depthMapping, List<String> excludes ) {
+	protected Map<String, Object> convertNativeMap(Map<String, Object> nativeMap, Map<String,String> mapping, Map<String,String> depthMapping, List<String> excludes, Schema schema ) {
 		Map<String,Object> scimMap = new HashMap<String,Object>();
 		for ( String key : mapping.keySet()) {
 			if ( nativeMap.containsKey(key)) {
@@ -82,9 +83,35 @@ public abstract class ConnectorStorage implements Storage {
 					((Map)scimMap.get(parts[0])).put(parts[1], scimMap.get(mappingValue));
 				}
 				else {
-					Map<String,Object> mm = new HashMap<>();
-					mm.put(parts[1], scimMap.get(mappingValue));
-					scimMap.put(parts[0], mm);
+					Object value = scimMap.get(mappingValue);
+					logger.debug("parts [0] {}", parts[0]);
+					SchemaAttribute sa = schema.getAttribute(parts[0]);
+					if ( sa != null && sa.isMultiValued()) {
+						logger.debug("its multivalued {} {} {}", mappingValue, value, value.getClass());
+						List<Map> newList = new ArrayList<>();
+						if ( value instanceof List ) {
+							logger.debug("its a list {} ", value);
+							for ( Object o : (List)value) {
+								logger.debug("object {} ", o);
+								Map<String,Object> newMap = new HashMap<>();
+								newMap.put(parts[1], o);
+								newList.add(newMap);
+							}
+							
+						}
+						else if ( value instanceof String ) {
+							logger.debug("its a string {} ", value);
+							Map<String,Object> newMap = new HashMap<>();
+							newMap.put(parts[1], value);
+							newList.add(newMap);
+						}
+						scimMap.put(parts[0], newList);
+					}
+					else {
+						Map<String,Object> mm = new HashMap<>();
+						mm.put(parts[1], value );
+						scimMap.put(parts[0], mm);
+					}
 				}
 				scimMap.remove(mappingValue);
 			}
@@ -116,11 +143,16 @@ public abstract class ConnectorStorage implements Storage {
 							String parts[] = mappingValue.split(ESCAPED_DOT);
 							if ( sa.isMultiValued()) {
 								//TODO
+								List<Map> list = (List)scimObject.get(key);
+								List<Object> valueList = new ArrayList<Object>();
+								for ( Map m : list) {
+									valueList.add(m.get(parts[1]));
+								}
+								newMap.put(mappingValue, valueList);
 							}
 							else {
 								value = ((Map)scimObject.get(key)).get(parts[1]);
 								newMap.put(mappingValue, value);
-								sa.getSubAttribute(parts[1]);
 							}
 						}
 					}

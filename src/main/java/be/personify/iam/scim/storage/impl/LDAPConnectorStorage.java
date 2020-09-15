@@ -90,7 +90,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 			connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
 			Map<String,Object> nativeMap = connection.getConnector().find(composeDn(id));
 			if ( nativeMap != null ) {
-				Map<String,Object> scimMap = convertNativeMap(nativeMap, mapping, depthMapping, Arrays.asList(new String[] {OBJECT_CLASS}));
+				Map<String,Object> scimMap = convertNativeMap(nativeMap, mapping, depthMapping, Arrays.asList(new String[] {OBJECT_CLASS}), schema);
 				scimMap.put(Constants.KEY_SCHEMAS, schemaList);
 				scimMap.put(Constants.ID, id);
 				return scimMap;
@@ -98,6 +98,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 			return null;
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 			throw new DataException(e.getMessage());
 		}
 		finally {

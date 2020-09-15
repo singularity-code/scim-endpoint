@@ -2,9 +2,9 @@
 
 Lean, mean and high performant open source Spring Boot Java SCIM server implementation with pluggable persistence layer.
 
-Usefull for exposing a company's identities using the SCIM protocol and target point for your provisioning engine.
+Useful for exposing a company's identities using the SCIM protocol and target point for your provisioning engine.
 
-You can reuse the integrated storage layer or write a custom java implementation and wire it via configuration.
+You can reuse the integrated storage layers (mongo,ldap,...) or write a custom java implementation and wire it via configuration.
 
 
 ## intro
@@ -21,14 +21,15 @@ basic server implementation.
 - schema validation
 - uniqueness constraint validation
 - authentication : basic and OAUTH bearer token ( with roles )
-- bearer token endpoint created and verified with forgerock IDM connector
+- bearer token endpoint created and verified with Forgerock IDM SCIM connector (compatible)
+- /ME endpoint
 
 
 
 **on the list :**
 
 - filtering : complete specification
-- /Me endpoint
+
 
 
 
