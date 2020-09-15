@@ -16,7 +16,6 @@ import be.mogo.provisioning.connectors.ConnectorConnection;
 import be.mogo.provisioning.connectors.ConnectorPool;
 import be.personify.iam.model.provisioning.TargetSystem;
 import be.personify.iam.scim.schema.Schema;
-import be.personify.iam.scim.schema.SchemaAttribute;
 import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.storage.ConfigurationException;
 import be.personify.iam.scim.storage.ConstraintViolationException;
@@ -24,21 +23,20 @@ import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.SearchCriteria;
 import be.personify.iam.scim.util.Constants;
 import be.personify.util.State;
-import be.personify.util.StringUtils;
 
 /**
- * Sample storage implementation that stores data into a volatile memory store
+ * Storage implementation that stores data into a LDAP
  * @author vanderw
  *
  */
-public class MogoConnectorStorage extends MogoStorage {
+public class LDAPConnectorStorage extends ConnectorStorage {
 	
 	private static final String OBJECT_CLASS = "objectClass";
 	private static final String CN = "cn=";
 	
 
 
-	private static final Logger logger = LogManager.getLogger(MogoConnectorStorage.class);
+	private static final Logger logger = LogManager.getLogger(LDAPConnectorStorage.class);
 
 	
 	private String basedn = null;
@@ -60,7 +58,10 @@ public class MogoConnectorStorage extends MogoStorage {
 	public void create(String id, Map<String,Object> scimObject) throws ConstraintViolationException, DataException {
 		
 		try {
-			scimObject = processMapping( id, scimObject);
+			Map<String,Object> extra = new HashMap<String,Object>();
+			extra.put(Constants.ID, composeDn(id));
+			extra.put(OBJECT_CLASS, objectClasses);
+			scimObject = processMapping( id, scimObject, extra, depthMapping, schema);
 			ProvisionResult result = new ProvisionTask().provision(State.PRESENT, scimObject, mapping, targetSystem);
 			if ( !result.getStatus().equals(ProvisionStatus.SUCCESS)) {
 				throw new DataException(result.getErrorCode() + Constants.SPACE + result.getErrorDetail());
@@ -81,7 +82,7 @@ public class MogoConnectorStorage extends MogoStorage {
 			connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
 			Map<String,Object> nativeMap = connection.getConnector().find(composeDn(id));
 			if ( nativeMap != null ) {
-				Map<String,Object> scimMap = convertNativeMap(nativeMap);
+				Map<String,Object> scimMap = convertNativeMap(nativeMap, mapping, depthMapping, Arrays.asList(new String[] {OBJECT_CLASS}));
 				scimMap.put(Constants.KEY_SCHEMAS, schemaList);
 				scimMap.put(Constants.ID, id);
 				return scimMap;
@@ -106,7 +107,10 @@ public class MogoConnectorStorage extends MogoStorage {
 	public void update(String id, Map<String,Object> scimObject) throws ConstraintViolationException {
 		
 		try {
-			scimObject = processMapping( id, scimObject);
+			Map<String,Object> extra = new HashMap<String,Object>();
+			extra.put(Constants.ID, composeDn(id));
+			extra.put(OBJECT_CLASS, objectClasses);
+			scimObject = processMapping( id, scimObject, extra, depthMapping, schema);
 			ProvisionResult result = new ProvisionTask().provision(State.PRESENT, scimObject, mapping, targetSystem);
 			if ( !result.getStatus().equals(ProvisionStatus.SUCCESS)) {
 				throw new DataException(result.getErrorCode() + Constants.SPACE + result.getErrorDetail());
@@ -144,7 +148,20 @@ public class MogoConnectorStorage extends MogoStorage {
 	
 	@Override
 	public List<Map<String,Object>> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString) {
-		return null;
+		ConnectorConnection connection = null;
+		try {
+			connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
+			be.mogo.provisioning.connectors.
+			return connection.getConnector().find(searchCriteria, start, count, null);
+		}
+		catch (Exception e) {
+			throw new DataException(e.getMessage());
+		}
+		finally {
+			if ( connection != null ) {
+				connection.close();
+			}
+		}
 	}
 	
 	
@@ -200,74 +217,6 @@ public class MogoConnectorStorage extends MogoStorage {
 	}
 
 	
-
-	
-
-
-	
-	
-	
-	
-	private Map<String, Object> convertNativeMap(Map<String, Object> nativeMap) {
-		Map<String,Object> scimMap = new HashMap<String,Object>();
-		for ( String key : mapping.keySet()) {
-			if ( nativeMap.containsKey(key)) {
-				scimMap.put(mapping.get(key), nativeMap.get(key));
-			}
-		}
-		scimMap.remove(OBJECT_CLASS);
-		if ( depthMapping.size() > 0 ) {
-			for ( String mappingValue : depthMapping.values()) {
-				String parts[] = mappingValue.split(ESCAPED_DOT);
-				if ( scimMap.get(parts[0]) != null ) {
-					((Map)scimMap.get(parts[0])).put(parts[1], scimMap.get(mappingValue));
-				}
-				else {
-					Map<String,Object> mm = new HashMap<>();
-					mm.put(parts[1], scimMap.get(mappingValue));
-					scimMap.put(parts[0], mm);
-				}
-				scimMap.remove(mappingValue);
-			}
-		}
-		return scimMap;
-	}
-	
-	
-	
-	
-	private Map<String, Object> processMapping(String id, Map<String, Object> scimObject) {
-		scimObject.put(Constants.ID, composeDn(id));
-		scimObject.put(OBJECT_CLASS, objectClasses);
-		
-		if ( depthMapping.size() > 0 ) {
-			
-			Map<String, Object> newMap = new HashMap<String,Object>(scimObject);
-			SchemaAttribute sa = null;
-			Object value = null;
-			for ( String key : scimObject.keySet() ) {
-				for ( String mappingValue : depthMapping.values()) {
-					if ( mappingValue.startsWith(key + StringUtils.DOT)) {
-						sa = schema.getAttribute(key);
-						if ( sa != null) {
-							String parts[] = mappingValue.split(ESCAPED_DOT);
-							if ( sa.isMultiValued()) {
-								//TODO
-							}
-							else {
-								value = ((Map)scimObject.get(key)).get(parts[1]);
-								newMap.put(mappingValue, value);
-								sa.getSubAttribute(parts[1]);
-							}
-						}
-					}
-				}
-			}
-			return newMap;
-		}
-		return scimObject;
-	}
-
 	
 
 	@Override

@@ -59,6 +59,11 @@ When you **clone** the project, you can build the binary from source.
 
 Requirements to build are installation of a Java JDK 1.8+ and Maven.
 
+For building :
+
+> mvn clean install -Dgpg.skip
+
+
 For running the maven project :
 
 > mvn spring-boot:run
