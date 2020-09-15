@@ -151,8 +151,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 		ConnectorConnection connection = null;
 		try {
 			connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
-			be.mogo.provisioning.connectors.
-			return connection.getConnector().find(searchCriteria, start, count, null);
+			return null;//connection.getConnector().find(searchCriteria, start, count, null);
 		}
 		catch (Exception e) {
 			throw new DataException(e.getMessage());
