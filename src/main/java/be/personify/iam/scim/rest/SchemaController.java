@@ -29,6 +29,8 @@ import be.personify.iam.scim.schema.SchemaReader;
 @RestController
 public class SchemaController extends Controller {
 	
+	private static final SchemaReader schemaReader = SchemaReader.getInstance();
+	
 	
 	/**
 	 * POST of a entity
@@ -47,7 +49,7 @@ public class SchemaController extends Controller {
 													@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
 													HttpServletRequest request, 
 													HttpServletResponse response ) {
-		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
+		Schema schema = schemaReader.getSchemaByResourceType(resourceType);
 		if ( schema != null ) {
 			List<String> schemas = extractSchemas(entity);
 			if ( schemas != null && schemas.size() > 0) {
@@ -83,7 +85,7 @@ public class SchemaController extends Controller {
 													@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
 													HttpServletRequest request, 
 													HttpServletResponse response ) {
-		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
+		Schema schema = schemaReader.getSchemaByResourceType(resourceType);
 		if ( schema != null ) {
 			List<String> schemas = extractSchemas(entity);
 			if ( schemas != null && schemas.size() > 0) {
@@ -121,7 +123,7 @@ public class SchemaController extends Controller {
 														@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
 														HttpServletRequest request, 
 														HttpServletResponse response ) {
-		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
+		Schema schema = schemaReader.getSchemaByResourceType(resourceType);
 		if ( schema != null ) {
 			List<String> schemas = extractSchemas(entity);
 			if ( schemas.contains(schema.getId())) {
@@ -152,7 +154,7 @@ public class SchemaController extends Controller {
 													@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
 													HttpServletRequest request, 
 													HttpServletResponse response ) {
-		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
+		Schema schema = schemaReader.getSchemaByResourceType(resourceType);
 		if ( schema != null ) {
 			return get(id, request, response, schema, attributes, excludedAttributes);
 		}
@@ -187,7 +189,7 @@ public class SchemaController extends Controller {
 			@RequestParam(required = false, name="attributes") String attributes,
 			@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response ) {
-		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
+		Schema schema = schemaReader.getSchemaByResourceType(resourceType);
 		if (schema != null ) {
 			return search(startIndex, count, schema, filter, sortBy, sortOrder, attributes, excludedAttributes);
 		}
@@ -206,7 +208,7 @@ public class SchemaController extends Controller {
 	 */
 	@DeleteMapping(path="/scim/v2/{resourceType}s/{id}")
 	public ResponseEntity<?> delete(@PathVariable String resourceType, @PathVariable String id ) {
-		Schema schema = SchemaReader.getInstance().getSchemaByResourceType(resourceType);
+		Schema schema = schemaReader.getSchemaByResourceType(resourceType);
 		if (schema != null ) {
 			return delete(id, schema);
 		}

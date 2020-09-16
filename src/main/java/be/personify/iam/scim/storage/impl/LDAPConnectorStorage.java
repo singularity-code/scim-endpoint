@@ -3,6 +3,7 @@ package be.personify.iam.scim.storage.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -160,7 +161,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 		ConnectorConnection connection = null;
 		try {
 			connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
-			return null;//connection.getConnector().find(searchCriteria, start, count, null);
+			return new ArrayList<>();//connection.getConnector().find(searchCriteria, start, count, null);
 		}
 		catch (Exception e) {
 			throw new DataException(e.getMessage());
@@ -181,7 +182,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 	
 	
 	private List<Map<String, Object>> filterOnSearchCriteria(SearchCriteria searchCriteria) {
-		return null;
+		return new ArrayList<>();
 	}
 	
 	

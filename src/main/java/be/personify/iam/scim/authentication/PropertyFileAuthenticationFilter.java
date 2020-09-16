@@ -20,7 +20,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Base64Utils;
 
-import be.personify.iam.scim.init.Application;
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.TokenUtils;
 
@@ -43,12 +42,9 @@ public class PropertyFileAuthenticationFilter implements Filter {
 	@Autowired
 	private TokenUtils tokenUtils;
 	
-	private Map<String,List<String>> basicAuthUsers = AuthenticationUtils.getUserList(Constants.BASIC.toLowerCase());
-	private Map<String,List<String>> bearerAuthUsers = AuthenticationUtils.getUserList(Constants.BEARER.toLowerCase());
-	
-	
+	private static final Map<String,List<String>> basicAuthUsers = AuthenticationUtils.getUserList(Constants.BASIC.toLowerCase());
+	private static final Map<String,List<String>> bearerAuthUsers = AuthenticationUtils.getUserList(Constants.BEARER.toLowerCase());
 	private static final List<String> PUBLIC_ENDPOINTS = Arrays.asList(new String[] {"/scim/v2/token", "/scim/v2/Me"});
-	
 	private static final String serverDescription = PropertyFileAuthenticationFilter.class.getPackage().getImplementationTitle() + Constants.SPACE + PropertyFileAuthenticationFilter.class.getPackage().getImplementationVersion();
 
 	@Override
