@@ -1,4 +1,4 @@
-package be.personify.iam.scim.util;
+package be.personify.iam.scim.authentication;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -15,9 +15,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Base64Utils;
+
+import be.personify.iam.scim.init.Application;
+import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.TokenUtils;
 
 
 /**
@@ -26,13 +31,16 @@ import org.springframework.util.Base64Utils;
  * @author wouter
  *
  */
-public class AuthenticationFilter implements Filter {
+public class PropertyFileAuthenticationFilter implements Filter {
 	
+	
+	private static final String SERVER = "Server";
 	private static final String ROLE_READ = "read";
 	private static final String ROLE_WRITE = "write";
 
-	private static final Logger logger = LogManager.getLogger(AuthenticationFilter.class);
+	private static final Logger logger = LogManager.getLogger(PropertyFileAuthenticationFilter.class);
 	
+	@Autowired
 	private TokenUtils tokenUtils;
 	
 	private Map<String,List<String>> basicAuthUsers = AuthenticationUtils.getUserList(Constants.BASIC.toLowerCase());
@@ -40,12 +48,15 @@ public class AuthenticationFilter implements Filter {
 	
 	
 	private static final List<String> PUBLIC_ENDPOINTS = Arrays.asList(new String[] {"/scim/v2/token", "/scim/v2/Me"});
+	
+	private static final String serverDescription = PropertyFileAuthenticationFilter.class.getPackage().getImplementationTitle() + Constants.SPACE + PropertyFileAuthenticationFilter.class.getPackage().getImplementationVersion();
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		
 		HttpServletRequest req = (HttpServletRequest) request;
 		
+		((HttpServletResponse)response).addHeader(SERVER, serverDescription);
 
 		String header = req.getHeader(HttpHeaders.AUTHORIZATION);
 		boolean filtered = false;
@@ -107,13 +118,7 @@ public class AuthenticationFilter implements Filter {
 	}
 
 	
-	
-	
-	public void setTokenUtils(TokenUtils tokenUtils) {
-		this.tokenUtils = tokenUtils;
-	}
-	
-	
+
 	
 	
 

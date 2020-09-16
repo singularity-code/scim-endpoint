@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>be.personify.iam</groupId>
 	<artifactId>personify-scim-server</artifactId>
-	<version>1.1.2.RELEASE</version>
+	<version>1.1.3.RELEASE</version>
 	<packaging>jar</packaging>
 	<licenses>
 		<license>
@@ -20,7 +20,7 @@
 		<connection>scm:git:ssh://git@bitbucket.org:wouter29/personify-scim-server.git</connection>
 	</scm>
 
-	<name>personify scim server</name>
+	<name>personify-scim-server</name>
 	<description>reference implementation for the scim v2 protocol</description>
 
 	<organization>
@@ -44,7 +44,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<spring-boot-starter-version>2.3.3.RELEASE</spring-boot-starter-version>
-		<mogo.provisioning.version>1.1.6.RELEASE</mogo.provisioning.version>
+		<mogo.provisioning.version>1.1.7.RELEASE</mogo.provisioning.version>
 		<junit.version>4.12</junit.version>
 	</properties>
 
@@ -130,11 +130,18 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.2.0</version>
+<!-- 				<configuration> -->
+<!-- 					<archive> -->
+<!-- 						<addMavenDescriptor>false</addMavenDescriptor> -->
+<!-- 					</archive> -->
+<!-- 				</configuration> -->
 				<configuration>
-					<archive>
-						<addMavenDescriptor>false</addMavenDescriptor>
-					</archive>
-				</configuration>
+        			<archive>
+          				<manifest>
+            				<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+          				</manifest>
+			        </archive>
+      			</configuration>
 			</plugin>
 
 

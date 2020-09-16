@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import be.personify.iam.scim.util.AuthenticationUtils;
+import be.personify.iam.scim.authentication.AuthenticationUtils;
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.TokenUtils;
 
