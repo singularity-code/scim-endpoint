@@ -30,7 +30,9 @@ basic server implementation.
 
 - filtering : complete specification
 
+##
 
+Take also a look at the [Wiki](https://bitbucket.org/wouter29/personify-scim-server/wiki/Home) for more documentation.
 
 
 ##  
