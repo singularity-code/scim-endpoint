@@ -36,7 +36,10 @@ public class TokenController extends Controller {
 
 	private static final Logger logger = LogManager.getLogger(TokenController.class);
 	
-	private static final Map<String,List<String>> bearerAuthUsers = AuthenticationUtils.getUserList(Constants.BEARER.toLowerCase());
+	@Autowired
+	private AuthenticationUtils authenticationUtils;
+	
+	private Map<String,List<String>> bearerAuthUsers = null;
 	
 	@Autowired
 	private TokenUtils tokenUtils;
@@ -60,7 +63,7 @@ public class TokenController extends Controller {
 			
 			if ( !StringUtils.isEmpty(credentials) && credentials.contains(Constants.COLON)) {
 				
-				if ( bearerAuthUsers.containsKey(credentials)) {
+				if ( getBearerAuthUsers().containsKey(credentials)) {
 					
 					String[] cc = credentials.split(Constants.COLON);
 					
@@ -115,7 +118,12 @@ public class TokenController extends Controller {
 	
 	
 	
-	
+	public Map<String,List<String>> getBearerAuthUsers() {
+		if ( bearerAuthUsers == null) {
+			bearerAuthUsers = authenticationUtils.getUserList(Constants.BEARER.toLowerCase());
+		}
+		return bearerAuthUsers;
+	}
 	
 	
 	

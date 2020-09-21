@@ -42,10 +42,14 @@ public class PropertyFileAuthenticationFilter implements Filter {
 	@Autowired
 	private TokenUtils tokenUtils;
 	
-	private static final Map<String,List<String>> basicAuthUsers = AuthenticationUtils.getUserList(Constants.BASIC.toLowerCase());
-	private static final Map<String,List<String>> bearerAuthUsers = AuthenticationUtils.getUserList(Constants.BEARER.toLowerCase());
-	private static final List<String> PUBLIC_ENDPOINTS = Arrays.asList(new String[] {"/scim/v2/token", "/scim/v2/Me"});
-	private static final String serverDescription = PropertyFileAuthenticationFilter.class.getPackage().getImplementationTitle() + Constants.SPACE + PropertyFileAuthenticationFilter.class.getPackage().getImplementationVersion();
+	@Autowired
+	private AuthenticationUtils authenticationUtils;
+	
+	private Map<String,List<String>> basicAuthUsers;
+	private Map<String,List<String>> bearerAuthUsers;
+	
+	private final List<String> PUBLIC_ENDPOINTS = Arrays.asList(new String[] {"/scim/v2/token", "/scim/v2/Me"});
+	private final String serverDescription = PropertyFileAuthenticationFilter.class.getPackage().getImplementationTitle() + Constants.SPACE + PropertyFileAuthenticationFilter.class.getPackage().getImplementationVersion();
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -69,16 +73,17 @@ public class PropertyFileAuthenticationFilter implements Filter {
 					String method = req.getMethod();
 					if ( auth[0].equalsIgnoreCase(Constants.BASIC)) {
 						String credential = new String(Base64Utils.decode(auth[1].getBytes()));
-						if ( basicAuthUsers != null && basicAuthUsers.containsKey(credential)) {
+						
+						if ( getBasicAuthUsers() != null && getBasicAuthUsers().containsKey(credential)) {
 							//check roles 
-							filtered = checkRole(request, response, chain, filtered, credential, method, basicAuthUsers);
+							filtered = checkRole(request, response, chain, filtered, credential, method, getBasicAuthUsers());
 						}
 					}
 					else if (auth[0].equalsIgnoreCase(Constants.BEARER)) {
 						String token = auth[1];
 						logger.debug("token {}", token);
 						if ( tokenUtils.isValid(token)) {
-							filtered = checkRole(request, response, chain, filtered, token, method, bearerAuthUsers);
+							filtered = checkRole(request, response, chain, filtered, token, method, getBearerAuthUsers());
 						}
 					}
 				}
@@ -115,6 +120,19 @@ public class PropertyFileAuthenticationFilter implements Filter {
 
 	
 
+	public Map<String,List<String>> getBasicAuthUsers() {
+		if ( basicAuthUsers == null) {
+			basicAuthUsers = authenticationUtils.getUserList(Constants.BASIC.toLowerCase());
+		}
+		return basicAuthUsers;
+	}
+	
+	public Map<String,List<String>> getBearerAuthUsers() {
+		if ( bearerAuthUsers == null) {
+			bearerAuthUsers = authenticationUtils.getUserList(Constants.BEARER.toLowerCase());
+		}
+		return bearerAuthUsers;
+	}
 	
 	
 

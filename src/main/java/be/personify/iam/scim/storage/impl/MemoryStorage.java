@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import be.personify.iam.scim.storage.ConstraintViolationException;
@@ -29,6 +30,9 @@ import be.personify.util.SearchOperation;
  *
  */
 public class MemoryStorage implements Storage {
+	
+	@Autowired
+	private PropertyFactory propertyFactory;
 	
 	private static final Logger logger = LogManager.getLogger(MemoryStorage.class);
 
@@ -232,7 +236,7 @@ public class MemoryStorage implements Storage {
 	
 
 	private void initializeUniqueConstraints(String type) {
-		String uniqueConstraintsString = PropertyFactory.getInstance().getProperty("scim.storage.memory." + type.toLowerCase() + ".unique");
+		String uniqueConstraintsString = propertyFactory.getProperty("scim.storage.memory." + type.toLowerCase() + ".unique");
 		uniqueConstraints = new HashMap<String, Map<Object,Object>>();
 		if ( !StringUtils.isEmpty(uniqueConstraintsString)) {
 			uniqueConstraintsList = Arrays.asList(uniqueConstraintsString.split(Constants.COMMA));
@@ -295,7 +299,7 @@ public class MemoryStorage implements Storage {
 
 	@Override
 	public synchronized void flush() {
-		Boolean flush = Boolean.valueOf(PropertyFactory.getInstance().getProperty("scim.storage.flush"));
+		Boolean flush = Boolean.valueOf(propertyFactory.getProperty("scim.storage.flush"));
 		if ( flush ) {
 			logger.debug("flushing");
 			
@@ -327,7 +331,7 @@ public class MemoryStorage implements Storage {
 	
 	
 	private File getStorageFile() {
-		String dir = PropertyFactory.getInstance().getProperty("scim.storage.memory.flushToFileDirectory");
+		String dir = propertyFactory.getProperty("scim.storage.memory.flushToFileDirectory");
 		if ( dir != null) {
 			File directory = new File(dir);
 			if ( directory.exists() && directory.isDirectory()) {

@@ -11,6 +11,7 @@ import javax.servlet.Filter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -30,6 +31,9 @@ public class AuthenticationUtils implements ApplicationContextAware {
 	@Value("${scim.authentication.implementation}")
 	private String filterImplementation;
 	
+	@Autowired
+	private PropertyFactory propertyFactory;
+	
 
 	/**
 	 * Initializes the credential list
@@ -41,15 +45,15 @@ public class AuthenticationUtils implements ApplicationContextAware {
 	 * @param authenticationType authenticationtype ( basic or bearer )
 	 * @return a map containing the user+secret as a key and a list of roles as value
 	 */
-	public static Map<String,List<String>> getUserList(String authenticationType){
+	public Map<String,List<String>> getUserList(String authenticationType){
 		logger.info("initializing users of type {}", authenticationType);
 		try {
 			Map<String,List<String>> users = new HashMap<String,List<String>>();
 			int count = 1;
 			String user = null;
 			List<String> roles = null;
-			while ( (user = PropertyFactory.getInstance().getProperty("scim.authentication.propertyfile.method." + authenticationType + ".user." + count)) != null) {
-				String rolesString = PropertyFactory.getInstance().getProperty("scim.authentication.propertyfile.method." + authenticationType + ".user." + count + ".roles");
+			while ( (user = propertyFactory.getProperty("scim.authentication.propertyfile.method." + authenticationType + ".user." + count)) != null) {
+				String rolesString = propertyFactory.getProperty("scim.authentication.propertyfile.method." + authenticationType + ".user." + count + ".roles");
 				logger.info("adding user {} with roles {}", user.split(Constants.COLON)[0], rolesString);
 				roles = new ArrayList<String>();
 				if ( !StringUtils.isEmpty(rolesString)) {

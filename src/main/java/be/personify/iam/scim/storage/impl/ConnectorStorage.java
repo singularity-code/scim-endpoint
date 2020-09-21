@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -31,6 +32,9 @@ public abstract class ConnectorStorage implements Storage {
 	private static final Logger logger = LogManager.getLogger(ConnectorStorage.class);
 	
 	protected static final String ESCAPED_DOT = "\\.";
+	
+	@Autowired
+	private PropertyFactory propertyFactory;
 	
 	
 	protected void testConnection(TargetSystem targetSystem) {
@@ -179,8 +183,8 @@ public abstract class ConnectorStorage implements Storage {
 	
 	
 	protected Map<String,Object> getConfigMap(String connectorType) throws JsonMappingException, JsonParseException, IOException  {
-		String configFile = PropertyFactory.getInstance().getProperty("scim.storage." + connectorType + ".configFile");
-		String fileContent = null;
+		String configFile = propertyFactory.getProperty("scim.storage." + connectorType + ".configFile");
+		String fileContent = null; 
 		if ( !StringUtils.isEmpty(configFile)) {
 			fileContent = new String(IOUtils.readFileAsBytes(new FileInputStream(new File(configFile))));
 		}
@@ -188,15 +192,7 @@ public abstract class ConnectorStorage implements Storage {
 			fileContent = new String(IOUtils.readFileAsBytes(DatabaseConnectorStorage.class.getResourceAsStream("/connector_" + connectorType + ".json")));
 		}
 		
-		List<String> properties = PropertyFactory.getInstance().getPropertyKeysStartingWith("scim.storage." + connectorType + ".");
-		for ( String key : properties ) {
-			logger.debug("key {}", key);
-			String toReplace = "\\$\\{" + key + "\\}";
-			if ( fileContent.contains(key)) {
-				logger.debug("contains");
-				fileContent = fileContent.replaceAll(toReplace, PropertyFactory.getInstance().getProperty(key));
-			}
-		}
+		fileContent = propertyFactory.resolvePlaceHolder(fileContent);
 
 		logger.debug("{}", fileContent);
 		return Constants.objectMapper.readValue(fileContent, Map.class);

@@ -9,8 +9,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import be.personify.iam.scim.authentication.AuthenticationUtils;
-import be.personify.iam.scim.authentication.PropertyFileAuthenticationFilter;
 import be.personify.iam.scim.util.CryptUtils;
+import be.personify.iam.scim.util.PropertyFactory;
 import be.personify.iam.scim.util.TokenUtils;
 
 @Configuration
@@ -50,6 +50,12 @@ public class SpringConfig{
 	@Bean
 	public AuthenticationUtils authenticationUtils(){
 		return new AuthenticationUtils();
+	}
+	
+	
+	@Bean
+	public PropertyFactory propertyFactgory(){
+		return new PropertyFactory();
 	}
 	
 	
