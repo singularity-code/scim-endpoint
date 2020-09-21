@@ -1,5 +1,7 @@
 package be.personify.iam.scim.util;
 
+import java.util.UUID;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +11,7 @@ public class TokenUtils {
 	
 	private static final Logger logger = LogManager.getLogger(TokenUtils.class);
 	
-	public static final String SALT = new String(Hex.encode("tokenUtils".getBytes()));
+	public static final String SALT = new String(Hex.encode(UUID.randomUUID().toString().getBytes()));
 	
 	@Autowired
 	private CryptUtils cryptUtils;

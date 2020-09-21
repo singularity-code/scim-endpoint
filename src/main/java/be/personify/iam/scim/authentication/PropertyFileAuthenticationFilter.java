@@ -130,7 +130,6 @@ public class PropertyFileAuthenticationFilter implements Filter {
 	
 	private String getClientIdWithCredential( String clientId , Map<String,List<String>> users ) {
 		for ( String key : users.keySet()) {
-			logger.debug("[{}]",clientId);
 			if ( key.startsWith((clientId + Constants.COLON))) {
 				return key;
 			}
