@@ -21,7 +21,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.Base64Utils;
 
 import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.CryptUtils;
 import be.personify.iam.scim.util.TokenUtils;
+import be.personify.util.StringUtils;
 
 
 /**
@@ -41,6 +43,9 @@ public class PropertyFileAuthenticationFilter implements Filter {
 	
 	@Autowired
 	private TokenUtils tokenUtils;
+	
+	@Autowired
+	private CryptUtils cryptUtils;
 	
 	@Autowired
 	private AuthenticationUtils authenticationUtils;
@@ -80,6 +85,10 @@ public class PropertyFileAuthenticationFilter implements Filter {
 						String token = auth[1];
 						logger.debug("token {}", token);
 						if ( tokenUtils.isValid(token)) {
+							String decrypted = cryptUtils.decrypt(token, TokenUtils.SALT);
+							String[] parts = decrypted.split(StringUtils.COLON);
+							String clientId = parts[0];
+							token = getClientIdWithCredential(clientId, authenticationUtils.getBearerAuthUsers());
 							filtered = checkRole(request, response, chain, filtered, token, method, authenticationUtils.getBearerAuthUsers());
 						}
 					}
@@ -114,6 +123,18 @@ public class PropertyFileAuthenticationFilter implements Filter {
 		}
 		return filtered;
 	}
+	
+	
+	private String getClientIdWithCredential( String clientId , Map<String,List<String>> users ) {
+		for ( String key : users.keySet()) {
+			logger.debug("[{}]",clientId);
+			if ( key.startsWith((clientId + Constants.COLON))) {
+				return key;
+			}
+		}
+		return null;
+	}
+
 
 	
 

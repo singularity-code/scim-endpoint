@@ -110,6 +110,8 @@ Three storage implementations are developed but if needed, you can implement and
 * memory storage implementation : basic fast access with flushing to a file, choose this for development or show case, demo testing, trial.
 * mongo storage implementation : should be fine and scalable for development and production.
 * ldap storage implementation (experimental) : tested with ForgedRock Directory Server 6.5, consider it as a easy **scim to ldap**.
+* postgres implementation : stable, creates table and indexes
+* mysql implementation : stable, creates table and indexes
 
 For using a OAUTH bearer token on forgerock openidm and other products, just point the endpoint to http://localhost:{8090}/scim/v2/token and use the credentials from the application.properties.
 

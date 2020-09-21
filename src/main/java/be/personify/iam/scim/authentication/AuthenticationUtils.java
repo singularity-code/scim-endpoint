@@ -16,10 +16,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.util.StringUtils;
 
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.PropertyFactory;
+import be.personify.util.StringUtils;
 
 public class AuthenticationUtils implements ApplicationContextAware {
 	

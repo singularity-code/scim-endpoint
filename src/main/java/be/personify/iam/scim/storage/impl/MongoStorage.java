@@ -257,7 +257,6 @@ public class MongoStorage implements Storage {
 
     @Override
     public void flush() {
-
     }
 
     

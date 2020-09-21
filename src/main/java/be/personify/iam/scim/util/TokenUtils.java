@@ -17,15 +17,15 @@ public class TokenUtils {
 	public boolean isValid( String encryptedToken ) {
 		String token = cryptUtils.decrypt(encryptedToken,SALT);
 		String[] parts = token.split(Constants.COLON);
-		logger.debug("checking is valid for user  {}", parts[0]);
+		logger.debug("checking is valid for user [{}]", parts[0]);
 		long now = System.currentTimeMillis();
 		long timeIssued = Long.parseLong(parts[1]);
 		long expiryTimeInSeconds = Long.parseLong(parts[2]);
 		if ( timeIssued + ( expiryTimeInSeconds * 1000) < now  ) {
-			logger.debug("token is not valid for user  {}", parts[0]);
+			logger.debug("token is not valid for user [{}]", parts[0]);
 			return false;
 		}
-		logger.debug("token is valid for user  {}", parts[0]);
+		logger.debug("token is valid for user [{}]", parts[0]);
 		return true;
 	}
 	
