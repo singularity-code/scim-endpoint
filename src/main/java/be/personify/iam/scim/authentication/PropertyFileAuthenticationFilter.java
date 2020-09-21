@@ -109,16 +109,19 @@ public class PropertyFileAuthenticationFilter implements Filter {
 	
 	
 	private boolean checkRole(ServletRequest request, ServletResponse response, FilterChain chain, boolean filtered, String credential, String method, Map<String,List<String>> users) throws IOException, ServletException {
-		if ( method.equals(HttpMethod.GET.name()) ) {
-			if ( users.get(credential).contains(ROLE_READ)) {
-				chain.doFilter(request, response);
-				filtered = true;
+		List<String> roles = users.get(credential);
+		if ( roles != null ) {
+			if ( method.equals(HttpMethod.GET.name()) ) {
+				if ( roles.contains(ROLE_READ)) {
+					chain.doFilter(request, response);
+					filtered = true;
+				}
 			}
-		}
-		else {
-			if ( users.get(credential).contains(ROLE_WRITE)) {
-				chain.doFilter(request, response);
-				filtered = true;
+			else {
+				if ( roles.contains(ROLE_WRITE)) {
+					chain.doFilter(request, response);
+					filtered = true;
+				}
 			}
 		}
 		return filtered;
