@@ -50,7 +50,7 @@ Use the integrated [postman collection](https://bitbucket.org/wouter29/personify
 
 For spinning up a scim server from the **[downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/)**: 
 
-> java -jar -Dserver.port=8080 personify-scim-server-1.1.3.RELEASE.jar
+> java -jar -Dserver.port=8080 personify-scim-server-1.1.4.RELEASE.jar
 
 When port 8080 is already taken or other problems occur, adapt the server.port via the commandline.
 
@@ -75,7 +75,8 @@ For running the maven project :
  
 
 If you **really** do not want to build anything : spin up the **[docker image](https://hub.docker.com/r/personify/personify-scim-server)**
-> docker run -p 8080:8080 personify/personify-scim-server:1.1.3.RELEASE
+
+> docker run -p 8080:8080 personify/personify-scim-server:1.1.4.RELEASE
 
 Or integrate it into your cloud environment.
 
@@ -83,7 +84,7 @@ Different environment variables can be used to choose the storage implementation
 
 In your docker container specify/override environment entries you find in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)
 
->docker run -p 8080:8080 -e scim.storage.implementation=... -e scim.storage.mongo.database=users personify/personify-scim-server:1.1.3.RELEASE
+>docker run -p 8080:8080 -e scim.storage.implementation=... -e scim.storage.mongo.database=users personify/personify-scim-server:1.1.4.RELEASE
 
  
 ##   
@@ -155,17 +156,13 @@ The current benchmark can give you already an idea about the throughput.
 
 Executed on a single AMD® Ryzen 3 2200g with the application consuming approximately 250MB for 4 threads and 5000 requests per thread.
 
-| request | MEM/FILE    | MONGO      | LDAP (FR DS) |
-|---------|-------------|------------|--------------|
-| create  | 882  req/s  | 225  req/s | 497  req/sec |
-| get     | 1609 req/s  | 1997 req/s | 1056 req/sec |
-| search  | 159  req/s  | 1446 req/s | ?            |
-| delete  | 993  req/s  | 2015 req/s | 756  req/sec |
+| request        | MEM  | MONGO | LDAP | Postgres | Mysql |
+|----------------|------|-------|------|----------|-------|
+| create (req/s) | 882  | 225   | 497  | 630      | 644   |
+| get    (req/s) | 1609 | 1280  | 1056 | 1248     | 1367  |
+| search (req/s) | 159  | 1034  | ?    | 1103     | 1141  |
+| delete (req/s) | 993  | 1340  | 756  | 1079     | 1068  |
 
-
-Mongo seems the fastest, although that the scaling and replication capabilites of the Forgerock Directory Server were not really utilized to the full extent.  
-
-Creation of objects is a weak point of the MongoDB compared to the others, probably the reason of the fast read.
 
 
 ##  

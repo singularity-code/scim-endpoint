@@ -3,6 +3,9 @@ package be.personify.iam.scim.storage;
 import java.util.List;
 import java.util.Map;
 
+import be.personify.util.SearchCriteria;
+
+
 public interface Storage {
 
 	/**

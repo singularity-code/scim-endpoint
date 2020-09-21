@@ -1,5 +1,8 @@
 package be.personify.iam.scim.storage.impl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,14 +11,20 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import be.mogo.provisioning.connectors.ConnectorConnection;
-import be.mogo.provisioning.connectors.ConnectorPool;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 import be.personify.iam.model.provisioning.TargetSystem;
+import be.personify.iam.provisioning.connectors.ConnectorConnection;
+import be.personify.iam.provisioning.connectors.ConnectorPool;
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaAttribute;
 import be.personify.iam.scim.storage.ConfigurationException;
 import be.personify.iam.scim.storage.Storage;
+import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.PropertyFactory;
 import be.personify.util.StringUtils;
+import be.personify.util.io.IOUtils;
 
 public abstract class ConnectorStorage implements Storage {
 	
@@ -37,6 +46,7 @@ public abstract class ConnectorStorage implements Storage {
 			}
 		}
 		catch ( Exception e ) {
+			logger.error("can not test connection", e);
 			throw new ConfigurationException("can not lease connection " + e.getMessage());
 		}
 	}
@@ -83,34 +93,36 @@ public abstract class ConnectorStorage implements Storage {
 					((Map)scimMap.get(parts[0])).put(parts[1], scimMap.get(mappingValue));
 				}
 				else {
-					Object value = scimMap.get(mappingValue);
-					logger.debug("parts [0] {}", parts[0]);
-					SchemaAttribute sa = schema.getAttribute(parts[0]);
-					if ( sa != null && sa.isMultiValued()) {
-						logger.debug("its multivalued {} {} {}", mappingValue, value, value.getClass());
-						List<Map> newList = new ArrayList<>();
-						if ( value instanceof List ) {
-							logger.debug("its a list {} ", value);
-							for ( Object o : (List)value) {
-								logger.debug("object {} ", o);
+					Object value = scimMap.get(mappingValue);//contains dot
+					if ( value != null ) {
+						logger.debug("mappingValue {} value {} parts [0] {}", mappingValue, value, parts[0]);
+						SchemaAttribute sa = schema.getAttribute(parts[0]);
+						if ( sa != null && sa.isMultiValued()) {
+							logger.debug("its multivalued {} {} {}", mappingValue, value, value.getClass());
+							List<Map> newList = new ArrayList<>();
+							if ( value instanceof List ) {
+								logger.debug("its a list {} ", value);
+								for ( Object o : (List)value) {
+									logger.debug("object {} ", o);
+									Map<String,Object> newMap = new HashMap<>();
+									newMap.put(parts[1], o);
+									newList.add(newMap);
+								}
+								
+							}
+							else if ( value instanceof String ) {
+								logger.debug("its a string {} ", value);
 								Map<String,Object> newMap = new HashMap<>();
-								newMap.put(parts[1], o);
+								newMap.put(parts[1], value);
 								newList.add(newMap);
 							}
-							
+							scimMap.put(parts[0], newList);
 						}
-						else if ( value instanceof String ) {
-							logger.debug("its a string {} ", value);
-							Map<String,Object> newMap = new HashMap<>();
-							newMap.put(parts[1], value);
-							newList.add(newMap);
+						else {
+							Map<String,Object> mm = new HashMap<>();
+							mm.put(parts[1], value );
+							scimMap.put(parts[0], mm);
 						}
-						scimMap.put(parts[0], newList);
-					}
-					else {
-						Map<String,Object> mm = new HashMap<>();
-						mm.put(parts[1], value );
-						scimMap.put(parts[0], mm);
 					}
 				}
 				scimMap.remove(mappingValue);
@@ -161,6 +173,33 @@ public abstract class ConnectorStorage implements Storage {
 			return newMap;
 		}
 		return scimObject;
+	}
+	
+	
+	
+	
+	protected Map<String,Object> getConfigMap(String connectorType) throws JsonMappingException, JsonParseException, IOException  {
+		String configFile = PropertyFactory.getInstance().getProperty("scim.storage." + connectorType + ".configFile");
+		String fileContent = null;
+		if ( !StringUtils.isEmpty(configFile)) {
+			fileContent = new String(IOUtils.readFileAsBytes(new FileInputStream(new File(configFile))));
+		}
+		else {
+			fileContent = new String(IOUtils.readFileAsBytes(DatabaseConnectorStorage.class.getResourceAsStream("/connector_" + connectorType + ".json")));
+		}
+		
+		List<String> properties = PropertyFactory.getInstance().getPropertyKeysStartingWith("scim.storage." + connectorType + ".");
+		for ( String key : properties ) {
+			logger.debug("key {}", key);
+			String toReplace = "\\$\\{" + key + "\\}";
+			if ( fileContent.contains(key)) {
+				logger.debug("contains");
+				fileContent = fileContent.replaceAll(toReplace, PropertyFactory.getInstance().getProperty(key));
+			}
+		}
+
+		logger.debug("{}", fileContent);
+		return Constants.objectMapper.readValue(fileContent, Map.class);
 	}
 
 }

@@ -1,23 +1,28 @@
 package be.personify.iam.scim.storage.impl;
 
-import be.personify.iam.scim.storage.*;
-import be.personify.iam.scim.util.Constants;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.QueryOperators;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.Indexes;
 import org.bson.BsonBinary;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Value;
+
+import com.mongodb.QueryOperators;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
+
+import be.personify.iam.scim.storage.ConstraintViolationException;
+import be.personify.iam.scim.storage.Storage;
+import be.personify.iam.scim.util.Constants;
+import be.personify.util.SearchCriteria;
+import be.personify.util.SearchCriterium;
+import be.personify.util.SearchOperation;
 
 
 /**

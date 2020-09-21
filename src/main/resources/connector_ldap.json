@@ -2,8 +2,9 @@
   "mapping" : {
     "userPassword" : "password",
     "employeeNumber" : "userName",
-    "displayName" : "lastName",
+    "displayName" : "name.familyName",
     "givenName" : "name.givenName",
+    "carLicense" : "externalId",
     "mail" : "emails.value",
     "sn" : "name.familyName",
     "createTimestamp" : "meta.created",
@@ -73,6 +74,14 @@
       "primaryKey" : false
     }, 
     {
+      "name" : "employeeNumber",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false
+    }, 
+    {
       "name" : "userPassword",
       "attributeType" : "PASSWORD",
       "readable" : true,
@@ -98,7 +107,7 @@
     } ],
     "connectorConfiguration" : {
       "connectorImplementation" : {
-        "className" : "be.mogo.provisioning.connectors.LdapConnector"
+        "className" : "be.personify.iam.provisioning.connectors.LdapConnector"
       },
       "poolSize" : ${scim.storage.ldap.poolSize},
       "configuration" : {
@@ -113,4 +122,10 @@
       }
     }
   }
+  
+  
+  
+  
+  
+  
 }

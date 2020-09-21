@@ -30,25 +30,20 @@ import be.personify.util.State;
  * @author vanderw
  *
  */
-public class LDAPConnectorStorage extends ConnectorStorage {
-	
-	private static final String OBJECT_CLASS = "objectClass";
-	private static final String CN = "cn=";
+public class DatabaseConnectorStorage extends ConnectorStorage {
 	
 
 
-	private static final Logger logger = LogManager.getLogger(LDAPConnectorStorage.class);
 
-	
-	private String basedn = null;
-	
+	private static final Logger logger = LogManager.getLogger(DatabaseConnectorStorage.class);
+
+
 	private static TargetSystem targetSystem = null;
 	
 	private static Map<String,String> mapping;
 	private static Map<String,String> depthMapping;
 	
-	private List<String> objectClasses = null;
-	
+		
 	private Schema schema = null;
 	private List<String> schemaList = null;
 
@@ -60,8 +55,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 		
 		try {
 			Map<String,Object> extra = new HashMap<String,Object>();
-			extra.put(Constants.ID, composeDn(id));
-			extra.put(OBJECT_CLASS, objectClasses);
+			extra.put(Constants.ID, id);
 			scimObject = processMapping( id, scimObject, extra, depthMapping, schema);
 			ProvisionResult result = new ProvisionTask().provision(State.PRESENT, scimObject, mapping, targetSystem);
 			if ( !result.getStatus().equals(ProvisionStatus.SUCCESS)) {
@@ -81,9 +75,9 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 		ConnectorConnection connection = null;
 		try {
 			connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
-			Map<String,Object> nativeMap = connection.getConnector().find(composeDn(id));
+			Map<String,Object> nativeMap = connection.getConnector().find(id);
 			if ( nativeMap != null ) {
-				Map<String,Object> scimMap = convertNativeMap(nativeMap, mapping, depthMapping, Arrays.asList(new String[] {OBJECT_CLASS}), schema);
+				Map<String,Object> scimMap = convertNativeMap(nativeMap, mapping, depthMapping, Arrays.asList(new String[] {}), schema);
 				scimMap.put(Constants.KEY_SCHEMAS, schemaList);
 				scimMap.put(Constants.ID, id);
 				return scimMap;
@@ -110,8 +104,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 		
 		try {
 			Map<String,Object> extra = new HashMap<String,Object>();
-			extra.put(Constants.ID, composeDn(id));
-			extra.put(OBJECT_CLASS, objectClasses);
+			extra.put(Constants.ID, id);
 			scimObject = processMapping( id, scimObject, extra, depthMapping, schema);
 			ProvisionResult result = new ProvisionTask().provision(State.PRESENT, scimObject, mapping, targetSystem);
 			if ( !result.getStatus().equals(ProvisionStatus.SUCCESS)) {
@@ -133,7 +126,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 		ConnectorConnection connection = null;
 		try {
 			connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
-			return connection.getConnector().delete(composeDn(id));
+			return connection.getConnector().delete(id);
 		}
 		catch (Exception e) {
 			throw new DataException(e.getMessage());
@@ -159,9 +152,9 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 			List<Map<String,Object>> nativeList = connection.getConnector().find(nativeSearchCriteria, start, count, null);
 			List<Map<String,Object>> scimList = new ArrayList<>();
 			for ( Map<String,Object> nativeMap : nativeList ) {
-				Map<String,Object> scimMap = convertNativeMap(nativeMap, mapping, depthMapping, Arrays.asList(new String[] {OBJECT_CLASS}), schema);
+				Map<String,Object> scimMap = convertNativeMap(nativeMap, mapping, depthMapping, Arrays.asList(new String[] {}), schema);
 				scimMap.put(Constants.KEY_SCHEMAS, schemaList);
-				scimMap.put(Constants.ID, decomposeDn(scimMap.get(Constants.ID)));
+				scimMap.put(Constants.ID, scimMap.get(Constants.ID));
 				scimList.add(scimMap);
 			}
 			return scimList;
@@ -215,41 +208,22 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 
 	
 	
-
-	private String composeDn(String id) {
-		return CN + id + Constants.COMMA + basedn;
-	}
-	
-	private String decomposeDn(Object id) {
-		if ( id instanceof List ) {
-			String firstId = ((String)((List)id).get(0));
-			return firstId.substring(CN.length(), firstId.indexOf(Constants.COMMA));
-		}
-		return null;
-	}
-	
 	
 
 	@Override
 	public void initialize(String type) {
 		try {
-			Map<String,Object> config = getConfigMap("ldap");
+			Map<String,Object> config = getConfigMap("database");
 			
 			final String targetSystemJson = Constants.objectMapper.writeValueAsString(config.get("targetSystem"));
 			targetSystem = Constants.objectMapper.readValue(targetSystemJson, TargetSystem.class);
 
-			//add type to basedn
-			basedn = targetSystem.getConnectorConfiguration().getConfiguration().get("baseDn");
-			basedn = "ou=" + type.toLowerCase() + Constants.COMMA + basedn;
-			targetSystem.getConnectorConfiguration().getConfiguration().put("baseDn", basedn);
-			
 			
 			mapping = (Map)config.get("mapping");
 			if ( mapping == null || targetSystem == null) {
 				throw new ConfigurationException("can not find mapping or targetSystem in configuration");
 			}
 			else {
-				objectClasses = Arrays.asList(targetSystem.getConnectorConfiguration().getConfiguration().get(type.toLowerCase() + "ObjectClasses").split(Constants.COMMA));
 				schema = SchemaReader.getInstance().getSchemaByResourceType(type);
 				schemaList = Arrays.asList(new String[] {schema.getId()});
 				depthMapping = createDepthMapping(mapping);
@@ -261,6 +235,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 			throw new ConfigurationException(e.getMessage());
 		}
 	}
+
 
 	
 	

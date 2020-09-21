@@ -15,13 +15,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.StringUtils;
 
 import be.personify.iam.scim.storage.ConstraintViolationException;
-import be.personify.iam.scim.storage.SearchCriteria;
-import be.personify.iam.scim.storage.SearchCriterium;
-import be.personify.iam.scim.storage.SearchOperation;
 import be.personify.iam.scim.storage.SortOrder;
 import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.PropertyFactory;
+import be.personify.util.SearchCriteria;
+import be.personify.util.SearchCriterium;
+import be.personify.util.SearchOperation;
 
 /**
  * Sample storage implementation that stores data into a volatile memory store

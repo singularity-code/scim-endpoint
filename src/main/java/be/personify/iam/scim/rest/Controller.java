@@ -30,13 +30,13 @@ import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.storage.ConfigurationException;
 import be.personify.iam.scim.storage.ConstraintViolationException;
 import be.personify.iam.scim.storage.DataException;
-import be.personify.iam.scim.storage.SearchCriteria;
-import be.personify.iam.scim.storage.SearchCriterium;
-import be.personify.iam.scim.storage.SearchOperation;
 import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.ScimErrorType;
+import be.personify.util.SearchCriteria;
+import be.personify.util.SearchCriterium;
+import be.personify.util.SearchOperation;
 
 /**
  * Main controller class for the SCIM operations
