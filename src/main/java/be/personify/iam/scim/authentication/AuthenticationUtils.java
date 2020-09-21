@@ -34,18 +34,18 @@ public class AuthenticationUtils implements ApplicationContextAware {
 	@Autowired
 	private PropertyFactory propertyFactory;
 	
+	
+	private Map<String,List<String>> basicAuthUsers;
+	private Map<String,List<String>> bearerAuthUsers;
+	
 
-	/**
-	 * Initializes the credential list
-	 * @return a map containing the user+secret as a key and a list of roles as value
-	 */
 	
 	/**
 	 * Gets the userlist for a certain authentication type
 	 * @param authenticationType authenticationtype ( basic or bearer )
 	 * @return a map containing the user+secret as a key and a list of roles as value
 	 */
-	public Map<String,List<String>> getUserList(String authenticationType){
+	private Map<String,List<String>> getUserList(String authenticationType){
 		logger.info("initializing users of type {}", authenticationType);
 		try {
 			Map<String,List<String>> users = new HashMap<String,List<String>>();
@@ -90,7 +90,22 @@ public class AuthenticationUtils implements ApplicationContextAware {
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
-		
+	}
+	
+	
+	
+	public Map<String,List<String>> getBasicAuthUsers() {
+		if ( basicAuthUsers == null) {
+			basicAuthUsers = getUserList(Constants.BASIC.toLowerCase());
+		}
+		return basicAuthUsers;
+	}
+	
+	public Map<String,List<String>> getBearerAuthUsers() {
+		if ( bearerAuthUsers == null) {
+			bearerAuthUsers = getUserList(Constants.BEARER.toLowerCase());
+		}
+		return bearerAuthUsers;
 	}
 	
 

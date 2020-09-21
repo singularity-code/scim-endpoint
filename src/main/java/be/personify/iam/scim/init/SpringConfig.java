@@ -21,14 +21,13 @@ public class SpringConfig{
 	@Bean
 	public FilterRegistrationBean<Filter> authenticationFilters(){
 	    FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();     
-	    //PropertyFileAuthenticationFilter authenticationFilter = new PropertyFileAuthenticationFilter();
 	    Filter filter;
 		try {
 			filter = authenticationUtils().getFilterImplementation();
 			registrationBean.setFilter(filter);
 		    return registrationBean;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;

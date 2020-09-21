@@ -26,14 +26,13 @@ import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
 import be.personify.util.State;
 
-/** * Storage implementation that stores data into a LDAP
+/** 
+ * Storage implementation that stores data into a database using the personify connector framework
+ * 
  * @author vanderw
  *
  */
 public class DatabaseConnectorStorage extends ConnectorStorage {
-	
-
-
 
 	private static final Logger logger = LogManager.getLogger(DatabaseConnectorStorage.class);
 
@@ -85,7 +84,6 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 			return null;
 		}
 		catch (Exception e) {
-			e.printStackTrace();
 			throw new DataException(e.getMessage());
 		}
 		finally {
@@ -151,8 +149,10 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 			connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
 			List<Map<String,Object>> nativeList = connection.getConnector().find(nativeSearchCriteria, start, count, null);
 			List<Map<String,Object>> scimList = new ArrayList<>();
+			Map<String,Object> scimMap = null;
+			List<String> excludes = Arrays.asList(new String[] {});
 			for ( Map<String,Object> nativeMap : nativeList ) {
-				Map<String,Object> scimMap = convertNativeMap(nativeMap, mapping, depthMapping, Arrays.asList(new String[] {}), schema);
+				scimMap = convertNativeMap(nativeMap, mapping, depthMapping, excludes, schema);
 				scimMap.put(Constants.KEY_SCHEMAS, schemaList);
 				scimMap.put(Constants.ID, scimMap.get(Constants.ID));
 				scimList.add(scimMap);

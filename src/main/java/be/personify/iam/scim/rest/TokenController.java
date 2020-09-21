@@ -39,8 +39,6 @@ public class TokenController extends Controller {
 	@Autowired
 	private AuthenticationUtils authenticationUtils;
 	
-	private Map<String,List<String>> bearerAuthUsers = null;
-	
 	@Autowired
 	private TokenUtils tokenUtils;
 	
@@ -63,7 +61,7 @@ public class TokenController extends Controller {
 			
 			if ( !StringUtils.isEmpty(credentials) && credentials.contains(Constants.COLON)) {
 				
-				if ( getBearerAuthUsers().containsKey(credentials)) {
+				if ( authenticationUtils.getBearerAuthUsers().containsKey(credentials)) {
 					
 					String[] cc = credentials.split(Constants.COLON);
 					
@@ -117,13 +115,6 @@ public class TokenController extends Controller {
 	}
 	
 	
-	
-	public Map<String,List<String>> getBearerAuthUsers() {
-		if ( bearerAuthUsers == null) {
-			bearerAuthUsers = authenticationUtils.getUserList(Constants.BEARER.toLowerCase());
-		}
-		return bearerAuthUsers;
-	}
 	
 	
 	

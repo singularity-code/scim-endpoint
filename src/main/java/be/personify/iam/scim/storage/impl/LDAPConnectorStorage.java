@@ -26,7 +26,9 @@ import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
 import be.personify.util.State;
 
-/** * Storage implementation that stores data into a LDAP
+/** 
+ * Storage implementation that stores data into a LDAP using the personify connector framework
+ * 
  * @author vanderw
  *
  */
