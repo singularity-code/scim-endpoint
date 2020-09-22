@@ -30,7 +30,7 @@ basic server implementation.
 
 - filtering : complete specification
 
-##
+##  
 
 Take also a look at the [Wiki](https://bitbucket.org/wouter29/personify-scim-server/wiki/Home) for more documentation.
 
@@ -61,6 +61,8 @@ SSL can also be configured this way ( see spring-boot documentation and sample i
 When you **clone** the project, you can build the binary from source.
 
 Requirements to build are installation of a Java JDK 1.8+ and Maven.
+
+> git clone https://bitbucket.org/wouter29/personify-scim-server.git
 
 For building :
 
@@ -178,7 +180,7 @@ if you find any issues or have enhancement requests, please [create a issue](htt
 it will be looked at.
 
 
-##
+##  
 
 ##  
 
