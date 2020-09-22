@@ -107,13 +107,13 @@ create a environment in postman containing host and protocol and import the coll
 Pimp the application.properties file included.
 
 
-Three storage implementations are developed but if needed, you can implement and wire your own implementation (see again in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)).
+Five storage implementations are developed but if needed, you can implement and wire your own implementation (see again in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)).
 
 * memory storage implementation : basic fast access with flushing to a file, choose this for development or show case, demo testing, trial.
 * mongo storage implementation : should be fine and scalable for development and production.
-* ldap storage implementation (experimental) : tested with ForgedRock Directory Server 6.5, consider it as a easy **scim to ldap**.
-* postgres implementation : stable, creates table and indexes
-* mysql implementation : stable, creates table and indexes
+* ldap storage implementation (experimental) : tested with ForgeRock Directory Server 6.5, consider it as a easy **scim to ldap**.
+* postgres implementation : stable, creates table and indexes based on mapping
+* mysql implementation : stable, creates table and indexes based on mapping
 
 For using a OAUTH bearer token on forgerock openidm and other products, just point the endpoint to http://localhost:{8090}/scim/v2/token and use the credentials from the application.properties.
 
