@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import be.personify.iam.scim.storage.ConstraintViolationException;
+import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.SortOrder;
 import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.util.Constants;
@@ -137,7 +138,7 @@ public class MemoryStorage implements Storage {
 				Object value = getRecursiveObject(object, criterium.getKey());
 				if ( criterium.getSearchOperation() == SearchOperation.EQUALS) {
 					
-					boolean m = matchValue( value, criterium.getValue());
+					boolean m = matchValue( value, criterium);
 					if (m) {
 						criteriaCount++;
 					}
@@ -181,7 +182,8 @@ public class MemoryStorage implements Storage {
 	
 	
 	
-	private boolean matchValue(Object value, Object criteriumValue) {
+	private boolean matchValue(Object value, SearchCriterium criterium) {
+		Object criteriumValue = criterium.getValue();
 		if ( value instanceof List ) {
 			List l = (List)value;
 			for ( Object o : l  ) {
@@ -191,12 +193,16 @@ public class MemoryStorage implements Storage {
 			}
 		}
 		else {
+			if ( value == null ) {
+				throw new DataException("criterium with key " + criterium.getKey() + " not valid");
+			}
 			return value.equals(criteriumValue);
 		}
 		return false;
 	}
 
-	private static Object getRecursiveObject(Map<String, Object> object, String key) {
+	
+	public Object getRecursiveObject(Map<String, Object> object, String key) {
 		System.out.println(" object " + object + " " + key);
 		if ( key.contains(StringUtils.DOT)) {
 			Object o = null;
@@ -233,36 +239,6 @@ public class MemoryStorage implements Storage {
 	
 	
 	
-//	public static void main(String[] args) {
-//		Map<String,Object> m = new HashMap<>();
-//		
-//		
-//		Map<String,Object> v1 = new HashMap<>();
-//		v1.put("type", "home");
-//		v1.put("mail", "mail1");
-//		
-//		List<Map> list = new ArrayList<>();
-//		list.add(v1);
-//		
-//		m.put("emails", list);
-//		
-//		System.out.println(getRecursiveObject(m, "emails.mail"));
-//	}
-	
-	
-	public static void main(String[] args) {
-		Map<String,Object> m = new HashMap<>();
-		
-		
-		Map<String,Object> v1 = new HashMap<>();
-		v1.put("familyName", "Simpson");
-		
-		
-		
-		m.put("name", v1);
-		
-		System.out.println(getRecursiveObject(m, "name.familyName"));
-	}
 	
 
 	private List<Map<String, Object>> sort(List<Map<String, Object>> result, String sortBy, SortOrder sortOrder) {
