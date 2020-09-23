@@ -54,10 +54,10 @@ public class AuthenticationUtils implements ApplicationContextAware {
 			List<String> roles = null;
 			while ( (user = propertyFactory.getProperty("scim.authentication.propertyfile.method." + authenticationType + ".user." + count)) != null) {
 				String rolesString = propertyFactory.getProperty("scim.authentication.propertyfile.method." + authenticationType + ".user." + count + ".roles");
-				logger.info("adding user {} with roles {}", user.split(Constants.COLON)[0], rolesString);
+				logger.info("adding user {} with roles {}", user.split(StringUtils.COLON)[0], rolesString);
 				roles = new ArrayList<String>();
 				if ( !StringUtils.isEmpty(rolesString)) {
-					roles = Arrays.asList(rolesString.split(Constants.COMMA));
+					roles = Arrays.asList(rolesString.split(StringUtils.COMMA));
 				}
 				users.put(user,roles);
 				count++;

@@ -27,6 +27,7 @@ import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.storage.ConstraintViolationException;
 import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
+import be.personify.util.StringUtils;
 
 /**
  * Controller managing bulk operations with circular reference processing, maxPayloadSize and maxOperations
@@ -106,7 +107,7 @@ public class BulkController extends Controller {
 					schemaReader.validate(schema,entity, true);
 					String id = createId(entity);
 					entity.put(Constants.ID, id);
-					String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + Constants.SLASH + id;
+					String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + StringUtils.SLASH + id;
 					Date now = new Date();
 					createMeta( now, id, entity, schema.getName(), location);
 					storageImplementationFactory.getStorageImplementation(schema).create(id, entity);
@@ -143,7 +144,7 @@ public class BulkController extends Controller {
 		result.put(Constants.KEY_METHOD, method);
 		result.put(Constants.KEY_BULKID, bulkId);
 		Map<String,String> statusMap = new HashMap<String, String>();
-		statusMap.put(Constants.KEY_CODE, Constants.EMPTY + status.value());
+		statusMap.put(Constants.KEY_CODE, StringUtils.EMPTY_STRING + status.value());
 		result.put(Constants.KEY_STATUS, statusMap);
 		return result;
 	}

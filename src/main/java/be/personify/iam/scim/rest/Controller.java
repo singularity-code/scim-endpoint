@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import be.personify.iam.scim.schema.Schema;
@@ -37,6 +36,7 @@ import be.personify.iam.scim.util.ScimErrorType;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
 import be.personify.util.SearchOperation;
+import be.personify.util.StringUtils;
 
 /**
  * Main controller class for the SCIM operations
@@ -65,7 +65,7 @@ public class Controller {
 			//prepare
 			String id = createId(entity);
 			entity.put(Constants.ID, id);
-			String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + Constants.SLASH + id;
+			String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + StringUtils.SLASH + id;
 			createMeta( new Date(), id, entity, schema.getName(), location);
 			response.addHeader(Constants.HEADER_LOCATION, location);
 			
@@ -279,7 +279,7 @@ public class Controller {
 
 	private SearchCriterium extractCriteriumFromString(String filter, SearchCriteria searchCriteria)
 			throws InvalidFilterException {
-		String[] filterParts = filter.split(Constants.SPACE);
+		String[] filterParts = filter.split(StringUtils.SPACE);
 		SearchOperation operation = null;
 		if ( filterParts.length != 3 ) {
 			if ( filterParts.length == 2 ) {
@@ -299,7 +299,7 @@ public class Controller {
 			throw new InvalidFilterException("no valid operator found for [" + filterParts[1] + "]");
 		}
 		if ( filterParts.length == 3 ) {
-			String value = filterParts[2].replaceAll("\"", Constants.EMPTY);
+			String value = filterParts[2].replaceAll("\"", StringUtils.EMPTY_STRING);
 			return new SearchCriterium(filterParts[0], value, operation);
 		}
 		else {
@@ -360,7 +360,7 @@ public class Controller {
 	
 	
 	protected String createVersion( Date date ) {
-		return Constants.EMPTY + date.getTime();
+		return StringUtils.EMPTY_STRING + date.getTime();
 	}
 
 
@@ -375,7 +375,7 @@ public class Controller {
 			error.put(Constants.KEY_SCIMTYPE, scimType);
 		}
 		error.put(Constants.KEY_DETAIL, detail);
-		error.put(Constants.KEY_STATUS, Constants.EMPTY + status );
+		error.put(Constants.KEY_STATUS, StringUtils.EMPTY_STRING + status );
 		return new ResponseEntity<Map<String, Object>>(error, HttpStatus.valueOf(status));
 	}
 	
@@ -424,7 +424,7 @@ public class Controller {
 	
 	private List<String> getListFromString(String attributes) {
 		if ( !StringUtils.isEmpty(attributes)) {
-			return Arrays.asList(attributes.split(Constants.COMMA));
+			return Arrays.asList(attributes.split(StringUtils.COMMA));
 		}
 		return null;
 	}

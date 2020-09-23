@@ -25,6 +25,7 @@ import be.personify.util.MapUtils;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
 import be.personify.util.State;
+import be.personify.util.StringUtils;
 
 /** 
  * Storage implementation that stores data into a LDAP using the personify connector framework
@@ -67,7 +68,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 			scimObject = processMapping( id, scimObject, extra, depthMapping, schema);
 			ProvisionResult result = new ProvisionTask().provision(State.PRESENT, scimObject, mapping, targetSystem);
 			if ( !result.getStatus().equals(ProvisionStatus.SUCCESS)) {
-				throw new DataException(result.getErrorCode() + Constants.SPACE + result.getErrorDetail());
+				throw new DataException(result.getErrorCode() + StringUtils.SPACE + result.getErrorDetail());
 			}
 		}
 		catch (Exception e) {
@@ -117,7 +118,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 			scimObject = processMapping( id, scimObject, extra, depthMapping, schema);
 			ProvisionResult result = new ProvisionTask().provision(State.PRESENT, scimObject, mapping, targetSystem);
 			if ( !result.getStatus().equals(ProvisionStatus.SUCCESS)) {
-				throw new DataException(result.getErrorCode() + Constants.SPACE + result.getErrorDetail());
+				throw new DataException(result.getErrorCode() + StringUtils.SPACE + result.getErrorDetail());
 			}
 		}
 		catch (Exception e) {
@@ -219,13 +220,13 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 	
 
 	private String composeDn(String id) {
-		return CN + id + Constants.COMMA + basedn;
+		return CN + id + StringUtils.COMMA + basedn;
 	}
 	
 	private String decomposeDn(Object id) {
 		if ( id instanceof List ) {
 			String firstId = ((String)((List)id).get(0));
-			return firstId.substring(CN.length(), firstId.indexOf(Constants.COMMA));
+			return firstId.substring(CN.length(), firstId.indexOf(StringUtils.COMMA));
 		}
 		return null;
 	}
@@ -242,7 +243,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 
 			//add type to basedn
 			basedn = targetSystem.getConnectorConfiguration().getConfiguration().get("baseDn");
-			basedn = "ou=" + type.toLowerCase() + Constants.COMMA + basedn;
+			basedn = "ou=" + type.toLowerCase() + StringUtils.COMMA + basedn;
 			targetSystem.getConnectorConfiguration().getConfiguration().put("baseDn", basedn);
 			
 			
@@ -251,7 +252,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 				throw new ConfigurationException("can not find mapping or targetSystem in configuration");
 			}
 			else {
-				objectClasses = Arrays.asList(targetSystem.getConnectorConfiguration().getConfiguration().get(type.toLowerCase() + "ObjectClasses").split(Constants.COMMA));
+				objectClasses = Arrays.asList(targetSystem.getConnectorConfiguration().getConfiguration().get(type.toLowerCase() + "ObjectClasses").split(StringUtils.COMMA));
 				schema = SchemaReader.getInstance().getSchemaByResourceType(type);
 				schemaList = Arrays.asList(new String[] {schema.getId()});
 				depthMapping = createDepthMapping(mapping);

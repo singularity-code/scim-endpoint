@@ -7,11 +7,6 @@ public class Constants {
 	
 	public static final String DATEFORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 	
-	
-	//format.setTimeZone(TimeZone.getTimeZone("UTC"));
-	
-//	public static final String SCHEMA_USER = "urn:ietf:params:scim:schemas:core:2.0:User";
-//	public static final String SCHEMA_GROUP = "urn:ietf:params:scim:schemas:core:2.0:Group";
 	public static final String SCHEMA_SERVICEPROVIDERCONFIG = "urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig";
 	public static final String SCHEMA_LISTRESPONSE = "urn:ietf:params:scim:api:messages:2.0:ListResponse";
 	public static final String SCHEMA_BULKREQUEST = "urn:ietf:params:scim:api:messages:2.0:BulkRequest";
@@ -46,11 +41,6 @@ public class Constants {
 	
 	public static final ObjectMapper objectMapper = new ObjectMapper();
 	
-	public static final String SLASH = "/";
-	public static final String EMPTY = "";
-	public static final String SPACE = " ";
-	public static final String COMMA = ",";
-	public static final String COLON = ":";
 	public static final String AND_WITH_SPACES = " and ";
 	
 	public static final String ID = "id";
@@ -63,7 +53,6 @@ public class Constants {
 	public static final String HEADER_LOCATION = "Location";
 	
 	public static final String tempDir = System.getProperty("java.io.tmpdir");
-	
 	public static final String HTTP_METHOD_POST = "POST";
 	
 	public static final String BASIC = "Basic";

@@ -7,6 +7,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.codec.Hex;
 
+import be.personify.util.StringUtils;
+
 public class TokenUtils {
 	
 	private static final Logger logger = LogManager.getLogger(TokenUtils.class);
@@ -18,7 +20,7 @@ public class TokenUtils {
 	
 	public boolean isValid( String encryptedToken ) {
 		String token = cryptUtils.decrypt(encryptedToken,SALT);
-		String[] parts = token.split(Constants.COLON);
+		String[] parts = token.split(StringUtils.COLON);
 		logger.debug("checking is valid for user [{}]", parts[0]);
 		long now = System.currentTimeMillis();
 		long timeIssued = Long.parseLong(parts[1]);
@@ -35,8 +37,8 @@ public class TokenUtils {
 	public String construct( String client_id, long expiryTime ) {
 		
 		StringBuffer b = new StringBuffer(client_id);
-		b.append(Constants.COLON).append(System.currentTimeMillis())
-		.append(Constants.COLON).append(expiryTime);
+		b.append(StringUtils.COLON).append(System.currentTimeMillis())
+		.append(StringUtils.COLON).append(expiryTime);
 		
 		return cryptUtils.encrypt(b.toString(), SALT);
 	}

@@ -1,7 +1,6 @@
 package be.personify.iam.scim.rest;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import be.personify.iam.scim.authentication.AuthenticationUtils;
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.TokenUtils;
+import be.personify.util.StringUtils;
 
 /**
  * Discovery controller for the SCIM server
@@ -59,11 +58,11 @@ public class TokenController extends Controller {
 			String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 			String credentials = extractCredentials(entity, header);
 			
-			if ( !StringUtils.isEmpty(credentials) && credentials.contains(Constants.COLON)) {
+			if ( !StringUtils.isEmpty(credentials) && credentials.contains(StringUtils.COLON)) {
 				
 				if ( authenticationUtils.getBearerAuthUsers().containsKey(credentials)) {
 					
-					String[] cc = credentials.split(Constants.COLON);
+					String[] cc = credentials.split(StringUtils.COLON);
 					
 					Map<String,Object> response = new HashMap<>();
 					response.put("access_token", tokenUtils.construct(cc[0], lifeTimeInSeconds));
@@ -100,11 +99,11 @@ public class TokenController extends Controller {
 		String credential = null;
 		if ( entity.containsKey(Constants.CLIENT_ID) && entity.containsKey(Constants.CLIENT_SECRET)) {
 			//first fetch it from the payload
-			credential = entity.get(Constants.CLIENT_ID).get(0).toString() + Constants.COLON + entity.get(Constants.CLIENT_SECRET).get(0).toString();
+			credential = entity.get(Constants.CLIENT_ID).get(0).toString() + StringUtils.COLON + entity.get(Constants.CLIENT_SECRET).get(0).toString();
 		}
 		else {
 			//else fetch it from the authorization header
-			String[] auth = authorizationHeader.split(Constants.SPACE);
+			String[] auth = authorizationHeader.split(StringUtils.SPACE);
 			if ( auth.length == 2) {
 				if ( auth[0].equalsIgnoreCase(Constants.BASIC)) {
 					credential = new String(Base64Utils.decode(auth[1].getBytes()));

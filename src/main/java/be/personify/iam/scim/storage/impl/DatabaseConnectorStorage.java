@@ -25,6 +25,7 @@ import be.personify.util.MapUtils;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
 import be.personify.util.State;
+import be.personify.util.StringUtils;
 
 /** 
  * Storage implementation that stores data into a database using the personify connector framework
@@ -58,7 +59,7 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 			scimObject = processMapping( id, scimObject, extra, depthMapping, schema);
 			ProvisionResult result = new ProvisionTask().provision(State.PRESENT, scimObject, mapping, targetSystem);
 			if ( !result.getStatus().equals(ProvisionStatus.SUCCESS)) {
-				throw new DataException(result.getErrorCode() + Constants.SPACE + result.getErrorDetail());
+				throw new DataException(result.getErrorCode() + StringUtils.SPACE + result.getErrorDetail());
 			}
 		}
 		catch (Exception e) {
@@ -106,7 +107,7 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 			scimObject = processMapping( id, scimObject, extra, depthMapping, schema);
 			ProvisionResult result = new ProvisionTask().provision(State.PRESENT, scimObject, mapping, targetSystem);
 			if ( !result.getStatus().equals(ProvisionStatus.SUCCESS)) {
-				throw new DataException(result.getErrorCode() + Constants.SPACE + result.getErrorDetail());
+				throw new DataException(result.getErrorCode() + StringUtils.SPACE + result.getErrorDetail());
 			}
 		}
 		catch (Exception e) {

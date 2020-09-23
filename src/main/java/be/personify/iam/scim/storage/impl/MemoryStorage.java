@@ -13,7 +13,6 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 
 import be.personify.iam.scim.storage.ConstraintViolationException;
 import be.personify.iam.scim.storage.SortOrder;
@@ -23,6 +22,7 @@ import be.personify.iam.scim.util.PropertyFactory;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
 import be.personify.util.SearchOperation;
+import be.personify.util.StringUtils;
 
 /**
  * Sample storage implementation that stores data into a volatile memory store
@@ -133,9 +133,12 @@ public class MemoryStorage implements Storage {
 		for( Map<String,Object> object : storage.values()){
 			int criteriaCount = 0;
 			for ( SearchCriterium criterium : searchCriteria.getCriteria() ) {
-				Object value = object.get( criterium.getKey());
+				
+				Object value = getRecursiveObject(object, criterium.getKey());
 				if ( criterium.getSearchOperation() == SearchOperation.EQUALS) {
-					if ( value.toString().equals(criterium.getValue())) {
+					
+					boolean m = matchValue( value, criterium.getValue());
+					if (m) {
 						criteriaCount++;
 					}
 				}
@@ -178,6 +181,90 @@ public class MemoryStorage implements Storage {
 	
 	
 	
+	private boolean matchValue(Object value, Object criteriumValue) {
+		if ( value instanceof List ) {
+			List l = (List)value;
+			for ( Object o : l  ) {
+				if ( o.equals(criteriumValue)) {
+					return true;
+				}
+			}
+		}
+		else {
+			return value.equals(criteriumValue);
+		}
+		return false;
+	}
+
+	private static Object getRecursiveObject(Map<String, Object> object, String key) {
+		System.out.println(" object " + object + " " + key);
+		if ( key.contains(StringUtils.DOT)) {
+			Object o = null;
+			int index = 0;
+			while ( (index = key.indexOf(StringUtils.DOT)) > 0 ) {
+				String part = key.substring(0, index);
+				if ( o == null ) {
+					o = object.get(part);
+				}
+				else {
+					
+				}
+				key = key.substring(index, key.length());
+			}
+			key = key.substring(1, key.length());
+			if ( o instanceof List ) {
+				List<Object> valueList = new ArrayList<>();
+				List<Map> mapList = (List)o;
+				for ( Map m : mapList ) {
+					System.out.println(" key " + key);
+					valueList.add(m.get(key));
+				}
+				return valueList;
+			}
+			else if ( o instanceof Map ) {
+				Map map = (Map)o;
+				return map.get(key);
+			}
+			return o;
+		}
+		return object.get(key);
+	}
+	
+	
+	
+	
+//	public static void main(String[] args) {
+//		Map<String,Object> m = new HashMap<>();
+//		
+//		
+//		Map<String,Object> v1 = new HashMap<>();
+//		v1.put("type", "home");
+//		v1.put("mail", "mail1");
+//		
+//		List<Map> list = new ArrayList<>();
+//		list.add(v1);
+//		
+//		m.put("emails", list);
+//		
+//		System.out.println(getRecursiveObject(m, "emails.mail"));
+//	}
+	
+	
+	public static void main(String[] args) {
+		Map<String,Object> m = new HashMap<>();
+		
+		
+		Map<String,Object> v1 = new HashMap<>();
+		v1.put("familyName", "Simpson");
+		
+		
+		
+		m.put("name", v1);
+		
+		System.out.println(getRecursiveObject(m, "name.familyName"));
+	}
+	
+
 	private List<Map<String, Object>> sort(List<Map<String, Object>> result, String sortBy, SortOrder sortOrder) {
 		
 		if ( !StringUtils.isEmpty(sortBy)) {
@@ -239,7 +326,7 @@ public class MemoryStorage implements Storage {
 		String uniqueConstraintsString = propertyFactory.getProperty("scim.storage.memory." + type.toLowerCase() + ".unique");
 		uniqueConstraints = new HashMap<String, Map<Object,Object>>();
 		if ( !StringUtils.isEmpty(uniqueConstraintsString)) {
-			uniqueConstraintsList = Arrays.asList(uniqueConstraintsString.split(Constants.COMMA));
+			uniqueConstraintsList = Arrays.asList(uniqueConstraintsString.split(StringUtils.COMMA));
 			for ( String u : uniqueConstraintsList ) {
 				uniqueConstraints.put(u, new HashMap<Object, Object>());
 			}

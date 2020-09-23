@@ -51,7 +51,7 @@ public class PropertyFileAuthenticationFilter implements Filter {
 	private AuthenticationUtils authenticationUtils;
 	
 	private final List<String> PUBLIC_ENDPOINTS = Arrays.asList(new String[] {"/scim/v2/token", "/scim/v2/Me"});
-	private final String serverDescription = PropertyFileAuthenticationFilter.class.getPackage().getImplementationTitle() + Constants.SPACE + PropertyFileAuthenticationFilter.class.getPackage().getImplementationVersion();
+	private final String serverDescription = PropertyFileAuthenticationFilter.class.getPackage().getImplementationTitle() + StringUtils.SPACE + PropertyFileAuthenticationFilter.class.getPackage().getImplementationVersion();
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -70,7 +70,7 @@ public class PropertyFileAuthenticationFilter implements Filter {
 		}
 		else {
 			if ( header != null ) {
-				String[] auth = header.split(Constants.SPACE);
+				String[] auth = header.split(StringUtils.SPACE);
 				if ( auth.length == 2) {
 					String method = req.getMethod();
 					if ( auth[0].equalsIgnoreCase(Constants.BASIC)) {
@@ -130,7 +130,7 @@ public class PropertyFileAuthenticationFilter implements Filter {
 	
 	private String getClientIdWithCredential( String clientId , Map<String,List<String>> users ) {
 		for ( String key : users.keySet()) {
-			if ( key.startsWith((clientId + Constants.COLON))) {
+			if ( key.startsWith((clientId + StringUtils.COLON))) {
 				return key;
 			}
 		}
