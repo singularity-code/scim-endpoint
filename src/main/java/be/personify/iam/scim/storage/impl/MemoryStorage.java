@@ -27,6 +27,7 @@ import be.personify.util.StringUtils;
 
 /**
  * Sample storage implementation that stores data into a volatile memory store
+ * 
  * @author vanderw
  *
  */
@@ -148,14 +149,10 @@ public class MemoryStorage implements Storage {
 	
 	
 	
-	
-	
-	
-	
 	private boolean matchValue(Object value, SearchCriterium criterium) {
 		Object criteriumValue = criterium.getValue();
 		if ( value instanceof List ) {
-			List l = (List)value;
+			List<Object> l = (List)value;
 			boolean found = false;
 			for ( Object o : l  ) {
 				if ( evaluate(o, criteriumValue,criterium.getSearchOperation())) {

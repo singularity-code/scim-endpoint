@@ -41,21 +41,46 @@ public class MemoryStorageTest {
 	}
 	
 	
-	
-
 	@Test
 	public void testSubAttributes2() {
 		Map<String,Object> m = new HashMap<>();
 		
 		
 		Map<String,Object> v1 = new HashMap<>();
+		v1.put("type", "home");
+		v1.put("mail", "mail1");
+		
+		Map<String,Object> v2 = new HashMap<>();
+		v1.put("type", "home");
+		v1.put("mail", "mail2");
+		
+		List<Map> list = new ArrayList<>();
+		list.add(v1);
+		list.add(v2);
+		
+		m.put("emails", list);
+		
+				
+		Object ss = storage.getRecursiveObject(m, "emails.mail");
+		if ( ss instanceof List ) {
+			if (!((List)ss).contains("mail2")) {
+				fail("not equals");
+			}
+		};
+	}
+	
+	
+	
+
+	@Test
+	public void testSubAttributes3() {
+		Map<String,Object> m = new HashMap<>();
+		
+		
+		Map<String,Object> v1 = new HashMap<>();
 		v1.put("familyName", "Simpson");
 		
-		
-		
 		m.put("name", v1);
-		
-		System.out.println(storage.getRecursiveObject(m, "name.familyName"));
 		
 		if ( !storage.getRecursiveObject(m, "name.familyName").equals("Simpson")) {
 			fail("not equals");
