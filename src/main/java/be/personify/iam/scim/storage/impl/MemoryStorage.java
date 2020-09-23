@@ -134,39 +134,9 @@ public class MemoryStorage implements Storage {
 		for( Map<String,Object> object : storage.values()){
 			int criteriaCount = 0;
 			for ( SearchCriterium criterium : searchCriteria.getCriteria() ) {
-				
 				Object value = getRecursiveObject(object, criterium.getKey());
-				if ( criterium.getSearchOperation() == SearchOperation.EQUALS) {
-					
-					boolean m = matchValue( value, criterium);
-					if (m) {
-						criteriaCount++;
-					}
-				}
-				else if ( criterium.getSearchOperation() == SearchOperation.NOT_EQUALS) {
-					if ( !value.toString().equals(criterium.getValue())) {
-						criteriaCount++;
-					}
-				}
-				else if ( criterium.getSearchOperation() == SearchOperation.STARTS_WITH) {
-					if ( value.toString().startsWith((String)criterium.getValue())) {
-						criteriaCount++;
-					}
-				}
-				else if ( criterium.getSearchOperation() == SearchOperation.CONTAINS) {
-					if ( value.toString().contains((String)criterium.getValue())) {
-						criteriaCount++;
-					}
-				}
-				else if ( criterium.getSearchOperation() == SearchOperation.ENDS_WITH) {
-					if ( value.toString().endsWith((String)criterium.getValue())) {
-						criteriaCount++;
-					}
-				}
-				else if ( criterium.getSearchOperation() == SearchOperation.PRESENT) {
-					if ( value != null) {
-						criteriaCount++;
-					}
+				if ( matchValue( value, criterium)) {
+					criteriaCount++;
 				}
 			}
 			if ( criteriaCount == searchCriteria.getCriteria().size()) {
@@ -186,24 +156,51 @@ public class MemoryStorage implements Storage {
 		Object criteriumValue = criterium.getValue();
 		if ( value instanceof List ) {
 			List l = (List)value;
+			boolean found = false;
 			for ( Object o : l  ) {
-				if ( o.equals(criteriumValue)) {
-					return true;
+				if ( evaluate(o, criteriumValue,criterium.getSearchOperation())) {
+					found = true;
 				}
 			}
+			return found;
 		}
 		else {
 			if ( value == null ) {
 				throw new DataException("criterium with key " + criterium.getKey() + " not valid");
 			}
-			return value.equals(criteriumValue);
+			return evaluate(value, criteriumValue,criterium.getSearchOperation());
+		}
+	}
+	
+	
+	
+	private  boolean evaluate( Object firstValue, Object secondValue, SearchOperation searchOperation ) {
+		if ( searchOperation == SearchOperation.EQUALS) {
+			return firstValue.equals(secondValue);
+		}
+		else if ( searchOperation == SearchOperation.NOT_EQUALS) {
+			return !firstValue.equals(secondValue);
+		}
+		else if ( searchOperation == SearchOperation.STARTS_WITH) {
+			return firstValue.toString().startsWith(secondValue.toString());
+		}
+		else if ( searchOperation == SearchOperation.CONTAINS) {
+			return firstValue.toString().contains(secondValue.toString());
+		}
+		else if ( searchOperation == SearchOperation.ENDS_WITH) {
+			return firstValue.toString().endsWith(secondValue.toString());
+		}
+		else if ( searchOperation == SearchOperation.PRESENT) {
+			return firstValue != null;
 		}
 		return false;
 	}
+	
+	
+
 
 	
 	public Object getRecursiveObject(Map<String, Object> object, String key) {
-		System.out.println(" object " + object + " " + key);
 		if ( key.contains(StringUtils.DOT)) {
 			Object o = null;
 			int index = 0;
@@ -213,7 +210,7 @@ public class MemoryStorage implements Storage {
 					o = object.get(part);
 				}
 				else {
-					
+					//TODO
 				}
 				key = key.substring(index, key.length());
 			}
@@ -222,7 +219,6 @@ public class MemoryStorage implements Storage {
 				List<Object> valueList = new ArrayList<>();
 				List<Map> mapList = (List)o;
 				for ( Map m : mapList ) {
-					System.out.println(" key " + key);
 					valueList.add(m.get(key));
 				}
 				return valueList;
