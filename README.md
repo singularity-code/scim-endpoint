@@ -107,13 +107,14 @@ create a environment in postman containing host and protocol and import the coll
 Pimp the application.properties file included.
 
 
-Five storage implementations are developed but if needed, you can implement and wire your own implementation (see again in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)).
+Six storage implementations are developed but if needed, you can implement and wire your own implementation (see again in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)).
 
 * memory storage implementation : basic fast access with flushing to a file, choose this for development or show case, demo testing, trial.
 * mongo storage implementation : should be fine and scalable for development and production.
 * ldap storage implementation (experimental) : tested with ForgeRock Directory Server 6.5, consider it as a easy **scim to ldap**.
 * postgres implementation : stable, creates table and indexes based on mapping
 * mysql implementation : stable, creates table and indexes based on mapping
+* OrientDB implementation : in development
 
 For using a OAUTH bearer token on forgerock openidm and other products, just point the endpoint to http://localhost:{8090}/scim/v2/token and use the credentials from the application.properties.
 
@@ -160,12 +161,12 @@ The current benchmark can give you already an idea about the throughput.
 
 Executed on a single AMD® Ryzen 3 2200g with the application consuming approximately 250MB for 4 threads and 5000 requests per thread.
 
-| request        | MEM  | MONGO | LDAP | Postgres | Mysql |
-|----------------|------|-------|------|----------|-------|
-| create (req/s) | 882  | 225   | 497  | 630      | 644   |
-| get    (req/s) | 1609 | 1280  | 1056 | 1248     | 1367  |
-| search (req/s) | 159  | 1034  | ?    | 1103     | 1141  |
-| delete (req/s) | 993  | 1340  | 756  | 1079     | 1068  |
+| request        | MEM  | MONGO | LDAP | Postgres | Mysql | OrientDB |
+|----------------|------|-------|------|----------|-------|----------|
+| create (req/s) | 882  | 225   | 497  | 630      | 644   | ??       | 
+| get    (req/s) | 1609 | 1280  | 1056 | 1248     | 1367  | ??       |
+| search (req/s) | 159  | 1034  | ?    | 1103     | 1141  | ??       |
+| delete (req/s) | 993  | 1340  | 756  | 1079     | 1068  | ??       |
 
 
 
