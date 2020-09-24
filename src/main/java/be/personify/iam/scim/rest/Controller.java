@@ -127,7 +127,7 @@ public class Controller {
 			logger.error("constraint violation", e);
 			return showError( 409, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.uniqueness );
 		}
-		catch( DataException e) {
+		catch( DataException | ConfigurationException e) {
 			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 		}
 	}
@@ -178,7 +178,7 @@ public class Controller {
 			logger.error("constraint violation", e);
 			return showError( 409, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.uniqueness );
 		}
-		catch( DataException e) {
+		catch( DataException | ConfigurationException e ) {
 			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 		}
 	}
@@ -203,7 +203,7 @@ public class Controller {
 			logger.info("resource of type {} with id {} fetched in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
 			return result;
 		}
-		catch( DataException | ConfigurationException e) {
+		catch( DataException | ConfigurationException e ) {
 			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 		}
 	}
@@ -250,9 +250,11 @@ public class Controller {
 		catch ( InvalidFilterException ife ) {
 			return showError(HttpStatus.BAD_REQUEST.value(), "the filter [" + filter + "] is not correct : " + ife.getMessage(), ScimErrorType.invalidFilter);
 		}
-		catch( DataException e) {
+		catch( DataException | ConfigurationException e) {
 			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage() );
 		}
+		
+		
 	}
 	
 	
@@ -277,8 +279,8 @@ public class Controller {
 
 
 
-	private SearchCriterium extractCriteriumFromString(String filter, SearchCriteria searchCriteria)
-			throws InvalidFilterException {
+	private SearchCriterium extractCriteriumFromString(String filter, SearchCriteria searchCriteria) throws InvalidFilterException {
+		
 		String[] filterParts = filter.split(StringUtils.SPACE);
 		SearchOperation operation = null;
 		if ( filterParts.length != 3 ) {
