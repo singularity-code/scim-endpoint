@@ -67,7 +67,9 @@ public class MemoryStorage implements Storage {
 	@Override
 	public void create(String id, final Map<String,Object> object) throws ConstraintViolationException {
 		checkConstraints(id, object);
-		storage.put(id, object);
+		synchronized(storage){
+			storage.put(id, object);
+		}
 		updateConstraints(id,object);
 	}
 	
