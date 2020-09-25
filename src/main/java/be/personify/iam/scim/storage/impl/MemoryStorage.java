@@ -19,6 +19,7 @@ import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.SortOrder;
 import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.Index;
 import be.personify.iam.scim.util.PropertyFactory;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
@@ -43,6 +44,7 @@ public class MemoryStorage implements Storage {
 	private List<String> uniqueConstraintsList = new ArrayList<String>();
 	private Map<String,Map<Object,Object>> uniqueConstraints = null;
 	
+
 	private String type;
 	
 	
@@ -126,26 +128,90 @@ public class MemoryStorage implements Storage {
 	
 	@Override
 	public long count(SearchCriteria searchCriteria) {
-		return Long.valueOf(filterOnSearchCriteria(searchCriteria).size());
+		long totalCount = 0;
+		
+		//first check constraints
+		int count = 0;
+		List<String> criteriaFoundInConstraints = new ArrayList<String>();
+		for ( SearchCriterium criterium : searchCriteria.getCriteria() ) {
+			Map m = uniqueConstraints.get(criterium.getKey());
+			if ( m != null ) {
+				String id = (String)m.get(criterium.getValue());
+				//logger.info("found id in unique {} for value {}", id, criterium.getValue());
+				if ( id != null && !criteriaFoundInConstraints.contains(id)) {
+					//logger.info("putting it in map {}", id);
+					criteriaFoundInConstraints.add(id);
+				}
+				count++;
+			}
+		}
+			
+		if ( count < searchCriteria.size() ) {
+			logger.info("not all criteria are found in contraints");
+			for( Map<String,Object> object : storage.values()){
+				int criteriaCount = 0;
+				for ( SearchCriterium criterium : searchCriteria.getCriteria() ) {
+					Object value = getRecursiveObject(object, criterium.getKey());
+					if ( matchValue( value, criterium)) {
+						criteriaCount++;
+					}
+				}
+				if ( criteriaCount == searchCriteria.getCriteria().size()) {
+					totalCount++;
+				}
+			}
+		}
+		else {
+			totalCount = criteriaFoundInConstraints.size();
+		}
+				
+		return totalCount;
 	}
 
 	
 	
 	private List<Map<String, Object>> filterOnSearchCriteria(SearchCriteria searchCriteria) {
-		List<Map<String, Object>> result;
-		result = new ArrayList<Map<String,Object>>();
-		for( Map<String,Object> object : storage.values()){
-			int criteriaCount = 0;
-			for ( SearchCriterium criterium : searchCriteria.getCriteria() ) {
-				Object value = getRecursiveObject(object, criterium.getKey());
-				if ( matchValue( value, criterium)) {
-					criteriaCount++;
+		List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
+		
+		//first check constraints
+		int count = 0;
+		List<String> criteriaFoundInConstraints = new ArrayList<String>();
+		for ( SearchCriterium criterium : searchCriteria.getCriteria() ) {
+			Map m = uniqueConstraints.get(criterium.getKey());
+			if ( m != null ) {
+				String id = (String)m.get(criterium.getValue());
+				//logger.info("found id in unique {} for value {}", id, criterium.getValue());
+				if ( id != null && !criteriaFoundInConstraints.contains(id)) {
+					//logger.info("putting it in map {}", id);
+					criteriaFoundInConstraints.add(id);
 				}
-			}
-			if ( criteriaCount == searchCriteria.getCriteria().size()) {
-				result.add(object);
+				count++;
 			}
 		}
+		
+		if ( count < searchCriteria.size() ) {
+			logger.info("not all criteria are found in contraints");
+			for( Map<String,Object> object : storage.values()){
+				int criteriaCount = 0;
+				for ( SearchCriterium criterium : searchCriteria.getCriteria() ) {
+					Object value = getRecursiveObject(object, criterium.getKey());
+					if ( matchValue( value, criterium)) {
+						criteriaCount++;
+					}
+				}
+				if ( criteriaCount == searchCriteria.getCriteria().size()) {
+					result.add(object);
+				}
+			}
+		}
+		else {
+			for ( String s : criteriaFoundInConstraints ) {
+				Map<String,Object> mm = storage.get(s);
+				logger.info("mm {}" , mm);
+				result.add(mm);
+			}
+		}
+		
 		return result;
 	}
 	

@@ -164,9 +164,10 @@ Executed on a single AMD® Ryzen 3 2200g ( both the loadtest and the storage imp
 | request        | MEM  | MONGO | LDAP | Postgres | Mysql | OrientDB |
 |----------------|------|-------|------|----------|-------|----------|
 | create (req/s) | 882  | 225   | 497  | 630      | 644   | 718      | 
-| get    (req/s) | 1609 | 1280  | 1056 | 1248     | 1367  | 1248     |
-| search (req/s) | 159  | 1034  | ?    | 1103     | 1141  | 993      |
+| get    (req/s) | 1409 | 1280  | 1056 | 1248     | 1367  | 1248     |
+| search (req/s) | 1219 | 1034  | ?    | 1103     | 1141  | 993      |
 | delete (req/s) | 993  | 1340  | 756  | 1079     | 1068  | 472      |
+
 
 
 

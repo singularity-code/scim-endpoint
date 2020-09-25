@@ -287,13 +287,17 @@ public class OrientDBStorage implements Storage, DisposableBean {
     				 OClass typeClass = schema.createClass(type);
     				 String[] uniqueIndexesArray = uniqueIndexes.split(StringUtils.COMMA);
     				 for ( String ui : uniqueIndexesArray) {
-    					 OProperty idProp = typeClass.createProperty(ui, OType.STRING);
-        				 idProp.createIndex(OClass.INDEX_TYPE.UNIQUE);
+    					 if ( ui.startsWith(type.toLowerCase() + StringUtils.COLON)) {
+    						 OProperty idProp = typeClass.createProperty(ui, OType.STRING);
+    						 idProp.createIndex(OClass.INDEX_TYPE.UNIQUE);
+    					 }
     				 }
     				 String[] indexesArray = indexes.split(StringUtils.COMMA);
     				 for ( String ui : indexesArray) {
-    					 OProperty idProp = typeClass.createProperty(ui, OType.STRING);
-        				 idProp.createIndex(OClass.INDEX_TYPE.NOTUNIQUE);
+    					 if ( ui.startsWith(type.toLowerCase() + StringUtils.COLON)) {
+    						 OProperty idProp = typeClass.createProperty(ui, OType.STRING);
+    						 idProp.createIndex(OClass.INDEX_TYPE.NOTUNIQUE);
+    					 }
     				 }
     			 }
     		 }
