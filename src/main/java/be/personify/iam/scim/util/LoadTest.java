@@ -235,12 +235,14 @@ public class LoadTest {
 						RestTemplate restTemplate = new RestTemplate();
 						try {
 							String identifier = "joske" + zz + j;
-							String filter = "userName eq " + identifier + " and externalId ne homer and externalId pr";
+							String filter = "userName eq " + identifier + " and externalId pr";
 							String encodedFilter = URLEncoder.encode(filter);
 							
 							ResponseEntity<Map> response  = restTemplate.exchange(endpoint + "/Users?filter=" + encodedFilter + sortBy ,HttpMethod.GET,entity, Map.class );
 							//System.out.println(response.getBody());
-							if ( (int)response.getBody().get("totalResults") != 1) {
+							int results = (int)response.getBody().get("totalResults");
+							if ( results != 1) {
+								System.out.println("number of esults " + results);
 								throw new Exception("no result found");
 							}
 						}
