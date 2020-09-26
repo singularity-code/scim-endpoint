@@ -292,6 +292,10 @@ public class LoadTest {
 			//System.out.println(response.getBody());
 			int findIdsFinished = (int)response.getBody().get("totalResults");
 			System.out.println("number of results " + findIdsFinished);
+			response  = restTemplate.exchange(endpoint + "/Users?attributes=id&startIndex=1&count=" + findIdsFinished,HttpMethod.GET,entity, Map.class );
+			System.out.println(response.getBody());
+			System.out.println("all ids fetched in " + ( System.currentTimeMillis() - start));
+			
 		}
 		catch( Exception e ) {
 			e.printStackTrace();

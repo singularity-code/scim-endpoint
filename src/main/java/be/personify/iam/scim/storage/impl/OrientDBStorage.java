@@ -271,24 +271,22 @@ public class OrientDBStorage implements Storage, DisposableBean {
 	    		 try (ODatabaseSession db = pool.acquire()) {
 	    			 OSchema schema = db.getMetadata().getSchema();
 	    			 if ( !schema.existsClass(type) ) {
-	    				 logger.info("schema does not exist, trying to create {}", type);
+	    				 logger.info("schema does not exist, trying to create schema [{}]", type);
 	    				 OClass typeClass = schema.createClass(type);
 	    				 String[] uniqueIndexesArray = uniqueIndexes.split(StringUtils.COMMA);
 	    				 for ( String ui : uniqueIndexesArray) {
-	    					 logger.info("creating unique index, {}", ui);
 	    					 if ( ui.startsWith(type.toLowerCase() + StringUtils.COLON)) {
 	    						 String index = ui.substring(ui.indexOf(StringUtils.COLON) +1, ui.length());
-	    						 logger.info("creating index, {}", index);
+	    						 logger.info("creating unique index [{}]", index);
 	    						 OProperty idProp = typeClass.createProperty(index, OType.STRING);
 	    						 idProp.createIndex(OClass.INDEX_TYPE.UNIQUE);
 	    					 }
 	    				 }
 	    				 String[] indexesArray = indexes.split(StringUtils.COMMA);
 	    				 for ( String ui : indexesArray) {
-	    					 logger.info("creating index, {}", ui);
 	    					 if ( ui.startsWith(type.toLowerCase() + StringUtils.COLON)) {
 	    						 String index = ui.substring(ui.indexOf(StringUtils.COLON) +1, ui.length());
-	    						 logger.info("creating index, {}", index);
+	    						 logger.info("creating index [{}]", index);
 	    						 OProperty idProp = typeClass.createProperty(index, OType.STRING);
 	    						 idProp.createIndex(OClass.INDEX_TYPE.NOTUNIQUE);
 	    					 }
