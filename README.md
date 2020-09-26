@@ -21,7 +21,7 @@ basic server implementation.
 - schema validation
 - uniqueness constraint validation
 - authentication : basic and OAUTH bearer token ( with roles )
-- bearer token endpoint created and verified with [Forgerock IDM SCIM connector](https://bitbucket.org/wouter29/personify-scim-server/wiki/Forgerock%20SCIM%20connector) (compatible)
+- bearer token endpoint created and verified with Forgerock IDM SCIM connector (compatible)
 - /ME endpoint
 
 
@@ -159,7 +159,7 @@ thread [3] 5000 records processed in 20076
 
 The current benchmark can give you already an idea about the throughput and compare the performance of the different persistency layers..
 
-Executed on a single AMD® Ryzen 3 2200g ( both the loadtest and the storage implementation ) with the application consuming approximately 250MB for 4 threads and 5000 requests per thread.
+Executed on a single AMDï¿½ Ryzen 3 2200g ( both the loadtest and the storage implementation ) with the application consuming approximately 250MB for 4 threads and 5000 requests per thread.
 
 | request        | MEM  | MONGO | LDAP | Postgres | Mysql | OrientDB |
 |----------------|------|-------|------|----------|-------|----------|
