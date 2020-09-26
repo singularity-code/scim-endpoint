@@ -42,7 +42,7 @@ public class TokenController extends Controller {
 	private TokenUtils tokenUtils;
 	
 	
-	@Value("${scim.authentication.method.bearer.lifeTimeInSeconds:60}")
+	@Value("${scim.authentication.propertyfile.method.bearer.lifeTimeInSeconds:60}")
 	private long lifeTimeInSeconds;
 
 

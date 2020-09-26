@@ -42,6 +42,7 @@ public class Constants {
 	public static final ObjectMapper objectMapper = new ObjectMapper();
 	
 	public static final String AND_WITH_SPACES = " and ";
+	public static final String QUESTION_MARK__WITH_SPACES = " ? ";
 	
 	public static final String ID = "id";
 

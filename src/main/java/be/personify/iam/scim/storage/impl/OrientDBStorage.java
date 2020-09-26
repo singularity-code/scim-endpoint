@@ -29,6 +29,7 @@ import com.orientechnologies.orient.core.storage.ORecordDuplicatedException;
 
 import be.personify.iam.scim.storage.ConfigurationException;
 import be.personify.iam.scim.storage.ConstraintViolationException;
+import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.util.Constants;
 import be.personify.util.SearchCriteria;
@@ -44,6 +45,11 @@ import be.personify.util.StringUtils;
  */
 public class OrientDBStorage implements Storage, DisposableBean {
 	
+	private static final String COUNT = "count";
+	private static final String ORIENT_OPERATOR_PRESENT = " is not null ";
+	private static final String ORIENT_OPERATOR_NOT_EQUALS = " <> ";
+	private static final String ORIENT_OPERATOR_EQUALS = " = ";
+
 	private static final Logger logger = LogManager.getLogger(OrientDBStorage.class);
 	
 	private String type;
@@ -73,57 +79,32 @@ public class OrientDBStorage implements Storage, DisposableBean {
 	private String indexes;
 	
    
-	private OrientDB orientDB;
-    private ODatabasePool pool;
+	private static OrientDB orientDB;
+    private static ODatabasePool pool;
     
-    private String QUERY_DELETE = null;
-	private String QUERY_FIND = null;
+    private String queryAll = null;
+    private String queryDelete = null;
+	private String queryFindById = null;
+	private String querySelectCount = null;
 
     
     @Override
     public Map<String, Object> get(String id) {
     	try (ODatabaseSession db = pool.acquire()) {
-    		OResultSet result = db.query(QUERY_FIND, id);
+    		OResultSet result = db.query(queryFindById, id);
     		if ( result.hasNext()) {
-    			OResult r = result.next();
-    			return resultToMap(r);
+    			return resultToMap(result.next());
     		}
     	}
     	return null;
     }
 
 
-
-	private Map<String, Object> resultToMap(OResult r) {
-		Map<String,Object> m = new HashMap<>();
-		for ( String key : r.getPropertyNames()) {
-			m.put(key, r.getProperty(key));
-		}
-		return m;
-	}
-
-    
-    
-    @Override
-    public Map<String, Object> get(String id, String version) {
-    	return null;
-    }
-
-    
-    
-    @Override
-    public List<String> getVersions(String id) {
-        List<String> vs = new ArrayList<>();
-        return null;
-    }
-    
-
-    
    
     @Override
     public boolean delete(String id) {
     	try (ODatabaseSession db = pool.acquire()) {
-    		db.command(QUERY_DELETE, id);
+    		db.command(queryDelete, id);
     		return true;
     	}
     	
@@ -183,7 +164,7 @@ public class OrientDBStorage implements Storage, DisposableBean {
     @Override
     public List<Map<String, Object>> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder) {
     	try (ODatabaseSession db = pool.acquire()) {
-    		StringBuilder builder = new StringBuilder("select * from " + type);
+    		StringBuilder builder = new StringBuilder(queryAll);
     		String query = constructQuery(searchCriteria, builder);
     		List<Object> objects = new ArrayList<>();
     		for ( SearchCriterium c : searchCriteria.getCriteria() ) {
@@ -211,10 +192,10 @@ public class OrientDBStorage implements Storage, DisposableBean {
 				sb.append(criterium.getKey());
 				sb.append(searchOperationToString(criterium.getSearchOperation()));
 				if ( criterium.getSearchOperation().getParts() == 3) {
-					sb.append(" ? ");
+					sb.append(Constants.QUESTION_MARK__WITH_SPACES);
 				}
 				if ( i < (searchCriteria.size() -1)) {
-					sb.append(" AND ");
+					sb.append(Constants.AND_WITH_SPACES);
 				}
 			}
 		}
@@ -226,13 +207,13 @@ public class OrientDBStorage implements Storage, DisposableBean {
     
     private Object searchOperationToString(SearchOperation searchOperation) {
     	if ( searchOperation.equals(SearchOperation.EQUALS)) {
-    		return " = ";
+    		return ORIENT_OPERATOR_EQUALS;
     	}
     	else if ( searchOperation.equals(SearchOperation.NOT_EQUALS)) {
-    		return " <> ";
+    		return ORIENT_OPERATOR_NOT_EQUALS;
     	}
     	else if ( searchOperation.equals(SearchOperation.PRESENT)) {
-    		return " is not null ";
+    		return ORIENT_OPERATOR_PRESENT;
     	}
     	return null;
 	}
@@ -242,7 +223,7 @@ public class OrientDBStorage implements Storage, DisposableBean {
 	@Override
 	public long count(SearchCriteria searchCriteria) {
 		try (ODatabaseSession db = pool.acquire()) {
-    		StringBuilder builder = new StringBuilder("select count(id) as count from " + type);
+    		StringBuilder builder = new StringBuilder(querySelectCount);
     		String query = constructQuery(searchCriteria, builder);
     		List<Object> objects = new ArrayList<>();
     		for ( SearchCriterium c : searchCriteria.getCriteria() ) {
@@ -252,7 +233,7 @@ public class OrientDBStorage implements Storage, DisposableBean {
     		}
     		OResultSet result = db.query(query, objects);
     		if( result.hasNext()) {
-    			return (Long)result.next().getProperty("count");
+    			return (Long)result.next().getProperty(COUNT);
     		}
     	}
 		return 0;
@@ -271,39 +252,45 @@ public class OrientDBStorage implements Storage, DisposableBean {
     public void initialize(String type) {
     	this.type = type;
     	 try {
-    		 orientDB = new OrientDB(url, user, password ,OrientDBConfig.defaultConfig());
-    		 
-    		 orientDB.createIfNotExists(database, ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
-    		 
-    		 OrientDBConfigBuilder poolCfg = OrientDBConfig.builder();
-    		 poolCfg.addConfig(OGlobalConfiguration.DB_POOL_MIN, poolMin);
-    		 poolCfg.addConfig(OGlobalConfiguration.DB_POOL_MAX, poolMax);
-
-    		 pool = new ODatabasePool(orientDB,database, user , password, poolCfg.build());
-    		 
-    		 try (ODatabaseSession db = pool.acquire()) {
-    			 OSchema schema = db.getMetadata().getSchema();
-    			 if ( !schema.existsClass(type) ) {
-    				 OClass typeClass = schema.createClass(type);
-    				 String[] uniqueIndexesArray = uniqueIndexes.split(StringUtils.COMMA);
-    				 for ( String ui : uniqueIndexesArray) {
-    					 if ( ui.startsWith(type.toLowerCase() + StringUtils.COLON)) {
-    						 OProperty idProp = typeClass.createProperty(ui, OType.STRING);
-    						 idProp.createIndex(OClass.INDEX_TYPE.UNIQUE);
-    					 }
-    				 }
-    				 String[] indexesArray = indexes.split(StringUtils.COMMA);
-    				 for ( String ui : indexesArray) {
-    					 if ( ui.startsWith(type.toLowerCase() + StringUtils.COLON)) {
-    						 OProperty idProp = typeClass.createProperty(ui, OType.STRING);
-    						 idProp.createIndex(OClass.INDEX_TYPE.NOTUNIQUE);
-    					 }
-    				 }
-    			 }
+    		 if ( orientDB == null ) {
+	    		 orientDB = new OrientDB(url, user, password ,OrientDBConfig.defaultConfig());
+	    		 
+	    		 orientDB.createIfNotExists(database, ODatabaseType.PLOCAL, OrientDBConfig.defaultConfig());
+	    		 
+	    		 OrientDBConfigBuilder poolCfg = OrientDBConfig.builder();
+	    		 poolCfg.addConfig(OGlobalConfiguration.DB_POOL_MIN, poolMin);
+	    		 poolCfg.addConfig(OGlobalConfiguration.DB_POOL_MAX, poolMax);
+	
+	    		 pool = new ODatabasePool(orientDB,database, user , password, poolCfg.build());
+	    		 
+	    		 try (ODatabaseSession db = pool.acquire()) {
+	    			 OSchema schema = db.getMetadata().getSchema();
+	    			 if ( !schema.existsClass(type) ) {
+	    				 OClass typeClass = schema.createClass(type);
+	    				 String[] uniqueIndexesArray = uniqueIndexes.split(StringUtils.COMMA);
+	    				 for ( String ui : uniqueIndexesArray) {
+	    					 if ( ui.startsWith(type.toLowerCase() + StringUtils.COLON)) {
+	    						 OProperty idProp = typeClass.createProperty(ui, OType.STRING);
+	    						 idProp.createIndex(OClass.INDEX_TYPE.UNIQUE);
+	    					 }
+	    				 }
+	    				 String[] indexesArray = indexes.split(StringUtils.COMMA);
+	    				 for ( String ui : indexesArray) {
+	    					 if ( ui.startsWith(type.toLowerCase() + StringUtils.COLON)) {
+	    						 OProperty idProp = typeClass.createProperty(ui, OType.STRING);
+	    						 idProp.createIndex(OClass.INDEX_TYPE.NOTUNIQUE);
+	    					 }
+	    				 }
+	    			 }
+	    		 }
     		 }
+	    		 
+	    	queryAll = "select * from " + type;
+	    	queryFindById = queryAll + " where id = ?";
+	    	queryDelete = "delete from " + type + " where id = ?";
+	    	querySelectCount = "select count(id) as count from " + type;
     		 
-    		 QUERY_FIND = "select * from " + type + " where id = ?";
-    		 QUERY_DELETE = "delete from " + type + " where id = ?";
+    		 
     		 
     	 }
     	 catch( Exception e) {
@@ -319,6 +306,29 @@ public class OrientDBStorage implements Storage, DisposableBean {
     	logger.info("closing orientdb pool and db");
         pool.close();
         orientDB.close();
+    }
+    
+    
+    
+    private Map<String, Object> resultToMap(OResult r) {
+		Map<String,Object> m = new HashMap<>();
+		for ( String key : r.getPropertyNames()) {
+			m.put(key, r.getProperty(key));
+		}
+		return m;
+	}
+
+    
+    
+    
+    @Override
+    public Map<String, Object> get(String id, String version) {
+    	throw new DataException("versioning not implemented");
+    }
+
+    @Override
+    public List<String> getVersions(String id) {
+    	throw new DataException("versioning not implemented");
     }
 
 

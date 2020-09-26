@@ -19,7 +19,6 @@ import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.SortOrder;
 import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.util.Constants;
-import be.personify.iam.scim.util.Index;
 import be.personify.iam.scim.util.PropertyFactory;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
