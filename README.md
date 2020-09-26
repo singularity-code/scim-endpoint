@@ -1,6 +1,6 @@
 # personify-scim-server
 
-Lean, mean and high performant open source Spring Boot Java SCIM server implementation with pluggable persistence layer.
+Lean, mean and high performant open source Spring Boot Java SCIM server implementation with pluggable persistence layer and customizable authorization filter.
 
 Useful for exposing a company's identities using the SCIM protocol and target point for your provisioning engine.
 
@@ -107,7 +107,7 @@ create a environment in postman containing host and protocol and import the coll
 Pimp the application.properties file included.
 
 
-Six storage implementations are developed but if needed, you can implement and wire your own implementation (see again in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)).
+Seven storage implementations are developed but if needed, you can implement and wire your own implementation (see again in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)).
 
 * memory storage implementation : basic fast access with flushing to a file, choose this for development or show case, demo testing, trial.
 * mongo storage implementation : should be fine and scalable for development and production.
@@ -160,14 +160,14 @@ thread [3] 5000 records processed in 20076
 
 The current benchmark can give you already an idea about the throughput and compare the performance of the different persistency layers..
 
-Executed on a single AMD� Ryzen 3 2200g ( both the loadtest and the storage implementation ) with the application consuming approximately 250MB for 4 threads and 5000 requests per thread.
+Executed on a single AMD Ryzen 3 2200g ( both the loadtest and the storage implementation ) with the application consuming approximately 250MB for 4 threads and 5000 requests per thread.
 
-| request        | MEM  | MONGO | LDAP | Postgres | Mysql | OrientDB | CouchBAse |
-|----------------|------|-------|------|----------|-------|----------|-----------|
-| create (req/s) | 882  | 225   | 497  | 630      | 644   | 718      | 584       |
-| get    (req/s) | 1409 | 1280  | 1056 | 1248     | 1367  | 1248     | 1187      |
-| search (req/s) | 1219 | 1034  | ?    | 1103     | 1141  | 993      | 50        |
-| delete (req/s) | 993  | 1340  | 756  | 1079     | 1068  | 472      | 760       |
+| request        | MEM  | MongoDB | LDAP | Postgres | Mysql | OrientDB | CouchBase |
+|----------------|------|---------|------|----------|-------|----------|-----------|
+| create (req/s) | 882  | 225     | 497  | 630      | 644   | 718      | 584       |
+| get    (req/s) | 1409 | 1280    | 1056 | 1248     | 1367  | 1248     | 1187      |
+| search (req/s) | 1219 | 1034    | ?    | 1103     | 1141  | 993      | 50        |
+| delete (req/s) | 993  | 1340    | 756  | 1079     | 1068  | 472      | 760       |
 
 
 

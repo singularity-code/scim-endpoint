@@ -96,12 +96,17 @@ public class MemoryStorage implements Storage {
 	}
 	
 	
+	@Override
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString ) {
+		return search(searchCriteria, start, count, sortBy, sortOrderString, null);
+	}
+	
 	
 	@Override
-	public List<Map<String,Object>> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString) {
-		List<Map<String,Object>> result = null;
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString, List<String> includeAttributes ) {
+		List<Map> result = null;
 		if ( searchCriteria == null || searchCriteria.getCriteria() == null || searchCriteria.getCriteria().size() == 0){
-			result = new ArrayList<Map<String,Object>>(storage.values());
+			result = new ArrayList<Map>(storage.values());
 		}
 		else {
 			logger.debug("{}", searchCriteria);
@@ -109,7 +114,7 @@ public class MemoryStorage implements Storage {
 		}
 		
 		if ( StringUtils.isEmpty(sortOrderString)) {
-			sortOrderString = SortOrder.ascending.name();
+			sortOrderString = SortOrder.ascending.name(); 
 			logger.debug("defaulting to sortorder {}", sortOrderString);
 		}
 		SortOrder sortOrder = SortOrder.valueOf(sortOrderString);
@@ -119,7 +124,7 @@ public class MemoryStorage implements Storage {
 		count = count > result.size() ? result.size() : count;
 		logger.debug("count {} start {}", count, start);
 		int newStart = (start -1) * count;
-		List<Map<String,Object>> sublist = result.subList(newStart , newStart + count);
+		List<Map> sublist = result.subList(newStart , newStart + count);
 		
 		return sublist;
 	}
@@ -169,8 +174,8 @@ public class MemoryStorage implements Storage {
 
 	
 	
-	private List<Map<String, Object>> filterOnSearchCriteria(SearchCriteria searchCriteria) {
-		List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
+	private List<Map> filterOnSearchCriteria(SearchCriteria searchCriteria) {
+		List<Map> result = new ArrayList<Map>();
 		
 		//first check constraints
 		int count = 0;
@@ -206,7 +211,6 @@ public class MemoryStorage implements Storage {
 		else {
 			for ( String s : criteriaFoundInConstraints ) {
 				Map<String,Object> mm = storage.get(s);
-				logger.info("mm {}" , mm);
 				result.add(mm);
 			}
 		}
@@ -301,14 +305,14 @@ public class MemoryStorage implements Storage {
 	
 	
 
-	private List<Map<String, Object>> sort(List<Map<String, Object>> result, String sortBy, SortOrder sortOrder) {
+	private List<Map> sort(List<Map> result, String sortBy, SortOrder sortOrder) {
 		
 		if ( !StringUtils.isEmpty(sortBy)) {
 			
-			Collections.sort(result, new Comparator<Map<String, Object>>() {
+			Collections.sort(result, new Comparator<Map>() {
 
 				@Override
-				public int compare(Map<String, Object> arg0, Map<String, Object> arg1) {
+				public int compare(Map arg0, Map arg1) {
 					
 					Object value0 = arg0.get(sortBy);
 					Object value1 = arg1.get(sortBy);

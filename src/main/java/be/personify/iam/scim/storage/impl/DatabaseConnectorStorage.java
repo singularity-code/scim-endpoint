@@ -42,7 +42,7 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 	
 	private static Map<String,String> mapping;
 	private static Map<String,String> depthMapping;
-	
+	 
 		
 	private Schema schema = null;
 	private List<String> schemaList = null;
@@ -139,9 +139,13 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 	
 	
 	
+	@Override
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString) {
+		return search(searchCriteria, start, count, sortBy, sortOrderString, null);
+	}
 	
 	@Override
-	public List<Map<String,Object>> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString) {
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString, List<String> includeAttributes ) {
 		ConnectorConnection connection = null;
 		try {
 			
@@ -149,7 +153,7 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 			
 			connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
 			List<Map<String,Object>> nativeList = connection.getConnector().find(nativeSearchCriteria, start, count, null);
-			List<Map<String,Object>> scimList = new ArrayList<>();
+			List<Map> scimList = new ArrayList<>();
 			Map<String,Object> scimMap = null;
 			List<String> excludes = Arrays.asList(new String[] {});
 			for ( Map<String,Object> nativeMap : nativeList ) {

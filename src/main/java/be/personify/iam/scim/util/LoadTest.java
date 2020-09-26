@@ -27,9 +27,10 @@ public class LoadTest {
 	
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 	
+	private static int createFinished = 0;
 	private static int getFinished = 0;
 	private static int searchFinished = 0;
-	private static int createFinished = 0;
+	private static int findIdsFinished = 0;
 	private static int deleteFinished = 0;
 	
 	private static int requests;
@@ -50,8 +51,6 @@ public class LoadTest {
 		
 		System.out.println("starting load test to " + endpoint + " with " + threads + " threads and " + requests + " requests....");
 		
-		
-		
 		Map<Integer,List<Map<String,Object>>> threadMap = test.loadTestCreate(endpoint, user, password, threads, requests);
 		
 		while ( createFinished != threads ) {
@@ -59,10 +58,7 @@ public class LoadTest {
 			Thread.sleep(1000);
 		}
 		
-		
 		test.loadTestGet(endpoint, user, password, threadMap);
-		
-		
 		
 		while ( getFinished != threads ) {
 			System.out.println("get finished " + getFinished);
@@ -72,21 +68,23 @@ public class LoadTest {
 		test.loadTestSearch(endpoint, user, password, threadMap);
 		
 		while ( searchFinished != threads ) {
-			System.out.println("search finished " + getFinished);
+			System.out.println("search finished " + searchFinished);
 			Thread.sleep(1000);
 		}
 		
-		test.loadTestDelete(endpoint, user, password, threadMap);
 		
+		test.loadTestFindAllIds(endpoint, user, password, threadMap);
+		System.out.println("findAllIds finished " + searchFinished);
+		
+				
+		test.loadTestDelete(endpoint, user, password, threadMap);
 		
 		
 		while ( deleteFinished != threads ) {
 			System.out.println("deleteFinished finished " + deleteFinished);
 			Thread.sleep(1000);
 		}
-//		
-		
-		
+
 		
 	}
 
@@ -242,7 +240,7 @@ public class LoadTest {
 							//System.out.println(response.getBody());
 							int results = (int)response.getBody().get("totalResults");
 							if ( results != 1) {
-								System.out.println("number of esults " + results);
+								System.out.println("number of results " + results);
 								throw new Exception("no result found");
 							}
 						}
@@ -270,6 +268,33 @@ public class LoadTest {
 			double dd = ms/1000d;
 			double dc = requests * threadMap.size();
 			System.out.println("--------------- loadTestSearch()    --- " +  format.format(dc / dd) + " req/sec");
+		}
+		
+	}
+	
+	
+	
+	
+	
+	
+	private void loadTestFindAllIds(String endpoint, String user, String password, Map<Integer,List<Map<String,Object>>> threadMap) throws Exception {
+
+
+		long mainStart = System.currentTimeMillis();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setBasicAuth(user, password);
+		HttpEntity entity = new HttpEntity(headers);
+		
+		long start = System.currentTimeMillis();
+		RestTemplate restTemplate = new RestTemplate();
+		try {
+			ResponseEntity<Map> response  = restTemplate.exchange(endpoint + "/Users?attributes=id",HttpMethod.GET,entity, Map.class );
+			//System.out.println(response.getBody());
+			int findIdsFinished = (int)response.getBody().get("totalResults");
+			System.out.println("number of results " + findIdsFinished);
+		}
+		catch( Exception e ) {
+			e.printStackTrace();
 		}
 		
 	}

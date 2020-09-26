@@ -54,7 +54,6 @@ public class MongoStorage implements Storage {
     private final static String used = "either id, externalId, or userName had been used";
 
     
-    
     private MongoCollection<Document> col;
 
     
@@ -146,10 +145,13 @@ public class MongoStorage implements Storage {
 
     
    
-    
+    @Override
+    public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder) {
+    	return search(searchCriteria, start, count, sortBy, sortOrder, null);
+    }
     
     @Override
-    public List<Map<String, Object>> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder) {
+    public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes ) {
 
         Document query = new Document();
         if (searchCriteria != null && searchCriteria.getCriteria() != null && searchCriteria.getCriteria().size() > 0) {
@@ -167,7 +169,7 @@ public class MongoStorage implements Storage {
             Document sort = new Document(sortBy, order);
             finds.sort(sort);
         }
-        List<Map<String, Object>> all = new ArrayList<>();
+        List<Map> all = new ArrayList<>();
         String id = null;
         for (Document doc : finds) {
             id = ((UUID) doc.remove(oid)).toString();

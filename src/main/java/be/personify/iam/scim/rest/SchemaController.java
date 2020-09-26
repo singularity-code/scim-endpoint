@@ -31,7 +31,7 @@ public class SchemaController extends Controller {
 	
 	private static final SchemaReader schemaReader = SchemaReader.getInstance();
 	
-	
+	 
 	/**
 	 * POST of a entity
 	 * @param resourceType the resourcetype for which to POST

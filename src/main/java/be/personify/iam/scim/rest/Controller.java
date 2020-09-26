@@ -225,7 +225,7 @@ public class Controller {
 			SearchCriteria searchCriteria = composeSearchCriteria(filter);
 			Storage storage = storageImplementationFactory.getStorageImplementation(schema);	
 			
-			List<Map<String,Object>> dataFetched = storage.search(searchCriteria, startIndex, count, sortBy,sortOrder);
+			List<Map> dataFetched = storage.search(searchCriteria, startIndex, count, sortBy,sortOrder); 
 			List<Map<String,Object>> data = new ArrayList<>();
 			if ( dataFetched != null ) {
 				for ( Map<String,Object> entity : dataFetched) {

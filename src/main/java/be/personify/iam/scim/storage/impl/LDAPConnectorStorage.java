@@ -149,10 +149,14 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 	}
 	
 	
+	@Override
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString) {
+		return search(searchCriteria, start, count, sortBy, sortOrderString, null);
+	}
 	
 	
 	@Override
-	public List<Map<String,Object>> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString) {
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString, List<String> includeAttributes) {
 		ConnectorConnection connection = null;
 		try {
 			
@@ -160,7 +164,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 			
 			connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
 			List<Map<String,Object>> nativeList = connection.getConnector().find(nativeSearchCriteria, start, count, null);
-			List<Map<String,Object>> scimList = new ArrayList<>();
+			List<Map> scimList = new ArrayList<>();
 			for ( Map<String,Object> nativeMap : nativeList ) {
 				Map<String,Object> scimMap = convertNativeMap(nativeMap, mapping, depthMapping, Arrays.asList(new String[] {OBJECT_CLASS}), schema);
 				scimMap.put(Constants.KEY_SCHEMAS, schemaList);
@@ -270,24 +274,25 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 
 	@Override
 	public synchronized void flush() {
+		throw new DataException("flush all not implemented");
 	}
 	
 	
 
 	@Override
 	public boolean deleteAll() {
-		return false;
+		throw new DataException("delete all not implemented");
 	}
 	
 	
 	@Override
 	public Map<String,Object> get(String id, String version) {
-		throw new RuntimeException("versioning not implemented");
+		throw new DataException("versioning not implemented");
 	}
 	
 	@Override
 	public List<String> getVersions(String id) {
-		throw new RuntimeException("versioning not implemented");
+		throw new DataException("versioning not implemented");
 	}
 	
 	

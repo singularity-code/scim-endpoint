@@ -45,7 +45,7 @@ import be.personify.util.StringUtils;
  */
 public class OrientDBStorage implements Storage, DisposableBean {
 	
-	private static final String COUNT = "count";
+	
 	private static final String ORIENT_OPERATOR_PRESENT = " is not null ";
 	private static final String ORIENT_OPERATOR_NOT_EQUALS = " <> ";
 	private static final String ORIENT_OPERATOR_EQUALS = " = ";
@@ -158,11 +158,16 @@ public class OrientDBStorage implements Storage, DisposableBean {
     }
 
     
+    
+    @Override
+    public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder) {
+    	return search(searchCriteria, start, count, sortBy, sortOrder, null);
+    }
    
     
     
     @Override
-    public List<Map<String, Object>> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder) {
+    public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes) {
     	try (ODatabaseSession db = pool.acquire()) {
     		StringBuilder builder = new StringBuilder(queryAll);
     		String query = constructQuery(searchCriteria, builder);
@@ -174,7 +179,7 @@ public class OrientDBStorage implements Storage, DisposableBean {
     		}
     		logger.debug("query {}", query);
     		OResultSet result = db.query(query, objects);
-    		List<Map<String,Object>> resultList  = new ArrayList<>();
+    		List<Map> resultList  = new ArrayList<>();
     		while( result.hasNext()) {
     			resultList.add(resultToMap(result.next()));
     		}
@@ -233,7 +238,7 @@ public class OrientDBStorage implements Storage, DisposableBean {
     		}
     		OResultSet result = db.query(query, objects);
     		if( result.hasNext()) {
-    			return (Long)result.next().getProperty(COUNT);
+    			return (Long)result.next().getProperty(Constants.COUNT);
     		}
     	}
 		return 0;
@@ -266,18 +271,25 @@ public class OrientDBStorage implements Storage, DisposableBean {
 	    		 try (ODatabaseSession db = pool.acquire()) {
 	    			 OSchema schema = db.getMetadata().getSchema();
 	    			 if ( !schema.existsClass(type) ) {
+	    				 logger.info("schema does not exist, trying to create {}", type);
 	    				 OClass typeClass = schema.createClass(type);
 	    				 String[] uniqueIndexesArray = uniqueIndexes.split(StringUtils.COMMA);
 	    				 for ( String ui : uniqueIndexesArray) {
+	    					 logger.info("creating unique index, {}", ui);
 	    					 if ( ui.startsWith(type.toLowerCase() + StringUtils.COLON)) {
-	    						 OProperty idProp = typeClass.createProperty(ui, OType.STRING);
+	    						 String index = ui.substring(ui.indexOf(StringUtils.COLON) +1, ui.length());
+	    						 logger.info("creating index, {}", index);
+	    						 OProperty idProp = typeClass.createProperty(index, OType.STRING);
 	    						 idProp.createIndex(OClass.INDEX_TYPE.UNIQUE);
 	    					 }
 	    				 }
 	    				 String[] indexesArray = indexes.split(StringUtils.COMMA);
 	    				 for ( String ui : indexesArray) {
+	    					 logger.info("creating index, {}", ui);
 	    					 if ( ui.startsWith(type.toLowerCase() + StringUtils.COLON)) {
-	    						 OProperty idProp = typeClass.createProperty(ui, OType.STRING);
+	    						 String index = ui.substring(ui.indexOf(StringUtils.COLON) +1, ui.length());
+	    						 logger.info("creating index, {}", index);
+	    						 OProperty idProp = typeClass.createProperty(index, OType.STRING);
 	    						 idProp.createIndex(OClass.INDEX_TYPE.NOTUNIQUE);
 	    					 }
 	    				 }
@@ -285,12 +297,10 @@ public class OrientDBStorage implements Storage, DisposableBean {
 	    		 }
     		 }
 	    		 
-	    	queryAll = "select * from " + type;
-	    	queryFindById = queryAll + " where id = ?";
-	    	queryDelete = "delete from " + type + " where id = ?";
-	    	querySelectCount = "select count(id) as count from " + type;
-    		 
-    		 
+    		 queryAll = "select * from " + type;
+    		 queryFindById = queryAll + " where id = ?";
+    		 queryDelete = "delete from " + type + " where id = ?";
+    		 querySelectCount = "select count(id) as count from " + type;
     		 
     	 }
     	 catch( Exception e) {

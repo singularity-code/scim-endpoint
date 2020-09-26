@@ -81,7 +81,9 @@ public interface Storage {
 	 * @param sortOrder the sortorder ( ascending or descending )
 	 * @return a list containing the entities
 	 */
-	public List<Map<String,Object>> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder);
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes);
+	
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder);
 	
 	
 	/**
