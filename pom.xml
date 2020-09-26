@@ -88,23 +88,29 @@
 			<artifactId>personify-provisioning</artifactId>
 			<version>${personify.provisioning.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>${postgress.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>${mysql-connector.version}</version>
 		</dependency>
-		
+
 		<dependency>
-    		<groupId>com.orientechnologies</groupId>
-    		<artifactId>orientdb-core</artifactId>
-    		<version>3.1.2</version>
+			<groupId>com.orientechnologies</groupId>
+			<artifactId>orientdb-core</artifactId>
+			<version>3.1.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.couchbase.client</groupId>
+			<artifactId>java-client</artifactId>
+			<version>3.0.2</version>
 		</dependency>
 
 
@@ -151,12 +157,12 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.2.0</version>
 				<configuration>
-        			<archive>
-          				<manifest>
-            				<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-          				</manifest>
-			        </archive>
-      			</configuration>
+					<archive>
+						<manifest>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+						</manifest>
+					</archive>
+				</configuration>
 			</plugin>
 
 
@@ -221,27 +227,27 @@
 
 
 
-<!-- 			<plugin> -->
-<!-- 				<groupId>com.spotify</groupId> -->
-<!-- 				<artifactId>dockerfile-maven-plugin</artifactId> -->
-<!-- 				<version>1.4.13</version> -->
-<!-- 				<executions> -->
-<!-- 					<execution> -->
-<!-- 						<id>default</id> -->
-<!-- 						<goals> -->
-<!-- 							<goal>build</goal> -->
-<!-- 							<goal>push</goal> -->
-<!-- 						</goals> -->
-<!-- 					</execution> -->
-<!-- 				</executions> -->
-<!-- 				<configuration> -->
-<!-- 					<repository>personify/${project.artifactId}</repository> -->
-<!-- 					<tag>${project.version}</tag> -->
-<!-- 					<buildArgs> -->
-<!-- 						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE> -->
-<!-- 					</buildArgs> -->
-<!-- 				</configuration> -->
-<!-- 			</plugin> -->
+			<!-- <plugin> -->
+			<!-- <groupId>com.spotify</groupId> -->
+			<!-- <artifactId>dockerfile-maven-plugin</artifactId> -->
+			<!-- <version>1.4.13</version> -->
+			<!-- <executions> -->
+			<!-- <execution> -->
+			<!-- <id>default</id> -->
+			<!-- <goals> -->
+			<!-- <goal>build</goal> -->
+			<!-- <goal>push</goal> -->
+			<!-- </goals> -->
+			<!-- </execution> -->
+			<!-- </executions> -->
+			<!-- <configuration> -->
+			<!-- <repository>personify/${project.artifactId}</repository> -->
+			<!-- <tag>${project.version}</tag> -->
+			<!-- <buildArgs> -->
+			<!-- <JAR_FILE>${project.build.finalName}.jar</JAR_FILE> -->
+			<!-- </buildArgs> -->
+			<!-- </configuration> -->
+			<!-- </plugin> -->
 
 		</plugins>
 	</build>

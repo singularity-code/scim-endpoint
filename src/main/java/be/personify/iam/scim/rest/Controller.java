@@ -227,25 +227,30 @@ public class Controller {
 			
 			List<Map<String,Object>> dataFetched = storage.search(searchCriteria, startIndex, count, sortBy,sortOrder);
 			List<Map<String,Object>> data = new ArrayList<>();
-			for ( Map<String,Object> entity : dataFetched) {
-				data.add(filterAttributes(schema, entity, attributes, excludedAttributes));
+			if ( dataFetched != null ) {
+				for ( Map<String,Object> entity : dataFetched) {
+					data.add(filterAttributes(schema, entity, attributes, excludedAttributes));
+				}
+				
+				ResponseEntity<Map<String,Object>> result = null;
+				
+				Map<String,Object> responseObject = new HashMap<>();
+				responseObject.put(Constants.KEY_SCHEMAS, new String[] {Constants.SCHEMA_LISTRESPONSE});
+				responseObject.put(Constants.KEY_STARTINDEX, startIndex);
+				responseObject.put(Constants.KEY_ITEMSPERPAGE, count);
+				
+				responseObject.put(Constants.KEY_TOTALRESULTS,storage.count(searchCriteria) );
+				responseObject.put(Constants.KEY_RESOURCES, data);
+				
+				result = new ResponseEntity<>(responseObject, HttpStatus.OK);
+				
+				logger.info("resources of type {} fetched in {} ms", schema.getName(), ( System.currentTimeMillis() -start));
+				
+				return result;
 			}
-			
-			ResponseEntity<Map<String,Object>> result = null;
-			
-			Map<String,Object> responseObject = new HashMap<>();
-			responseObject.put(Constants.KEY_SCHEMAS, new String[] {Constants.SCHEMA_LISTRESPONSE});
-			responseObject.put(Constants.KEY_STARTINDEX, startIndex);
-			responseObject.put(Constants.KEY_ITEMSPERPAGE, count);
-			
-			responseObject.put(Constants.KEY_TOTALRESULTS,storage.count(searchCriteria) );
-			responseObject.put(Constants.KEY_RESOURCES, data);
-			
-			result = new ResponseEntity<>(responseObject, HttpStatus.OK);
-			
-			logger.info("resources of type {} fetched in {} ms", schema.getName(), ( System.currentTimeMillis() -start));
-			
-			return result;
+			else {
+				throw new DataException("null value returned from storage layer implemetation, should be empty list");
+			}
 		}
 		catch ( InvalidFilterException ife ) {
 			return showError(HttpStatus.BAD_REQUEST.value(), "the filter [" + filter + "] is not correct : " + ife.getMessage(), ScimErrorType.invalidFilter);

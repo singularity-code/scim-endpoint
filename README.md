@@ -114,7 +114,8 @@ Six storage implementations are developed but if needed, you can implement and w
 * ldap storage implementation (experimental) : tested with ForgeRock Directory Server 6.5, consider it as a easy **scim to ldap**.
 * postgres implementation : stable, creates table and indexes based on mapping
 * mysql implementation : stable, creates table and indexes based on mapping
-* OrientDB implementation : in development
+* OrientDB implementation : just developed, in testing
+* CouchBase : just developed, in testing
 
 For using a OAUTH bearer token on [forgerock openidm](https://bitbucket.org/wouter29/personify-scim-server/wiki/Forgerock%20SCIM%20connector) and other products, just point the endpoint to http://localhost:{8090}/scim/v2/token and use the credentials from the application.properties.
 
@@ -161,12 +162,12 @@ The current benchmark can give you already an idea about the throughput and comp
 
 Executed on a single AMD� Ryzen 3 2200g ( both the loadtest and the storage implementation ) with the application consuming approximately 250MB for 4 threads and 5000 requests per thread.
 
-| request        | MEM  | MONGO | LDAP | Postgres | Mysql | OrientDB |
-|----------------|------|-------|------|----------|-------|----------|
-| create (req/s) | 882  | 225   | 497  | 630      | 644   | 718      | 
-| get    (req/s) | 1409 | 1280  | 1056 | 1248     | 1367  | 1248     |
-| search (req/s) | 1219 | 1034  | ?    | 1103     | 1141  | 993      |
-| delete (req/s) | 993  | 1340  | 756  | 1079     | 1068  | 472      |
+| request        | MEM  | MONGO | LDAP | Postgres | Mysql | OrientDB | CouchBAse |
+|----------------|------|-------|------|----------|-------|----------|-----------|
+| create (req/s) | 882  | 225   | 497  | 630      | 644   | 718      | 584       |
+| get    (req/s) | 1409 | 1280  | 1056 | 1248     | 1367  | 1248     | 1187      |
+| search (req/s) | 1219 | 1034  | ?    | 1103     | 1141  | 993      | 50        |
+| delete (req/s) | 993  | 1340  | 756  | 1079     | 1068  | 472      | 760       |
 
 
 
