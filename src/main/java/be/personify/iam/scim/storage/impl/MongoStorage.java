@@ -1,13 +1,16 @@
 package be.personify.iam.scim.storage.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.bson.BsonBinary;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.hateoas.mediatype.alps.Doc;
 
 import com.mongodb.QueryOperators;
 import com.mongodb.client.FindIterable;
@@ -18,6 +21,7 @@ import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 
 import be.personify.iam.scim.storage.ConstraintViolationException;
+import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.util.Constants;
 import be.personify.util.SearchCriteria;
@@ -158,17 +162,9 @@ public class MongoStorage implements Storage {
         	searchCriteria.getCriteria().forEach(sc -> genQuery(query, sc));
         }
         
-        FindIterable<Document> finds = col.find(query).skip(start -1 * count).limit(count);
-        if (sortBy != null) {
-            int order = 1;
-            if (sortOrder != null) {
-                if (descending.equals(sortOrder) || minus.equals(sortOrder)) {
-                    order = -1;
-                }
-            }
-            Document sort = new Document(sortBy, order);
-            finds.sort(sort);
-        }
+        FindIterable<Document> finds = find(start, count, includeAttributes, query);
+        	
+        sort(sortBy, sortOrder, finds);
         List<Map> all = new ArrayList<>();
         String id = null;
         for (Document doc : finds) {
@@ -178,6 +174,37 @@ public class MongoStorage implements Storage {
         }
         return all;
     }
+
+
+
+	private FindIterable<Document> find(int start, int count, List<String> includeAttributes, Document query) {
+		FindIterable<Document> finds;
+		if ( includeAttributes != null ) {
+        	Document projection = new Document();
+        	for ( String includeAttribute : includeAttributes ) {
+        		projection.append(includeAttribute,1);
+        	}
+        	finds = col.find(query).projection(projection).skip(start -1 * count).limit(count);
+        }
+        else {
+        	finds = col.find(query).skip(start -1 * count).limit(count);
+        }
+		return finds;
+	}
+
+
+
+	private void sort(String sortBy, String sortOrder, FindIterable<Document> finds) {
+		if (sortBy != null) {
+            int order = 1;
+            if (sortOrder != null) {
+                if(descending.equals(sortOrder) || minus.equals(sortOrder)) {
+                    order = -1;
+                }
+            }
+            finds.sort(new Document(sortBy, order));
+        }
+	}
     
     
     
@@ -266,7 +293,12 @@ public class MongoStorage implements Storage {
     public void initialize(String type) {
         MongoClient client = MongoClients.create(constr);
         col = client.getDatabase(database).getCollection(collection);
-        col.createIndex(Indexes.descending(userName), new IndexOptions().background(true).unique(true));
+        try {
+        	col.createIndex(Indexes.descending(userName), new IndexOptions().background(true).unique(true));
+        }
+        catch( Exception e) {
+        	throw new DataException(e.getMessage());
+        }
     }
 
 

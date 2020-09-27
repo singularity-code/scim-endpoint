@@ -130,6 +130,7 @@ public class MemoryStorage implements Storage {
 	}
 	
 	
+	
 	@Override
 	public long count(SearchCriteria searchCriteria) {
 		long totalCount = 0;
