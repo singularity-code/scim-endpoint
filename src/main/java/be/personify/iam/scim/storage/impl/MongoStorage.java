@@ -1,16 +1,13 @@
 package be.personify.iam.scim.storage.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.bson.BsonBinary;
 import org.bson.Document;
-import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.hateoas.mediatype.alps.Doc;
 
 import com.mongodb.QueryOperators;
 import com.mongodb.client.FindIterable;
@@ -142,8 +139,6 @@ public class MongoStorage implements Storage {
         Document doc = new Document(object);
         Document query = new Document(oid, new BsonBinary(UUID.fromString(id)));
         doc.remove(Constants.ID);
-        doc.remove(userName);
-        doc.remove(extid);
         col.findOneAndUpdate(query, new Document($set, doc));
     }
 
@@ -163,8 +158,8 @@ public class MongoStorage implements Storage {
         }
         
         FindIterable<Document> finds = find(start, count, includeAttributes, query);
-        	
         sort(sortBy, sortOrder, finds);
+
         List<Map> all = new ArrayList<>();
         String id = null;
         for (Document doc : finds) {
@@ -179,15 +174,16 @@ public class MongoStorage implements Storage {
 
 	private FindIterable<Document> find(int start, int count, List<String> includeAttributes, Document query) {
 		FindIterable<Document> finds;
+		int skip = (start - 1 ) * count;
 		if ( includeAttributes != null ) {
         	Document projection = new Document();
         	for ( String includeAttribute : includeAttributes ) {
         		projection.append(includeAttribute,1);
         	}
-        	finds = col.find(query).projection(projection).skip(start -1 * count).limit(count);
+        	finds = col.find(query).projection(projection).skip(skip).limit(count);
         }
         else {
-        	finds = col.find(query).skip(start -1 * count).limit(count);
+        	finds = col.find(query).skip(skip).limit(count);
         }
 		return finds;
 	}
@@ -226,51 +222,36 @@ public class MongoStorage implements Storage {
             SearchOperation op = sc.getSearchOperation();
             if (SearchOperation.EQUALS.equals(op)) {
                 query.append(sc.getKey(), sc.getValue());
-                return;
             }
-
-            if (SearchOperation.NOT_EQUALS.equals(op)) {
+            else if (SearchOperation.NOT_EQUALS.equals(op)) {
                 query.append(sc.getKey(), new Document(QueryOperators.NE, sc.getValue()));
-                return;
             }
-
-            if (SearchOperation.CONTAINS.equals(op)) {
+            else if (SearchOperation.CONTAINS.equals(op)) {
                 query.append(sc.getKey(), new Document($regex, sc.getValue()));
-                return;
             }
-
-            if (SearchOperation.STARTS_WITH.equals(op)) {
+            else if (SearchOperation.STARTS_WITH.equals(op)) {
                 query.append(sc.getKey(), new Document($regex, startRgx((String) sc.getValue())));
-                return;
             }
-
-            if (SearchOperation.ENDS_WITH.equals(op)) {
+            else if (SearchOperation.ENDS_WITH.equals(op)) {
                 query.append(sc.getKey(), new Document($regex, endRgx((String) sc.getValue())));
-                return;
             }
-
-            if (SearchOperation.PRESENT.equals(op)) {
+            else if (SearchOperation.PRESENT.equals(op)) {
                 query.append(sc.getKey(), new Document(QueryOperators.EXISTS, true));
-                return;
             }
-
-            if (SearchOperation.GREATER_THEN.equals(op)) {
+            else if (SearchOperation.GREATER_THEN.equals(op)) {
                 query.append(sc.getKey(), new Document(QueryOperators.GT, sc.getValue()));
-                return;
             }
-
-            if (SearchOperation.GREATER_THEN_OR_EQUAL.equals(op)) {
+            else if (SearchOperation.GREATER_THEN_OR_EQUAL.equals(op)) {
                 query.append(sc.getKey(), new Document(QueryOperators.GTE, sc.getValue()));
-                return;
             }
-
-            if (SearchOperation.LESS_THEN.equals(op)) {
+            else if (SearchOperation.LESS_THEN.equals(op)) {
                 query.append(sc.getKey(), new Document(QueryOperators.LT, sc.getValue()));
-                return;
             }
-
-            if (SearchOperation.LESS_THEN_EQUAL.equals(op)) {
+            else if (SearchOperation.LESS_THEN_EQUAL.equals(op)) {
                 query.append(sc.getKey(), new Document(QueryOperators.LTE, sc.getValue()));
+            }
+            else {
+            	throw new DataException("the operator " + op.name() + " is not implemented");
             }
         }
 
