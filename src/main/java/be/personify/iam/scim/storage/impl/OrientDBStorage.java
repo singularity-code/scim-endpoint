@@ -49,6 +49,11 @@ public class OrientDBStorage implements Storage, DisposableBean {
 	private static final String ORIENT_OPERATOR_PRESENT = " is not null ";
 	private static final String ORIENT_OPERATOR_NOT_EQUALS = " <> ";
 	private static final String ORIENT_OPERATOR_EQUALS = " = ";
+	private static final String ORIENT_OPERATOR_GT = " > ";
+	private static final String ORIENT_OPERATOR_GTE = " >= ";
+	private static final String ORIENT_OPERATOR_LT = " < ";
+	private static final String ORIENT_OPERATOR_LTE = " <= ";
+	
 
 	private static final Logger logger = LogManager.getLogger(OrientDBStorage.class);
 	
@@ -169,14 +174,23 @@ public class OrientDBStorage implements Storage, DisposableBean {
     @Override
     public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes) {
     	try (ODatabaseSession db = pool.acquire()) {
-    		StringBuilder builder = new StringBuilder(queryAll);
+    		String qquery = queryAll;
+        	if ( includeAttributes != null ) {
+        		logger.info("includeAttributes present");
+        		StringBuffer b = new StringBuffer("select ");
+        		for( int i =0; i < includeAttributes.size(); i++) {
+        			b.append(includeAttributes.get(i));
+        			if ( i != includeAttributes.size() -1) {
+        				b.append(StringUtils.COMMA);
+        			}
+        		}
+        		b.append(" from " + type + " ");
+        		qquery = b.toString();
+        	}
+    		
+    		StringBuilder builder = new StringBuilder(qquery);
     		String query = constructQuery(searchCriteria, builder);
-    		List<Object> objects = new ArrayList<>();
-    		for ( SearchCriterium c : searchCriteria.getCriteria() ) {
-    			if ( c.getSearchOperation().getParts() == 3) {
-    				objects.add(c.getValue());
-    			}
-    		}
+    		List<Object> objects = composeParameters(searchCriteria);
     		logger.debug("query {}", query);
     		OResultSet result = db.query(query, objects);
     		List<Map> resultList  = new ArrayList<>();
@@ -186,6 +200,40 @@ public class OrientDBStorage implements Storage, DisposableBean {
     		return resultList;
     	}
     }
+
+
+
+	
+    
+    
+    @Override
+	public long count(SearchCriteria searchCriteria) {
+		try (ODatabaseSession db = pool.acquire()) {
+    		StringBuilder builder = new StringBuilder(querySelectCount);
+    		String query = constructQuery(searchCriteria, builder);
+    		List<Object> objects = composeParameters(searchCriteria);
+    		OResultSet result = db.query(query, objects);
+    		if( result.hasNext()) {
+    			return (Long)result.next().getProperty(Constants.COUNT);
+    		}
+    	}
+		return 0;
+	}
+    
+    
+    
+    
+    private List<Object> composeParameters(SearchCriteria searchCriteria) {
+		List<Object> objects = new ArrayList<>();
+		for ( SearchCriterium c : searchCriteria.getCriteria() ) {
+			if ( c.getSearchOperation().getParts() == 3) {
+				objects.add(c.getValue());
+			}
+		}
+		return objects;
+	}
+    
+    
     
     
     private String constructQuery(SearchCriteria searchCriteria, StringBuilder sb) {
@@ -220,29 +268,24 @@ public class OrientDBStorage implements Storage, DisposableBean {
     	else if ( searchOperation.equals(SearchOperation.PRESENT)) {
     		return ORIENT_OPERATOR_PRESENT;
     	}
-    	return null;
-	}
-
-
-
-	@Override
-	public long count(SearchCriteria searchCriteria) {
-		try (ODatabaseSession db = pool.acquire()) {
-    		StringBuilder builder = new StringBuilder(querySelectCount);
-    		String query = constructQuery(searchCriteria, builder);
-    		List<Object> objects = new ArrayList<>();
-    		for ( SearchCriterium c : searchCriteria.getCriteria() ) {
-    			if ( c.getSearchOperation().getParts() == 3) {
-    				objects.add(c.getValue());
-    			}
-    		}
-    		OResultSet result = db.query(query, objects);
-    		if( result.hasNext()) {
-    			return (Long)result.next().getProperty(Constants.COUNT);
-    		}
+    	else if ( searchOperation.equals(SearchOperation.GREATER_THEN)) {
+    		return ORIENT_OPERATOR_GT;
     	}
-		return 0;
+    	else if ( searchOperation.equals(SearchOperation.GREATER_THEN_OR_EQUAL)) {
+    		return ORIENT_OPERATOR_GTE;
+    	}
+    	else if ( searchOperation.equals(SearchOperation.LESS_THEN)) {
+    		return ORIENT_OPERATOR_LT;
+    	}
+    	else if ( searchOperation.equals(SearchOperation.LESS_THEN_EQUAL)) {
+    		return ORIENT_OPERATOR_LTE;
+    	}
+    	throw new DataException("operator " + searchOperation + " not yet implemented");
 	}
+
+
+
+	
 
     
     

@@ -72,7 +72,7 @@ public class Controller {
 			//store and return
 			storageImplementationFactory.getStorageImplementation(schema).create(id, entity);
 			logger.info("resource of type {} with id {} created in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
-			return new ResponseEntity<>(filterAttributes(schema, entity, attributes, excludedAttributes), HttpStatus.CREATED);
+			return new ResponseEntity<>(filterAttributes(schema, entity, getListFromString(attributes), excludedAttributes), HttpStatus.CREATED);
 			
 		} 
 		catch (SchemaException e) { 
@@ -115,8 +115,9 @@ public class Controller {
 			
 			//store
 			storageImplementationFactory.getStorageImplementation(schema).update(id, entity);
+			
 			logger.info("resource of type {} with id {} updated in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
-			return new ResponseEntity<>(filterAttributes(schema, entity, attributes, excludedAttributes), HttpStatus.OK);
+			return new ResponseEntity<>(filterAttributes(schema, entity, getListFromString(attributes), excludedAttributes), HttpStatus.OK);
 			
 		} 
 		catch (SchemaException e) {
@@ -166,8 +167,9 @@ public class Controller {
 			createMeta( new Date(), id, existingEntity, schema.getName(), location);
 			storageImplementationFactory.getStorageImplementation(schema).update(id, existingEntity);
 			
+			
 			logger.info("resource of type {} with id {} patched in {} ms", schema.getName(), id, ( System.currentTimeMillis() -start));
-			return new ResponseEntity<>(filterAttributes(schema, existingEntity, attributes, excludedAttributes), HttpStatus.OK);
+			return new ResponseEntity<>(filterAttributes(schema, existingEntity, getListFromString(attributes), excludedAttributes), HttpStatus.OK);
 			
 		} 
 		catch (SchemaException e) {
@@ -193,7 +195,8 @@ public class Controller {
 		
 			ResponseEntity<Map<String,Object>> result = null;
 			if ( user != null ) {
-				user = filterAttributes(schema, user, attributes, excludedAttributes);
+				List<String> includeList = getListFromString(attributes);
+				user = filterAttributes(schema, user, includeList, excludedAttributes);
 				result = new ResponseEntity<>(user, HttpStatus.OK);
 				response.addHeader(Constants.HEADER_LOCATION, UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString());
 			}
@@ -225,11 +228,13 @@ public class Controller {
 			SearchCriteria searchCriteria = composeSearchCriteria(filter);
 			Storage storage = storageImplementationFactory.getStorageImplementation(schema);	
 			
-			List<Map> dataFetched = storage.search(searchCriteria, startIndex, count, sortBy,sortOrder); 
+			List<String> includeList = getListFromString(attributes);
+			
+			List<Map> dataFetched = storage.search(searchCriteria, startIndex, count, sortBy,sortOrder, includeList); 
 			List<Map<String,Object>> data = new ArrayList<>();
 			if ( dataFetched != null ) {
 				for ( Map<String,Object> entity : dataFetched) {
-					data.add(filterAttributes(schema, entity, attributes, excludedAttributes));
+					data.add(filterAttributes(schema, entity, includeList, excludedAttributes));
 				}
 				
 				ResponseEntity<Map<String,Object>> result = null;
@@ -389,10 +394,9 @@ public class Controller {
 	
 	
 
-	protected Map<String, Object> filterAttributes(Schema schema, Map<String, Object> entity, String attributes, String excludedAttributes) {
+	protected Map<String, Object> filterAttributes(Schema schema, Map<String, Object> entity, List<String> includeList, String excludedAttributes) {
 		Map<String,Object> copy = new HashMap<>();
 		copy.putAll(entity);
-		List<String> includeList = getListFromString(attributes);
 		List<String> excludeList = getListFromString(excludedAttributes);
 		for ( SchemaAttribute attribute : schema.getAttributes()) {
 			if ( attribute.getReturned().equalsIgnoreCase(Constants.RETURNED_NEVER)) {
@@ -429,7 +433,7 @@ public class Controller {
 	
 	
 	
-	private List<String> getListFromString(String attributes) {
+	protected List<String> getListFromString(String attributes) {
 		if ( !StringUtils.isEmpty(attributes)) {
 			return Arrays.asList(attributes.split(StringUtils.COMMA));
 		}

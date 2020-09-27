@@ -1,5 +1,7 @@
 package be.personify.iam.scim.storage.impl;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -19,10 +21,10 @@ import be.personify.iam.scim.storage.ConstraintViolationException;
 import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.util.Constants;
-
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
 import be.personify.util.SearchOperation;
+import be.personify.util.StringUtils;
 
 
 /**
@@ -39,6 +41,10 @@ public class CouchBaseStorage implements Storage {
 	private static final String COUCHBASE_OPERATOR_PRESENT = " is not null ";
 	private static final String COUCHBASE_OPERATOR_NOT_EQUALS = " <> ";
 	private static final String COUCHBASE_OPERATOR_EQUALS = " = ";
+	private static final String COUCHBASE_OPERATOR_GT = " > ";
+	private static final String COUCHBASE_OPERATOR_GTE = " >= ";
+	private static final String COUCHBASE_OPERATOR_LT = " < ";
+	private static final String COUCHBASE_OPERATOR_LTE = " <= ";
 
 	private static final Logger logger = LogManager.getLogger(CouchBaseStorage.class);
 	
@@ -53,7 +59,7 @@ public class CouchBaseStorage implements Storage {
 	private String password;
 
 	
-   
+	private String type;
     
     private Cluster cluster;
     private Bucket bucket;
@@ -113,20 +119,68 @@ public class CouchBaseStorage implements Storage {
     public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes) {
     	String query = queryAll;
     	if ( includeAttributes != null ) {
-    		//TODO
+    		logger.info("includeAttributes present");
+    		StringBuffer b = new StringBuffer("select ");
+    		for( int i =0; i < includeAttributes.size(); i++) {
+    			b.append(includeAttributes.get(i));
+    			if ( i != includeAttributes.size() -1) {
+    				b.append(StringUtils.COMMA);
+    			}
+    		}
+    		b.append(" from `" + type + "` ");
+    		query = b.toString();
     	}
     	StringBuilder builder = constructQuery(searchCriteria, new StringBuilder(query));
-   		JsonObject namedParameters = JsonObject.create();
+   		JsonObject namedParameters = composeNamedParameters(searchCriteria);
+   		
+   		builder.append(LIMIT_WITH_SPACES + count + OFFSET_WITH_SPACES + (start - 1));
+  		logger.info("query {}", builder);
+  		try {
+  			QueryResult result = cluster.query(builder.toString(), QueryOptions.queryOptions().parameters(namedParameters));
+  			List<Map> list = new ArrayList<>();
+  			List<Map> maps = result.rowsAs(Map.class);
+  			Iterator<Map> iter = maps.iterator();
+  			while ( iter.hasNext()) {
+  				Map m = iter.next();
+  				if( m.containsKey(type)) {
+  					list.add((Map)m.get(type));
+  				}
+  				else {
+  					list.add(m);
+  				}
+  				
+  			}
+  			return list;
+  		}
+  		catch( Exception e) {
+  			throw new DataException(e.getMessage());
+  		}
+    }
+    
+    
+    
+    
+    @Override
+	public long count(SearchCriteria searchCriteria) {
+		StringBuilder builder = new StringBuilder(querySelectCount);
+   		builder = constructQuery(searchCriteria, builder);
+   		JsonObject namedParameters = composeNamedParameters(searchCriteria);
+  		QueryResult result = cluster.query(builder.toString(), QueryOptions.queryOptions().parameters(namedParameters));
+   		return (Integer)result.rowsAs(Map.class).get(0).get(Constants.COUNT);
+		
+	}
+
+
+	private JsonObject composeNamedParameters(SearchCriteria searchCriteria) {
+		JsonObject namedParameters = JsonObject.create();
    		for ( SearchCriterium c : searchCriteria.getCriteria() ) {
    			if ( c.getSearchOperation().getParts() == 3) {
-   				namedParameters.put(c.getKey(), c.getValue());
+   				namedParameters.put(safeSubAttribute(c.getKey()), c.getValue());
    			}
    		}
-   		builder.append(LIMIT_WITH_SPACES + count + OFFSET_WITH_SPACES + (start - 1));
-  		logger.debug("query {}", builder);
-  		QueryResult result = cluster.query(builder.toString(), QueryOptions.queryOptions().parameters(namedParameters));
-   		return result.rowsAs(Map.class);
-    }
+		return namedParameters;
+	}
+
     
     
     
@@ -140,7 +194,7 @@ public class CouchBaseStorage implements Storage {
 				sb.append(criterium.getKey());
 				sb.append(searchOperationToString(criterium.getSearchOperation()));
 				if ( criterium.getSearchOperation().getParts() == 3) {
-					sb.append("$" + criterium.getKey());
+					sb.append("$" + safeSubAttribute(criterium.getKey()));
 				}
 				if ( i < (searchCriteria.size() -1)) {
 					sb.append(Constants.AND_WITH_SPACES);
@@ -149,6 +203,11 @@ public class CouchBaseStorage implements Storage {
 		}
 		return sb;
 	}
+    
+    
+    private String safeSubAttribute(String s) {
+    	return s.replace(StringUtils.DOT, StringUtils.EMPTY_STRING);
+    }
     
     
     
@@ -163,26 +222,24 @@ public class CouchBaseStorage implements Storage {
     	else if ( searchOperation.equals(SearchOperation.PRESENT)) {
     		return COUCHBASE_OPERATOR_PRESENT;
     	}
+    	else if ( searchOperation.equals(SearchOperation.GREATER_THEN)) {
+    		return COUCHBASE_OPERATOR_GT;
+    	}
+    	else if ( searchOperation.equals(SearchOperation.GREATER_THEN_OR_EQUAL)) {
+    		return COUCHBASE_OPERATOR_GTE;
+    	}
+    	else if ( searchOperation.equals(SearchOperation.LESS_THEN)) {
+    		return COUCHBASE_OPERATOR_LT;
+    	}
+    	else if ( searchOperation.equals(SearchOperation.LESS_THEN_EQUAL)) {
+    		return COUCHBASE_OPERATOR_LTE;
+    	}
     	throw new DataException("search operation " + searchOperation.name() + " not implemented");
     }
 
 
 
-	@Override
-	public long count(SearchCriteria searchCriteria) {
-		StringBuilder builder = new StringBuilder(querySelectCount);
-   		builder = constructQuery(searchCriteria, builder);
-   		JsonObject namedParameters = JsonObject.create();
-   		for ( SearchCriterium c : searchCriteria.getCriteria() ) {
-   			if ( c.getSearchOperation().getParts() == 3) {
-   				namedParameters.put(c.getKey(), c.getValue());
-   			}
-   		}
-  		QueryResult result = cluster.query(builder.toString(), QueryOptions.queryOptions().parameters(namedParameters));
-   		return (Integer)result.rowsAs(Map.class).get(0).get(Constants.COUNT);
-		
-	}
-
+	
     
     
     
@@ -195,6 +252,7 @@ public class CouchBaseStorage implements Storage {
     @Override
     public void initialize(String type) {
     	 try {
+    		 this.type = type;
    			 cluster = Cluster.connect(host, user, password);
    			 bucket = cluster.bucket(type);
     		 queryAll = "select * from `" + type + "`";

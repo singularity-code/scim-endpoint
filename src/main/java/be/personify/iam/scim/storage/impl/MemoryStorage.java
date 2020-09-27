@@ -261,6 +261,18 @@ public class MemoryStorage implements Storage {
 		else if ( searchOperation == SearchOperation.PRESENT) {
 			return firstValue != null;
 		}
+		else if ( searchOperation == SearchOperation.GREATER_THEN) {
+			return firstValue.toString().compareTo(secondValue.toString()) > 0 ? true : false ;
+		}
+		else if ( searchOperation == SearchOperation.GREATER_THEN_OR_EQUAL) {
+			return firstValue.toString().compareTo(secondValue.toString()) >= 0 ? true : false ;
+		}
+		else if ( searchOperation == SearchOperation.LESS_THEN) {
+			return firstValue.toString().compareTo(secondValue.toString()) < 0 ? true : false ;
+		}
+		else if ( searchOperation == SearchOperation.LESS_THEN_EQUAL) {
+			return firstValue.toString().compareTo(secondValue.toString()) <= 0 ? true : false ;
+		}
 		return false;
 	}
 	

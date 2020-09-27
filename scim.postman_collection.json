@@ -2,7 +2,7 @@
 	"variables": [],
 	"info": {
 		"name": "scim",
-		"_postman_id": "93e4e648-99b4-58fb-67ad-0f2b965ca86d",
+		"_postman_id": "9225cadb-02a7-c76d-1bfc-370b8121f3e7",
 		"description": "Core SCIM server implementation requests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
@@ -174,6 +174,102 @@
 						{
 							"key": "sortOrder",
 							"value": "ascending",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "user search with filter on subattributes",
+			"request": {
+				"url": {
+					"raw": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Users?attributes=userName&filter=name.familyName eq Simpson",
+					"protocol": "{{personify-scim-server-protocol}}",
+					"host": [
+						"{{personify-scim-server-host}}"
+					],
+					"path": [
+						"scim",
+						"v2",
+						"Users"
+					],
+					"query": [
+						{
+							"key": "attributes",
+							"value": "userName",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "filter",
+							"value": "name.familyName eq Simpson",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic c2NpbS11c2VyOmNoYW5nZWl0",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "user search with filter on lastmodified",
+			"request": {
+				"url": {
+					"raw": "{{personify-scim-server-protocol}}://{{personify-scim-server-host}}/scim/v2/Users?filter=meta.lastModified ge 2020-10-27T08:22:37.995Z",
+					"protocol": "{{personify-scim-server-protocol}}",
+					"host": [
+						"{{personify-scim-server-host}}"
+					],
+					"path": [
+						"scim",
+						"v2",
+						"Users"
+					],
+					"query": [
+						{
+							"key": "filter",
+							"value": "meta.lastModified ge 2020-10-27T08:22:37.995Z",
 							"equals": true,
 							"description": ""
 						}

@@ -76,7 +76,7 @@ public class MeController extends Controller {
 													HttpServletResponse response ) {
 		Map<String,Object> result = getAndValidateUserName(request,schema);
 		if ( !StringUtils.isEmpty(result)) {
-			ResponseEntity<Map<String,Object>> responseEntity = new ResponseEntity<Map<String,Object>>(filterAttributes(schema, result, attributes, excludedAttributes), HttpStatus.OK);
+			ResponseEntity<Map<String,Object>> responseEntity = new ResponseEntity<Map<String,Object>>(filterAttributes(schema, result, getListFromString(attributes), excludedAttributes), HttpStatus.OK);
 			String requestUrl = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
 			requestUrl = requestUrl.substring(0, requestUrl.lastIndexOf("/Me") + 1) + "Users/" + result.get(Constants.ID);
 			response.addHeader(Constants.HEADER_LOCATION, requestUrl);

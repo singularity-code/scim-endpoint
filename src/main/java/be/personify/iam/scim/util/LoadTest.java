@@ -132,6 +132,7 @@ public class LoadTest {
 						try {
 							HttpEntity entity = new HttpEntity(userList.get(j),headers);
 							ResponseEntity<Object> response  = restTemplate.exchange(endpoint + "/Users" ,HttpMethod.POST,entity, Object.class );
+							
 						}
 						catch( Exception e ) {
 							e.printStackTrace();
@@ -291,10 +292,15 @@ public class LoadTest {
 			ResponseEntity<Map> response  = restTemplate.exchange(endpoint + "/Users?attributes=id",HttpMethod.GET,entity, Map.class );
 			//System.out.println(response.getBody());
 			int findIdsFinished = (int)response.getBody().get("totalResults");
-			System.out.println("number of results " + findIdsFinished);
-			response  = restTemplate.exchange(endpoint + "/Users?attributes=id&startIndex=1&count=" + findIdsFinished,HttpMethod.GET,entity, Map.class );
-			System.out.println(response.getBody());
-			System.out.println("all ids fetched in " + ( System.currentTimeMillis() - start));
+			long count = 100;
+			long time = 0;
+			for ( int i=0; i < count; i++) {
+				long cstart = System.currentTimeMillis();
+				response  = restTemplate.exchange(endpoint + "/Users?attributes=id&startIndex=1&count=" + findIdsFinished,HttpMethod.GET,entity, Map.class );
+				time = time + (System.currentTimeMillis() - cstart);
+				//System.out.println(response.getBody());
+			}
+			System.out.println("all " + findIdsFinished + " ids fetched in average " + ( time / count ) + " ms");
 			
 		}
 		catch( Exception e ) {
