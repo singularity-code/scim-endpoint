@@ -82,7 +82,7 @@ If you **really** do not want to build anything : spin up the **[docker image](h
 
 Or integrate it into your cloud environment.
 
-Sample deployment configuration files for [openshift](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/create-app.yaml) and [kubernetes](https://bitbucket.org/wouter29/personify-scim-server/src/master/kube-create-app) are included.
+Sample deployment configuration files for [openshift](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/master/create-app.yaml) and [kubernetes](https://bitbucket.org/wouter29/personify-scim-server/src/master/kube-create-app) are included.
 
 Different environment variables can be used to choose the storage implementation, configure the connections and tune the behaviour.
 
