@@ -88,17 +88,18 @@ Sample deployment configuration files for [openshift](https://bitbucket.org/wout
 
 For kubernetes, deployment is as simple as :
 
+```
 > kubectl apply -f kube-create-app.yaml 
 > deployment.apps/personify-scim-server created
 > kubectl expose deployment personify-scim-server --port=8080 --name=personify-scim-server
 > service/personify-scim-server exposed
-
+```
 ##
 
 For openshift deployment is can be triggered as follows :
-
+```
 > oc create -f create-app.yaml
-
+```
 #  
 
 Different environment variables can be used to choose the storage implementation, configure the connections and tune the behaviour.
