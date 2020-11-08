@@ -94,13 +94,17 @@ For kubernetes, deployment is as simple as :
 > kubectl expose deployment personify-scim-server --port=8080 --name=personify-scim-server
 > service/personify-scim-server exposed
 ```
-##
+
+You still have to configure the ingress route to expose the service.
+
+##  
 
 For openshift, the deployment can be triggered as follows :
 ```
 > oc create -f create-app.yaml
 ```
-#  
+
+##  
 
 Different environment variables can be used to choose the storage implementation, configure the connections and tune the behaviour.
 
