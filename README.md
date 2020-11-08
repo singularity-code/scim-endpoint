@@ -96,7 +96,7 @@ For kubernetes, deployment is as simple as :
 ```
 ##
 
-For openshift deployment is can be triggered as follows :
+For openshift, the deployment can be triggered as follows :
 ```
 > oc create -f create-app.yaml
 ```
