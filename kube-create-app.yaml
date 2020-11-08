@@ -1,0 +1,33 @@
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      app: personify-scim-server
+    name: personify-scim-server
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: personify-scim-server
+    template:
+      metadata:
+        labels:
+          app: personify-scim-server
+      spec:
+        containers:
+        - image: personify-scim-server:1.1.8.RELEASE
+          name: personify-scim-server
+          imagePullPolicy: "Always"
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /tmp
+            name: personify-scim-server
+        volumes:
+        - emptyDir: {}
+          name: personify-scim-server
+kind: List
+metadata: {}
