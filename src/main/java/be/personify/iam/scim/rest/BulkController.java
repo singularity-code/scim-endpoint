@@ -50,6 +50,9 @@ public class BulkController extends Controller {
 	
 	@Value("${scim.bulk.maxOperations:1000}")
 	private int maxOperations;
+	
+	@Autowired
+	private SchemaReader schemaReader;
 
 	
 	@PostMapping(path="/scim/v2/Bulk", produces = {"application/scim+json","application/json"})
@@ -88,7 +91,7 @@ public class BulkController extends Controller {
 
 		Map<String,Object> entity = null;
 		
-		SchemaReader schemaReader = SchemaReader.getInstance();
+		
 		
 		for ( Map<String,Object> operation : operations ) {
 			entity = (Map<String,Object>)operation.get(Constants.KEY_DATA);

@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import be.personify.iam.scim.authentication.AuthenticationUtils;
+import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.util.CryptUtils;
 import be.personify.iam.scim.util.PropertyFactory;
 import be.personify.iam.scim.util.TokenUtils;
@@ -53,9 +54,16 @@ public class SpringConfig{
 	
 	
 	@Bean
-	public PropertyFactory propertyFactgory(){
+	public PropertyFactory propertyFactory(){
 		return new PropertyFactory();
 	}
+	
+	
+	@Bean
+	public SchemaReader schemaReader(){
+		return new SchemaReader();
+	}
+	
 	
 	
 	

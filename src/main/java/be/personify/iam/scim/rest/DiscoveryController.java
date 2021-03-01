@@ -9,11 +9,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.util.Constants;
 
 /**
@@ -29,6 +31,9 @@ public class DiscoveryController extends Controller {
 	private Map<String,Object> serviceProviderConfig = null;
 	private List<Object> resourceTypes = null;
 	private List<Object> schemas = null;
+	
+	@Autowired
+	private SchemaReader schemaReader;
 
 
 	@GetMapping(path="/scim/v2/ServiceProviderConfig", produces = {"application/scim+json","application/json"})
@@ -84,11 +89,11 @@ public class DiscoveryController extends Controller {
 		ResponseEntity<?> result = null;
 		try {
 			if ( schemas == null ) {
-				schemas = Constants.objectMapper.readValue(DiscoveryController.class.getResourceAsStream("/disc_schemas.json"), List.class);
+				schemas = schemaReader.getSchemas();
 			}
 			result = new ResponseEntity<List<Object>>(schemas, HttpStatus.OK);
 		} 
-		catch (IOException e) {
+		catch (Exception e) {
 			logger.error("can not read schemas", e);
 			result = new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}

@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>be.personify.iam</groupId>
 	<artifactId>personify-scim-server</artifactId>
-	<version>1.1.8.RELEASE</version>
+	<version>1.1.9.RELEASE</version>
 	<packaging>jar</packaging>
 	<licenses>
 		<license>
@@ -63,6 +63,13 @@
 					<artifactId>spring-boot-starter-logging</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		
+		<dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-test</artifactId>
+    		<scope>test</scope>
+    		<version>${spring-boot-starter-version}</version>
 		</dependency>
 
 		<dependency>

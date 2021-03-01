@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import be.personify.iam.model.provisioning.TargetSystem;
 import be.personify.iam.provisioning.ProvisionResult;
@@ -46,7 +47,11 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 		
 	private Schema schema = null;
 	private List<String> schemaList = null;
-
+	
+	@Autowired
+	private SchemaReader schemaReader;
+	
+	
 	
 	
 	
@@ -229,7 +234,7 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 				throw new ConfigurationException("can not find mapping or targetSystem in configuration");
 			}
 			else {
-				schema = SchemaReader.getInstance().getSchemaByResourceType(type);
+				schema = schemaReader.getSchemaByResourceType(type);
 				schemaList = Arrays.asList(new String[] {schema.getId()});
 				depthMapping = createDepthMapping(mapping);
 				testConnection(targetSystem);

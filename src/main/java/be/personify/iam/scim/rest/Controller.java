@@ -55,12 +55,15 @@ public class Controller {
 	@Autowired
 	private StorageImplementationFactory storageImplementationFactory;
 	
+	@Autowired
+	private SchemaReader schemaReader;
+	
 	
 	protected ResponseEntity<Map<String, Object>> post(Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes ) {
 		long start = System.currentTimeMillis();
 		try {
 			//validate
-			SchemaReader.getInstance().validate(schema, entity, true);
+			schemaReader.validate(schema, entity, true);
 
 			//prepare
 			String id = createId(entity);
@@ -96,7 +99,7 @@ public class Controller {
 		long start = System.currentTimeMillis();
 		try {
 			//validate
-			SchemaReader.getInstance().validate(schema, entity, true);
+			schemaReader.validate(schema, entity, true);
 			if ( !entity.get(Constants.ID).equals(id)){
 				return showError( 400, "id [" + entity.get(Constants.ID) + "] given in the data does not match the one in the url [" + id + "]");
 			};
@@ -141,7 +144,7 @@ public class Controller {
 		long start = System.currentTimeMillis();
 		try {
 			//validate
-			SchemaReader.getInstance().validate(schema, entity, false);
+			schemaReader.validate(schema, entity, false);
 			if ( !entity.get(Constants.ID).equals(id)){
 				return showError( 400, "invalid id given in the patch request");
 			};

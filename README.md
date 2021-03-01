@@ -143,7 +143,8 @@ Seven storage implementations are developed but if needed, you can implement and
 
 For using a OAUTH bearer token on [forgerock openidm](https://bitbucket.org/wouter29/personify-scim-server/wiki/Forgerock%20SCIM%20connector) and other products, just point the endpoint to http://localhost:{8090}/scim/v2/token and use the credentials from the application.properties.
 
-Custom schemas can also be configured simply by defining it in a file. Not tested yet, but give it a whirl and throw some feedback!
+Custom schemas can also be configured simply by defining it in a file.
+This is done by modifying the existing schema ( disc_schema.json ) and adapting the property scim.schema.location to point to the location of the adapted file.
 
 
 A **load test** is also runnable, below the response of a single instance :

@@ -1,17 +1,23 @@
 package be.personify.iam.scim.schema;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.ResourceUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import be.personify.iam.scim.util.Constants;
+
 
 public class SchemaReader {
 	
@@ -21,29 +27,15 @@ public class SchemaReader {
 	
 	private Map<String,String> schemaMapper = new HashMap<String, String>();
 	
-	private static SchemaReader _instance = null;
+	@Value("${scim.schema.location}")
+	private String schemaLocation;
+
 	
-		
-	/**
-	 * Creates an instance if not yet present
-	 * @return a instance of the SchemaReader
-	 */
-	public static synchronized SchemaReader getInstance() {
-		if ( _instance == null ) {
-			_instance = new SchemaReader();
-			try {
-				_instance.read();
-			} catch (Exception e) {
-				logger.error("can not create a schemareader instance", e);
-				_instance = null;
-			}
-		}
-		return _instance;
-	}
-	
-	
-	private void read() throws Exception {
-		JsonNode root = Constants.objectMapper.readTree(SchemaReader.class.getResourceAsStream("/disc_schemas.json"));
+	@PostConstruct
+	public void read() throws Exception {
+		logger.info("using schema location {} ", schemaLocation);
+		File file = ResourceUtils.getFile(schemaLocation);
+		JsonNode root = Constants.objectMapper.readTree(file);
 		if ( root.isArray() ) {
 			Iterator<JsonNode> iterator = root.elements();
 			Schema schema = null;
@@ -58,6 +50,11 @@ public class SchemaReader {
 			logger.info("it's no array");
 			throw new Exception("no array found in the schema");
 		}
+	}
+	
+	
+	public List getSchemas() throws Exception {
+		 return Constants.objectMapper.readValue(ResourceUtils.getFile(schemaLocation), List.class);
 	}
 	
 	

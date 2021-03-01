@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,8 +37,13 @@ import be.personify.util.StringUtils;
 public class MeController extends Controller {
 
 	
-	private static final Schema schema = SchemaReader.getInstance().getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
-
+	@Autowired
+	private SchemaReader schemaReader;
+	
+	
+	private Schema getSchema() {
+		return schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+	}
 	
 	
 	
@@ -48,11 +54,11 @@ public class MeController extends Controller {
 													@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
 													HttpServletRequest request, 
 													HttpServletResponse response ) {
-		Map<String,Object> result = getAndValidateUserName(request,schema );
+		Map<String,Object> result = getAndValidateUserName(request,getSchema() );
 		if ( !StringUtils.isEmpty(result)) {
 			//perform update
 			if ( result.get(Constants.ID).equals(entity.get(Constants.ID))) {
-				return put(result.get(Constants.ID).toString(), entity, request, response, schema, attributes, excludedAttributes);
+				return put(result.get(Constants.ID).toString(), entity, request, response, getSchema(), attributes, excludedAttributes);
 			}
 			else {
 				return showError(HttpStatus.UNAUTHORIZED.value(), "not authorized to update user with id " +  entity.get(Constants.ID), null);
@@ -74,9 +80,9 @@ public class MeController extends Controller {
 													@RequestParam(required = false, name="excludedAttributes") String excludedAttributes,
 													HttpServletRequest request, 
 													HttpServletResponse response ) {
-		Map<String,Object> result = getAndValidateUserName(request,schema);
+		Map<String,Object> result = getAndValidateUserName(request,getSchema());
 		if ( !StringUtils.isEmpty(result)) {
-			ResponseEntity<Map<String,Object>> responseEntity = new ResponseEntity<Map<String,Object>>(filterAttributes(schema, result, getListFromString(attributes), excludedAttributes), HttpStatus.OK);
+			ResponseEntity<Map<String,Object>> responseEntity = new ResponseEntity<Map<String,Object>>(filterAttributes(getSchema(), result, getListFromString(attributes), excludedAttributes), HttpStatus.OK);
 			String requestUrl = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
 			requestUrl = requestUrl.substring(0, requestUrl.lastIndexOf("/Me") + 1) + "Users/" + result.get(Constants.ID);
 			response.addHeader(Constants.HEADER_LOCATION, requestUrl);
