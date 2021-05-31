@@ -13,6 +13,7 @@
 			<name>MIT</name>
 		</license>
 	</licenses>
+	
 
 	<url>https://www.personify.be</url>
 	<scm>
@@ -50,6 +51,18 @@
 		<postgress.version>9.1-901-1.jdbc4</postgress.version>
 		<mysql-connector.version>5.1.39</mysql-connector.version>
 	</properties>
+	
+	<dependencyManagement>
+     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-dependencies</artifactId>
+            <version>${spring-boot-starter-version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
 
 
 	<dependencies>
@@ -57,7 +70,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<version>${spring-boot-starter-version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
@@ -66,23 +78,21 @@
 			</exclusions>
 		</dependency>
 		
+		
 		<dependency>
     		<groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-starter-test</artifactId>
     		<scope>test</scope>
-    		<version>${spring-boot-starter-version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-log4j2</artifactId>
-			<version>${spring-boot-starter-version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-crypto</artifactId>
-			<version>${spring-security-version}</version>
 		</dependency>
 
 		<dependency>
@@ -122,18 +132,17 @@
 		</dependency>
 
 
-		<dependency>
+<!-- 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency> -->
 
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
-            <scope>test</scope>
-			<version>${spring-security-version}</version>            
+            <scope>test</scope>        
         </dependency>
 
 
@@ -145,9 +154,6 @@
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
-
-
-
 
 	<build>
 		<plugins>
@@ -164,6 +170,11 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			<plugin>
+        		<artifactId>maven-surefire-plugin</artifactId>
+        		<version>2.22.2</version>
+      		</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

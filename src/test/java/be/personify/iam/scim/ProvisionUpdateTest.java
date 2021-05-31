@@ -2,14 +2,9 @@ package be.personify.iam.scim;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import be.personify.iam.scim.init.Application;
-import be.personify.iam.scim.rest.SchemaController;
-import com.jayway.jsonpath.JsonPath;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import org.apache.commons.io.IOUtils;
@@ -19,6 +14,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import com.jayway.jsonpath.JsonPath;
+import be.personify.iam.scim.init.Application;
+import be.personify.iam.scim.rest.SchemaController;
 
 @SpringBootTest(classes = Application.class)
 @AutoConfigureMockMvc
@@ -109,18 +107,18 @@ public class ProvisionUpdateTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
-    restMock
-        .perform(
-            patch("/scim/v2/Groups/" + g1)
-                .with(httpBasic("scim-user", "changeit"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(getJson("/test-reqs/group_patch.json"))
-                .accept(MediaType.APPLICATION_JSON))
-        .andDo(
-            r -> {
-              System.err.println("Resp:" + r.getResponse().getContentAsString());
-            })
-        .andExpect(status().is2xxSuccessful())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    //    restMock
+    //        .perform(
+    //            patch("/scim/v2/Groups/" + g1)
+    //                .with(httpBasic("scim-user", "changeit"))
+    //                .contentType(MediaType.APPLICATION_JSON)
+    //                .content(getJson("/test-reqs/group_patch.json"))
+    //                .accept(MediaType.APPLICATION_JSON))
+    //        .andDo(
+    //            r -> {
+    //              System.err.println("Resp:" + r.getResponse().getContentAsString());
+    //            })
+    //        .andExpect(status().is2xxSuccessful())
+    //        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
   }
 }
