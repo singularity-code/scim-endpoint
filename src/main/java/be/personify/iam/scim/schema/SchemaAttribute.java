@@ -4,134 +4,127 @@ import java.util.List;
 
 /**
  * Basic SchemaAttribute class
- * @author wouter
  *
+ * @author wouter
  */
 public class SchemaAttribute {
-	
-	private String name;
-	private String type;
-	private boolean multiValued;
-	private String description;
-	private boolean required;
-	private boolean caseExact;
-	private String mutability;
-	private String returned;
-	private String uniqueness;
-	private String[] referenceTypes;
-	private String[] canonicalValues;
-	
-	private List<SchemaAttribute> subAttributes;
 
-	public String getName() {
-		return name;
-	}
+  private String name;
+  private String type;
+  private boolean multiValued;
+  private String description;
+  private boolean required;
+  private boolean caseExact;
+  private String mutability;
+  private String returned;
+  private String uniqueness;
+  private String[] referenceTypes;
+  private String[] canonicalValues;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  private List<SchemaAttribute> subAttributes;
 
-	public String getType() {
-		return type;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public boolean isMultiValued() {
-		return multiValued;
-	}
+  public String getType() {
+    return type;
+  }
 
-	public void setMultiValued(boolean multiValued) {
-		this.multiValued = multiValued;
-	}
+  public void setType(String type) {
+    this.type = type;
+  }
 
-	public String getDescription() {
-		return description;
-	}
+  public boolean isMultiValued() {
+    return multiValued;
+  }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+  public void setMultiValued(boolean multiValued) {
+    this.multiValued = multiValued;
+  }
 
-	public boolean isRequired() {
-		return required;
-	}
+  public String getDescription() {
+    return description;
+  }
 
-	public void setRequired(boolean required) {
-		this.required = required;
-	}
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-	public boolean isCaseExact() {
-		return caseExact;
-	}
+  public boolean isRequired() {
+    return required;
+  }
 
-	public void setCaseExact(boolean caseExact) {
-		this.caseExact = caseExact;
-	}
+  public void setRequired(boolean required) {
+    this.required = required;
+  }
 
-	public String getMutability() {
-		return mutability;
-	}
+  public boolean isCaseExact() {
+    return caseExact;
+  }
 
-	public void setMutability(String mutability) {
-		this.mutability = mutability;
-	}
+  public void setCaseExact(boolean caseExact) {
+    this.caseExact = caseExact;
+  }
 
-	public String getReturned() {
-		return returned;
-	}
+  public String getMutability() {
+    return mutability;
+  }
 
-	public void setReturned(String returned) {
-		this.returned = returned;
-	}
+  public void setMutability(String mutability) {
+    this.mutability = mutability;
+  }
 
-	public List<SchemaAttribute> getSubAttributes() {
-		return subAttributes;
-	}
+  public String getReturned() {
+    return returned;
+  }
 
-	public void setSubAttributes(List<SchemaAttribute> subAttributes) {
-		this.subAttributes = subAttributes;
-	}
+  public void setReturned(String returned) {
+    this.returned = returned;
+  }
 
-	public String getUniqueness() {
-		return uniqueness;
-	}
+  public List<SchemaAttribute> getSubAttributes() {
+    return subAttributes;
+  }
 
-	public void setUniqueness(String uniqueness) {
-		this.uniqueness = uniqueness;
-	}
+  public void setSubAttributes(List<SchemaAttribute> subAttributes) {
+    this.subAttributes = subAttributes;
+  }
 
-	public String[] getReferenceTypes() {
-		return referenceTypes;
-	}
+  public String getUniqueness() {
+    return uniqueness;
+  }
 
-	public void setReferenceTypes(String[] referenceTypes) {
-		this.referenceTypes = referenceTypes;
-	}
+  public void setUniqueness(String uniqueness) {
+    this.uniqueness = uniqueness;
+  }
 
-	public String[] getCanonicalValues() {
-		return canonicalValues;
-	}
+  public String[] getReferenceTypes() {
+    return referenceTypes;
+  }
 
-	public void setCanonicalValues(String[] canonicalValues) {
-		this.canonicalValues = canonicalValues;
-	}
-	
-	
-	public SchemaAttribute getSubAttribute( String name ) {
-		for ( SchemaAttribute attr : getSubAttributes()) {
-			if ( attr.getName().equals(name)) {
-				return attr;
-			}
-		}
-		return null;
-	}
+  public void setReferenceTypes(String[] referenceTypes) {
+    this.referenceTypes = referenceTypes;
+  }
 
-	
-	
-	
-	
+  public String[] getCanonicalValues() {
+    return canonicalValues;
+  }
 
+  public void setCanonicalValues(String[] canonicalValues) {
+    this.canonicalValues = canonicalValues;
+  }
+
+  public SchemaAttribute getSubAttribute(String name) {
+    for (SchemaAttribute attr : getSubAttributes()) {
+      if (attr.getName().equals(name)) {
+        return attr;
+      }
+    }
+    return null;
+  }
 }

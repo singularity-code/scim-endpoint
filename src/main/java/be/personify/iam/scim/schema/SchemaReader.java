@@ -1,5 +1,7 @@
 package be.personify.iam.scim.schema;
 
+import be.personify.iam.scim.util.Constants;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,8 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
-import com.fasterxml.jackson.databind.JsonNode;
-import be.personify.iam.scim.util.Constants;
 
 public class SchemaReader {
 

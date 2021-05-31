@@ -5,6 +5,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import be.personify.iam.scim.init.Application;
+import be.personify.iam.scim.rest.SchemaController;
+import com.jayway.jsonpath.JsonPath;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import org.apache.commons.io.IOUtils;
@@ -14,9 +18,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import com.jayway.jsonpath.JsonPath;
-import be.personify.iam.scim.init.Application;
-import be.personify.iam.scim.rest.SchemaController;
 
 @SpringBootTest(classes = Application.class)
 @AutoConfigureMockMvc
