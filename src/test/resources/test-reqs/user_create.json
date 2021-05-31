@@ -1,0 +1,19 @@
+{
+    "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+    ],
+    "id" : "user1",
+    "name": {
+        "familyName": "One",
+        "givenName": "User"
+    },
+    "userName": "user1",
+    "password": "Azerty1234",
+    "externalId": "id-1",
+    "emails": [
+        {
+            "value": "user1@test.com",
+            "type": "work"
+        }
+    ]
+}
