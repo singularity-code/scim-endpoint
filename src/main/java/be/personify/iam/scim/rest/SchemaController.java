@@ -2,6 +2,7 @@ package be.personify.iam.scim.rest;
 
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.util.Constants;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -135,7 +136,7 @@ public class SchemaController extends Controller {
     Schema schema = schemaReader.getSchemaByResourceType(resourceType);
     if (schema != null) {
       List<String> schemas = extractSchemas(entity);
-      if (schemas.contains(schema.getId())) {
+      if (schemas.contains(Constants.SCHEMA_PATCHOP)) {
         return patch(id, entity, request, response, schema, attributes, excludedAttributes);
       }
       return invalidSchemaForResource(schemas, resourceType);

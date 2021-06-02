@@ -14,6 +14,8 @@ public class Constants {
       "urn:ietf:params:scim:api:messages:2.0:BulkRequest";
   public static final String SCHEMA_BULKRESPONSE =
       "urn:ietf:params:scim:api:messages:2.0:BulkResponse";
+  public static final String SCHEMA_PATCHOP = "urn:ietf:params:scim:api:messages:2.0:PatchOp";
+
   public static final String[] SCHEMA_ERROR =
       new String[] {"urn:ietf:params:scim:api:messages:2.0:Error"};
 
@@ -35,8 +37,10 @@ public class Constants {
   public static final String KEY_METHOD = "method";
   public static final String KEY_BULKID = "bulkId";
   public static final String KEY_OPERATIONS = "Operations";
+  public static final String KEY_OP = "op";
   public static final String KEY_PATH = "path";
   public static final String KEY_DATA = "data";
+  public static final String KEY_VALUE = "value";
   public static final String KEY_STATUS = "status";
   public static final String KEY_DETAIL = "detail";
   public static final String KEY_CODE = "code";

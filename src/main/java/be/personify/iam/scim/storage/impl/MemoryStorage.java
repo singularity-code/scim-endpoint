@@ -368,10 +368,7 @@ public class MemoryStorage implements Storage {
         if (valueFromConstraintCache != null) {
           if (!valueFromConstraintCache.equals(id)) {
             throw new ConstraintViolationException(
-                "the value "
-                    + valueFromEntity
-                    + " is already existing for the attribute "
-                    + constraint);
+                "the value " + valueFromEntity + " already exists for the attribute " + constraint);
           }
         }
       }
@@ -425,6 +422,9 @@ public class MemoryStorage implements Storage {
   @Override
   public boolean deleteAll() {
     storage.clear();
+    for (String constraint : uniqueConstraintsList) {
+      uniqueConstraints.get(constraint).clear();
+    }
     flush();
     return true;
   }

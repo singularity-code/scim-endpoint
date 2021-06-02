@@ -1,23 +1,9 @@
 package be.personify.iam.scim.rest;
 
-import be.personify.iam.scim.schema.Schema;
-import be.personify.iam.scim.schema.SchemaAttribute;
-import be.personify.iam.scim.schema.SchemaException;
-import be.personify.iam.scim.schema.SchemaReader;
-import be.personify.iam.scim.storage.ConfigurationException;
-import be.personify.iam.scim.storage.ConstraintViolationException;
-import be.personify.iam.scim.storage.DataException;
-import be.personify.iam.scim.storage.Storage;
-import be.personify.iam.scim.storage.StorageImplementationFactory;
-import be.personify.iam.scim.util.Constants;
-import be.personify.iam.scim.util.ScimErrorType;
-import be.personify.util.SearchCriteria;
-import be.personify.util.SearchCriterium;
-import be.personify.util.SearchOperation;
-import be.personify.util.StringUtils;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +20,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.util.UriComponentsBuilder;
+import be.personify.iam.scim.schema.Schema;
+import be.personify.iam.scim.schema.SchemaAttribute;
+import be.personify.iam.scim.schema.SchemaException;
+import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.storage.ConfigurationException;
+import be.personify.iam.scim.storage.ConstraintViolationException;
+import be.personify.iam.scim.storage.DataException;
+import be.personify.iam.scim.storage.Storage;
+import be.personify.iam.scim.storage.StorageImplementationFactory;
+import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.ScimErrorType;
+import be.personify.util.SearchCriteria;
+import be.personify.util.SearchCriterium;
+import be.personify.util.SearchOperation;
+import be.personify.util.StringUtils;
 
 /**
  * Main controller class for the SCIM operations
@@ -166,6 +167,7 @@ public class Controller {
     }
   }
 
+  @SuppressWarnings("unchecked")
   protected ResponseEntity<Map<String, Object>> patch(
       String id,
       Map<String, Object> entity,
@@ -174,14 +176,15 @@ public class Controller {
       Schema schema,
       String attributes,
       String excludedAttributes) {
+
     long start = System.currentTimeMillis();
     try {
       // validate
       schemaReader.validate(schema, entity, false);
-      if (!entity.get(Constants.ID).equals(id)) {
-        return showError(400, "invalid id given in the patch request");
+      if (!entity.containsKey(Constants.KEY_OPERATIONS)) {
+        return showError(400, "no Operations present");
       }
-      ;
+
       String location =
           UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request))
               .build()
@@ -198,11 +201,80 @@ public class Controller {
 
       response.addHeader(Constants.HEADER_LOCATION, location);
 
-      for (String key : entity.keySet()) {
-        if (!key.equals(Constants.ID)) {
-          existingEntity.put(key, entity.get(key));
+      List<Map<String, Object>> ops =
+          (List<Map<String, Object>>) entity.get(Constants.KEY_OPERATIONS);
+
+      for (Map<String, Object> op : ops) {
+        if (!op.containsKey(Constants.KEY_OP)) return showError(404, "Invalid Operation : " + op);
+
+        String opType = ((String) op.get(Constants.KEY_OP)).toLowerCase();
+        String path = (String) op.get(Constants.KEY_PATH);
+        Object value = op.get(Constants.KEY_VALUE);
+
+        switch (opType) {
+          case "add":
+            logger.debug("adding {} to {} in {}", value, path, entity);
+            Object entry = getPath(path, existingEntity);
+            //            if (!(entry instanceof List)) {
+            //              return showError(404, "Invalid add patch: " + path + " is not an
+            // array");
+            //            }
+            if (entry instanceof List) {
+              ((List) entry).addAll((List) value);
+            } else if (entry instanceof Map) {
+              Map<String, Object> eMap = (Map) entry;
+              Map<String, Object> aMap = (Map) value;
+              for (String key : aMap.keySet()) {
+                if (eMap.containsKey(key)) {
+                  Object e1 = eMap.get(key);
+                  if (e1 instanceof List) {
+                    ((List) e1).addAll((Collection) aMap.get(key));
+                  } else {
+                    eMap.put(key, aMap.get(key));
+                  }
+                } else {
+                  eMap.put(key, aMap.get(key));
+                }
+              }
+            } else {
+              logger.error("Cannot perform add patch: path {} value {} on {}", path, value, entity);
+            }
+            break;
+          case "remove":
+            logger.debug("removing {} from {} in {}", value, path, entity);
+            List<String> segs = getPathSegments(path);
+            if (segs.size() == 1) {
+              existingEntity.remove(path);
+            } else {
+              logger.error(
+                  "Cannot perform remove patch: path {} value {} on {}", path, value, entity);
+            }
+            break;
+          case "replace":
+            logger.debug("replace {} with {} in {}", path, value, entity);
+            entry = getPath(path, existingEntity);
+            if (entry instanceof Map) {
+              ((Map) entry).putAll((Map) value);
+            } else if (entry instanceof List) {
+              List list = (List) entry;
+              list.clear();
+              list.addAll((List) value);
+            } else {
+              logger.error(
+                  "Cannot perform replace patch: path {} value {} on {}", path, value, entity);
+            }
+            break;
+
+          default:
+            return showError(404, "Invalid Operation");
         }
       }
+
+      //      for (String key : entity.keySet()) {
+      //        if (!key.equals(Constants.ID)) {
+      //          existingEntity.put(key, entity.get(key));
+      //        }
+      //      }
 
       createMeta(new Date(), id, existingEntity, schema.getName(), location);
       storageImplementationFactory.getStorageImplementation(schema).update(id, existingEntity);
@@ -485,6 +557,19 @@ public class Controller {
     return null;
   }
 
+  protected List<String> getPathSegments(String path) {
+    List<String> rest = new ArrayList<>();
+    if (!path.contains(StringUtils.DOT)) {
+      rest.add(path);
+      return rest;
+    }
+    if (!StringUtils.isEmpty(path)) {
+      rest.addAll(Arrays.asList(path.split("\\.")));
+      return rest;
+    }
+    return rest;
+  }
+
   protected String createId(Map<String, Object> user) {
     Object id = user.get(Constants.ID);
     if (allowIdOnCreate) {
@@ -504,5 +589,30 @@ public class Controller {
         400,
         "schemas contains no " + resourceType + " schema " + schemas.toString(),
         ScimErrorType.invalidSyntax);
+  }
+
+  /**
+   * This function needs to handle paths with selectors... doesn't yet. See example user_patch4 ..
+   * (Microsoft AD example).
+   *
+   * @param path
+   * @param entity
+   * @return
+   */
+  Object getPath(String path, Map<String, Object> entity) {
+    if (StringUtils.isEmpty(path)) {
+      return entity;
+    }
+    List<String> segs = getPathSegments(path);
+    Object current = entity;
+    while (!segs.isEmpty()) {
+      String seg = segs.remove(0);
+      if (current instanceof Map) {
+        current = ((Map) current).get(seg);
+      } else {
+        return null;
+      }
+    }
+    return current;
   }
 }

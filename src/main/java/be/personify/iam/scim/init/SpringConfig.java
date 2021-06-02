@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
 @Configuration
 @EnableScheduling
@@ -54,5 +55,16 @@ public class SpringConfig {
   @Bean
   public SchemaReader schemaReader() {
     return new SchemaReader();
+  }
+
+  @Bean
+  public CommonsRequestLoggingFilter requestLoggingFilter() {
+    CommonsRequestLoggingFilter loggingFilter = new CommonsRequestLoggingFilter();
+    loggingFilter.setIncludeClientInfo(true);
+    loggingFilter.setIncludeQueryString(true);
+    loggingFilter.setIncludePayload(true);
+    loggingFilter.setMaxPayloadLength(64000);
+    loggingFilter.setIncludeHeaders(true);
+    return loggingFilter;
   }
 }
