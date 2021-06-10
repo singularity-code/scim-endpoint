@@ -1,0 +1,31 @@
+{
+   "schemas":[
+      "urn:ietf:params:scim:schemas:core:2.0:User",
+      "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User"
+   ],
+   "userName":"ravi@kloudspot.com",
+   "name":{
+      "givenName":"Ravi",
+      "familyName":"Akireddy"
+   },
+   "emails":[
+      {
+         "primary":true,
+         "value":"ravi@kloudspot.com",
+         "type":"work"
+      }
+   ],
+   "displayName":"Ravi Akireddy",
+   "preferredLanguage":"en",
+   "locale":"en-US",
+   "timezone":"MST",
+   "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User":{
+      "costCenter":"333"
+   },
+   "externalId":"00u25ddooX0N9hrMG5d6",
+   "groups":[
+      
+   ],
+   "password":"L91Oho85",
+   "active":true
+}

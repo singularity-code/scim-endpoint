@@ -1,0 +1,12 @@
+{
+    "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:Group"
+    ],
+    "displayName": "ks-admin",
+    "members": [
+        {
+            "value": "user1",
+            "display": "user1@test.com"
+        }
+    ]
+}
