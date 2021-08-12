@@ -1,5 +1,20 @@
 package be.personify.iam.scim.rest;
 
+import be.personify.iam.scim.schema.Schema;
+import be.personify.iam.scim.schema.SchemaAttribute;
+import be.personify.iam.scim.schema.SchemaException;
+import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.storage.ConfigurationException;
+import be.personify.iam.scim.storage.ConstraintViolationException;
+import be.personify.iam.scim.storage.DataException;
+import be.personify.iam.scim.storage.Storage;
+import be.personify.iam.scim.storage.StorageImplementationFactory;
+import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.ScimErrorType;
+import be.personify.util.SearchCriteria;
+import be.personify.util.SearchCriterium;
+import be.personify.util.SearchOperation;
+import be.personify.util.StringUtils;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,21 +35,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.util.UriComponentsBuilder;
-import be.personify.iam.scim.schema.Schema;
-import be.personify.iam.scim.schema.SchemaAttribute;
-import be.personify.iam.scim.schema.SchemaException;
-import be.personify.iam.scim.schema.SchemaReader;
-import be.personify.iam.scim.storage.ConfigurationException;
-import be.personify.iam.scim.storage.ConstraintViolationException;
-import be.personify.iam.scim.storage.DataException;
-import be.personify.iam.scim.storage.Storage;
-import be.personify.iam.scim.storage.StorageImplementationFactory;
-import be.personify.iam.scim.util.Constants;
-import be.personify.iam.scim.util.ScimErrorType;
-import be.personify.util.SearchCriteria;
-import be.personify.util.SearchCriterium;
-import be.personify.util.SearchOperation;
-import be.personify.util.StringUtils;
 
 /**
  * Main controller class for the SCIM operations

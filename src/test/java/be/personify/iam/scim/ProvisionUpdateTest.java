@@ -7,6 +7,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import be.personify.iam.scim.init.Application;
+import be.personify.iam.scim.rest.SchemaController;
+import be.personify.iam.scim.schema.Schema;
+import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.storage.StorageImplementationFactory;
+import be.personify.iam.scim.util.Constants;
+import be.personify.util.StringUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -19,18 +32,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
-import be.personify.iam.scim.init.Application;
-import be.personify.iam.scim.rest.SchemaController;
-import be.personify.iam.scim.schema.Schema;
-import be.personify.iam.scim.schema.SchemaReader;
-import be.personify.iam.scim.storage.StorageImplementationFactory;
-import be.personify.iam.scim.util.Constants;
-import be.personify.util.StringUtils;
 
 @SpringBootTest(classes = Application.class)
 @AutoConfigureMockMvc
