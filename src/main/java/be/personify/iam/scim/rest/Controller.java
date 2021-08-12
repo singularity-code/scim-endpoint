@@ -1,5 +1,25 @@
 package be.personify.iam.scim.rest;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.web.util.UriComponentsBuilder;
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaAttribute;
 import be.personify.iam.scim.schema.SchemaException;
@@ -15,27 +35,6 @@ import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
 import be.personify.util.SearchOperation;
 import be.personify.util.StringUtils;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.util.Pair;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Main controller class for the SCIM operations
@@ -46,7 +45,7 @@ public class Controller {
 
   private static final String SCHEMA_VALIDATION = "schema validation : ";
 
-  protected static final Logger logger = LoggerFactory.getLogger(Controller.class);
+  private static final Logger logger = LogManager.getLogger(Controller.class);
 
   @Value("${scim.allowIdOnCreate:true}")
   private boolean allowIdOnCreate;
@@ -117,7 +116,7 @@ public class Controller {
     try {
       // validate
       schemaReader.validate(schema, entity, true);
-      if (entity.get(Constants.ID) == null || !entity.get(Constants.ID).equals(id)) {
+      if (!entity.get(Constants.ID).equals(id)) {
         return showError(
             400,
             "id ["
@@ -253,21 +252,16 @@ public class Controller {
             break;
           case "replace":
             logger.debug("replace {} with {} in {}", path, value, entity);
-            if (!(value instanceof Map) && !(value instanceof List)) {
-              Pair<Map<String, Object>, String> target = getStringPath(path, existingEntity);
-              target.getFirst().put(target.getSecond(), value);
+            entry = getPath(path, existingEntity);
+            if (entry instanceof Map) {
+              ((Map) entry).putAll((Map) value);
+            } else if (entry instanceof List) {
+              List list = (List) entry;
+              list.clear();
+              list.addAll((List) value);
             } else {
-              entry = getPath(path, existingEntity);
-              if (entry instanceof Map) {
-                ((Map) entry).putAll((Map) value);
-              } else if (entry instanceof List) {
-                List list = (List) entry;
-                list.clear();
-                list.addAll((List) value);
-              } else {
-                logger.error(
-                    "Cannot perform replace patch: path {} value {} on {}", path, value, entity);
-              }
+              logger.error(
+                  "Cannot perform replace patch: path {} value {} on {}", path, value, entity);
             }
             break;
 
@@ -620,34 +614,5 @@ public class Controller {
       }
     }
     return current;
-  }
-
-  /**
-   * Path to string
-   *
-   * @param path
-   * @param entity
-   * @return
-   */
-  Pair<Map<String, Object>, String> getStringPath(String path, Map<String, Object> entity) {
-    if (StringUtils.isEmpty(path)) {
-      return null;
-    }
-    List<String> segs = getPathSegments(path);
-    Object current = entity;
-    Object prev = null;
-    String seg = null;
-    while (!segs.isEmpty()) {
-      seg = segs.remove(0);
-      if (current instanceof Map) {
-        prev = current;
-        current = ((Map) current).get(seg);
-        continue;
-      }
-      if (segs.isEmpty()) {
-        return null;
-      }
-    }
-    return Pair.of((Map<String, Object>) prev, seg);
   }
 }

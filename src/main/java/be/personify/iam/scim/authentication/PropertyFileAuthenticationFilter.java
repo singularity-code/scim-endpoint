@@ -15,8 +15,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -33,8 +33,7 @@ public class PropertyFileAuthenticationFilter implements Filter {
   private static final String ROLE_READ = "read";
   private static final String ROLE_WRITE = "write";
 
-  private static final Logger logger =
-      LoggerFactory.getLogger(PropertyFileAuthenticationFilter.class);
+  private static final Logger logger = LogManager.getLogger(PropertyFileAuthenticationFilter.class);
 
   @Autowired private TokenUtils tokenUtils;
 

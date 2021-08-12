@@ -1,14 +1,14 @@
 package be.personify.iam.scim.util;
 
 import be.personify.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.codec.Hex;
 
 public class TokenUtils {
 
-  private static final Logger logger = LoggerFactory.getLogger(TokenUtils.class);
+  private static final Logger logger = LogManager.getLogger(TokenUtils.class);
 
   public static final String SALT = new String(Hex.encode("ScimServer".getBytes()));
 

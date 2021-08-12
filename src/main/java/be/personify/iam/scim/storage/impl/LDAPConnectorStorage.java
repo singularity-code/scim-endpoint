@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -33,6 +35,8 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 
   private static final String OBJECT_CLASS = "objectClass";
   private static final String CN = "cn=";
+
+  private static final Logger logger = LogManager.getLogger(LDAPConnectorStorage.class);
 
   private String basedn = null;
 

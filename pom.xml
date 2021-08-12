@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>be.personify.iam</groupId>
     <artifactId>personify-scim-server</artifactId>
-    <version>2.0.5-SNAPSHOT</version>
+    <version>1.1.9.RELEASE</version>
     <packaging>jar</packaging>
 
     <name>personify-scim-server</name>
@@ -29,20 +29,16 @@
             <name>Wouter Van der Beken</name>
             <email>wouter@mogo.be</email>
         </developer>
-        <developer>
-            <name>Steve Jerman</name>
-            <email>steve@kloudspot.com</email>
-        </developer>
     </developers>
+    <scm>
+        <connection>scm:git:ssh://git@bitbucket.org:wouter29/personify-scim-server.git</connection>
+        <url>https://bitbucket.org/wouter29/?visibility=public</url>
+    </scm>
 
     <distributionManagement>
-        <repository>
-            <id>central</id>
-            <url>https://registry.kloudspot.com/repository/maven-releases/</url>
-        </repository>
         <snapshotRepository>
-            <id>central</id>
-            <url>https://registry.kloudspot.com/repository/maven-snapshots/</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -83,39 +79,60 @@
             <groupId>com.couchbase.client</groupId>
             <artifactId>java-client</artifactId>
             <version>3.0.2</version>
-            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-core</artifactId>
             <version>3.1.2</version>
-            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>${mysql-connector.version}</version>
-            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
             <version>3.12.7</version>
-            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j-to-slf4j</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>logback-core</artifactId>
+                    <groupId>ch.qos.logback</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>logback-classic</artifactId>
+                    <groupId>ch.qos.logback</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -133,7 +150,6 @@
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgress.version}</version>
-            <optional>true</optional>
         </dependency>
 
     </dependencies>
@@ -186,9 +202,6 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -242,7 +255,7 @@
                 <version>2.22.2</version>
             </plugin>
 
-            <!--             <plugin>
+            <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <version>1.6.7</version>
@@ -252,7 +265,7 @@
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
-            </plugin> -->
+            </plugin>
 
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -263,10 +276,6 @@
                         <goals>
                             <goal>repackage</goal>
                         </goals>
-                        <configuration>
-                            <classifier>app</classifier>
-                            <attach>true</attach>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

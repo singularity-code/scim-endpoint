@@ -1,7 +1,5 @@
 package be.personify.iam.scim.rest;
 
-import static be.personify.iam.scim.rest.Controller.logger;
-
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaException;
 import be.personify.iam.scim.schema.SchemaReader;
@@ -16,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -34,6 +34,8 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 @RestController
 public class BulkController extends Controller {
+
+  private static final Logger logger = LogManager.getLogger(BulkController.class);
 
   private static final String SCHEMA = Constants.SCHEMA_BULKREQUEST;
 

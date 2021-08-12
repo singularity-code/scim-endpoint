@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -30,6 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author vanderw
  */
 public class DatabaseConnectorStorage extends ConnectorStorage {
+
+  private static final Logger logger = LogManager.getLogger(DatabaseConnectorStorage.class);
 
   private static TargetSystem targetSystem = null;
 

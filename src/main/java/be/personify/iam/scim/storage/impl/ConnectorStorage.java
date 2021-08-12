@@ -20,9 +20,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class ConnectorStorage implements Storage {
+
+  private static final Logger logger = LogManager.getLogger(ConnectorStorage.class);
 
   protected static final String ESCAPED_DOT = "\\.";
 

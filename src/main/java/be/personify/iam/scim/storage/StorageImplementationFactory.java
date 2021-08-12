@@ -1,12 +1,11 @@
 package be.personify.iam.scim.storage;
 
-import be.personify.iam.scim.rest.Controller;
 import be.personify.iam.scim.schema.Schema;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.PreDestroy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -18,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class StorageImplementationFactory implements ApplicationContextAware {
 
-  protected static final Logger logger = LoggerFactory.getLogger(Controller.class);
+  private static final Logger logger = LogManager.getLogger(StorageImplementationFactory.class);
 
   @Value("${scim.storage.implementation}")
   private String storageImplementation;

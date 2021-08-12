@@ -1,7 +1,6 @@
 package be.personify.iam.scim.rest;
 
 import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import be.personify.iam.scim.init.Application;
@@ -15,7 +14,6 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.util.Pair;
 
 @SpringBootTest(classes = Application.class)
 public class SchemaTest {
@@ -133,17 +131,12 @@ public class SchemaTest {
     List<String> groups = new ArrayList<>();
     groups.add("admin");
     map.put("groups", groups);
-
     Map<String, Object> two = new HashMap<String, Object>();
     two.put("enabled", true);
     List<String> extra = new ArrayList<>();
     extra.add("e");
     two.put("extra", extra);
     map.put("extended", two);
-    Map<String, Object> name = new HashMap<String, Object>();
-    name.put("firstName", "steve");
-    name.put("count", 2);
-    two.put("name", name);
 
     Object o = schemaController.getPath(null, map);
     assertTrue(o instanceof Map);
@@ -155,11 +148,5 @@ public class SchemaTest {
     o = schemaController.getPath("extended.extra", map);
     assertTrue(o instanceof List);
     assertTrue(((List) o).contains("e"));
-
-    Pair<Map<String, Object>, String> tgt = schemaController.getStringPath("name.firstName", two);
-    assertTrue(tgt.getFirst() instanceof Map);
-    assertEquals(tgt.getFirst(), name);
-
-    assertEquals(tgt.getSecond(), "firstName");
   }
 }

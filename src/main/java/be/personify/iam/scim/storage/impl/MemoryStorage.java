@@ -19,6 +19,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -29,6 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class MemoryStorage implements Storage {
 
   @Autowired private PropertyFactory propertyFactory;
+
+  private static final Logger logger = LogManager.getLogger(MemoryStorage.class);
 
   private Map<String, Map<String, Object>> storage = null;
 

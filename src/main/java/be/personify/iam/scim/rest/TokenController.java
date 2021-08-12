@@ -7,6 +7,8 @@ import be.personify.util.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -27,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class TokenController extends Controller {
+
+  private static final Logger logger = LogManager.getLogger(TokenController.class);
 
   @Autowired private AuthenticationUtils authenticationUtils;
 
