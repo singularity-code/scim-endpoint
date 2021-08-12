@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class DiscoveryController extends Controller {
-
-  private static final Logger logger = LogManager.getLogger(DiscoveryController.class);
 
   private Map<String, Object> serviceProviderConfig = null;
   private List<Object> resourceTypes = null;

@@ -29,8 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -44,8 +42,6 @@ public class OrientDBStorage implements Storage, DisposableBean {
   private static final String ORIENT_OPERATOR_GTE = " >= ";
   private static final String ORIENT_OPERATOR_LT = " < ";
   private static final String ORIENT_OPERATOR_LTE = " <= ";
-
-  private static final Logger logger = LogManager.getLogger(OrientDBStorage.class);
 
   private String type;
 

@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 
 /** @author wouter vdb */
@@ -36,8 +34,6 @@ public class CouchBaseStorage implements Storage {
   private static final String COUCHBASE_OPERATOR_GTE = " >= ";
   private static final String COUCHBASE_OPERATOR_LT = " < ";
   private static final String COUCHBASE_OPERATOR_LTE = " <= ";
-
-  private static final Logger logger = LogManager.getLogger(CouchBaseStorage.class);
 
   @Value("${scim.storage.couchbase.host}")
   private String host;

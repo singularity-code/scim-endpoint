@@ -3,8 +3,12 @@ package be.personify.iam.scim.storage;
 import be.personify.util.SearchCriteria;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public interface Storage {
+
+  static final Logger logger = LoggerFactory.getLogger(Storage.class);
 
   /**
    * Bootstrap your storage here

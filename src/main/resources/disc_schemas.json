@@ -20,7 +20,7 @@
         "type" : "string",
         "multiValued" : false,
         "description" : "Unique identifier for the User, typicallyused by the user to directly authenticate to the service provider.Each User MUST include a non-empty userName value.  This identifierMUST be unique across the service provider's entire set of Users.REQUIRED.",
-        "required" : true,
+        "required" : false,
         "caseExact" : false,
         "mutability" : "readWrite",
         "returned" : "default",
@@ -309,6 +309,7 @@
             "required" : false,
             "caseExact" : false,
             "canonicalValues" : [
+               "",
               "work",
               "home",
               "mobile",
@@ -814,6 +815,17 @@
             "returned" : "default",
             "uniqueness" : "none"
           },
+          {
+            "name" : "display",
+            "type" : "string",
+            "multiValued" : false,
+            "description" : "Display name (OKTA).",
+            "required" : false,
+            "caseExact" : false,
+            "mutability" : "immutable",
+            "returned" : "default",
+            "uniqueness" : "none"
+          },          
           {
             "name" : "$ref",
             "type" : "reference",

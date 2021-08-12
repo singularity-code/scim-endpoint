@@ -1,15 +1,30 @@
-# This is a sample build configuration for Java (Maven).
-# Check our guides at https://confluence.atlassian.com/x/zd-5Mw for more examples.
-# Only use spaces to indent your .yml configuration.
-# -----
-# You can specify a custom docker image from Docker Hub as your build environment.
-image: maven:3.6.1
-
+image: maven:3.6-jdk-8
 pipelines:
-  default:
-    - step:
-        caches:
-          - maven
-        script: # Modify the commands below to build your repository.
-          - mvn -B clean install -Dgpg.skip # -B batch mode makes Maven less verbose
-          - curl -X POST --user "${BB_AUTH_STRING}" "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"target/personify-scim-server-1.2.0.RELEASE.jar"
+    default:
+        - step:
+            name: Compile & test
+            caches:
+                - maven
+            script:
+                - mvn -version
+                - bash configure-maven.sh
+                - mvn clean install
+        - step:
+            name: Release
+            trigger: manual
+            caches:
+                - maven
+            script:
+                - bash configure-maven.sh
+                - git config --global user.email "$email"
+                - git config --global user.name "$name"
+                - mvn versions:set -DremoveSnapshot=true versions:resolve-ranges
+                - mvn clean deploy
+                - version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+                - git commit -n -a -m "[skip ci] Release of $version"
+                - git tag -a -m "Release of $version" RELEASE-$version
+                - git push origin RELEASE-$version
+                - mvn versions:revert
+                - mvn versions:set -DnextSnapshot=true
+                - git commit -a -n -m "Next version"
+                - git push
