@@ -27,143 +27,125 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Controller managing bulk operations with circular reference processing, maxPayloadSize and
- * maxOperations
+ * Controller managing bulk operations with circular reference processing,
+ * maxPayloadSize and maxOperations
  *
- * <p>https://tools.ietf.org/html/rfc7644#section-3.7
+ * <p>
+ * https://tools.ietf.org/html/rfc7644#section-3.7
  */
 @RestController
 public class BulkController extends Controller {
 
-  private static final Logger logger = LogManager.getLogger(BulkController.class);
+	private static final Logger logger = LogManager.getLogger(BulkController.class);
 
-  private static final String SCHEMA = Constants.SCHEMA_BULKREQUEST;
+	private static final String SCHEMA = Constants.SCHEMA_BULKREQUEST;
 
-  @Autowired private StorageImplementationFactory storageImplementationFactory;
+	@Autowired
+	private StorageImplementationFactory storageImplementationFactory;
 
-  @Value("${scim.bulk.maxPayloadSize:1048576}")
-  private int maxPayloadSize;
+	@Value("${scim.bulk.maxPayloadSize:1048576}")
+	private int maxPayloadSize;
 
-  @Value("${scim.bulk.maxOperations:1000}")
-  private int maxOperations;
+	@Value("${scim.bulk.maxOperations:1000}")
+	private int maxOperations;
 
-  @Autowired private SchemaReader schemaReader;
+	@Autowired
+	private SchemaReader schemaReader;
 
-  @PostMapping(
-      path = "/scim/v2/Bulk",
-      produces = {"application/scim+json", "application/json"})
-  public ResponseEntity<Map<String, Object>> post(
-      @RequestBody Map<String, Object> objects,
-      HttpServletRequest request,
-      HttpServletResponse response) {
+	@PostMapping(path = "/scim/v2/Bulk", produces = { "application/scim+json", "application/json" })
+	public ResponseEntity<Map<String, Object>> post(@RequestBody Map<String, Object> objects, HttpServletRequest request, HttpServletResponse response) {
 
-    // check the maximum payload
-    long contentLenth = request.getContentLength();
-    if (contentLenth > maxPayloadSize) {
-      return showError(
-          HttpStatus.PAYLOAD_TOO_LARGE.value(),
-          "The size of the bulk operation ("
-              + contentLenth
-              + ") exceeds the maxPayloadSize ("
-              + maxPayloadSize
-              + ")",
-          null);
-    }
+		// check the maximum payload
+		long contentLenth = request.getContentLength();
+		if (contentLenth > maxPayloadSize) {
+			return showError(HttpStatus.PAYLOAD_TOO_LARGE.value(), "The size of the bulk operation (" + contentLenth + ") exceeds the maxPayloadSize (" + maxPayloadSize + ")", null);
+		}
 
-    List<String> schemas = extractSchemas(objects);
-    if (schemas.contains(SCHEMA)) {
-      return postBulk(objects, request, response);
-    }
-    return invalidSchemaForResource(schemas, null);
-  }
+		List<String> schemas = extractSchemas(objects);
+		if (schemas.contains(SCHEMA)) {
+			return postBulk(objects, request, response);
+		}
+		return invalidSchemaForResource(schemas, null);
+	}
+	
+	
 
-  protected ResponseEntity<Map<String, Object>> postBulk(
-      Map<String, Object> bulk, HttpServletRequest request, HttpServletResponse response) {
+	protected ResponseEntity<Map<String, Object>> postBulk(Map<String, Object> bulk, HttpServletRequest request, HttpServletResponse response) {
 
-    long start = System.currentTimeMillis();
-    List<Map<String, Object>> operations =
-        (List<Map<String, Object>>) bulk.get(Constants.KEY_OPERATIONS);
+		long start = System.currentTimeMillis();
+		List<Map<String, Object>> operations = (List<Map<String, Object>>) bulk.get(Constants.KEY_OPERATIONS);
 
-    if (operations.size() > maxOperations) {
-      return showError(
-          HttpStatus.PAYLOAD_TOO_LARGE.value(),
-          "The number of bulk operations ("
-              + operations.size()
-              + ") exceeds the maxOperations ("
-              + maxOperations
-              + ")",
-          null);
-    }
+		if (operations.size() > maxOperations) {
+			return showError(HttpStatus.PAYLOAD_TOO_LARGE.value(), "The number of bulk operations (" + operations.size() + ") exceeds the maxOperations (" + maxOperations + ")", null);
+		}
 
-    List<Map<String, Object>> resultOperations = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> resultOperations = new ArrayList<Map<String, Object>>();
 
-    String method = null;
-    String bulkId = null;
-    String path = null;
+		String method = null;
+		String bulkId = null;
+		String path = null;
 
-    Map<String, Object> entity = null;
+		Map<String, Object> entity = null;
 
-    for (Map<String, Object> operation : operations) {
-      entity = (Map<String, Object>) operation.get(Constants.KEY_DATA);
-      List<String> schemas = extractSchemas(entity);
-      Schema schema = schemaReader.getSchema(schemas.get(0));
-      method = (String) operation.get(Constants.KEY_METHOD);
-      bulkId = (String) operation.get(Constants.KEY_BULKID);
-      path = (String) operation.get(Constants.KEY_PATH);
-      logger.info("operation {} {} {}", method, path, bulkId);
+		for (Map<String, Object> operation : operations) {
+			entity = (Map<String, Object>) operation.get(Constants.KEY_DATA);
+			List<String> schemas = extractSchemas(entity);
+			Schema schema = schemaReader.getSchema(schemas.get(0));
+			method = (String) operation.get(Constants.KEY_METHOD);
+			bulkId = (String) operation.get(Constants.KEY_BULKID);
+			path = (String) operation.get(Constants.KEY_PATH);
+			logger.info("operation {} {} {}", method, path, bulkId);
 
-      Map<String, Object> operationResult = new HashMap<String, Object>();
+			Map<String, Object> operationResult = new HashMap<String, Object>();
 
-      if (method.equalsIgnoreCase(Constants.HTTP_METHOD_POST)) {
-        try {
-          schemaReader.validate(schema, entity, true);
-          String id = createId(entity);
-          entity.put(Constants.ID, id);
-          String location =
-              UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request))
-                      .build()
-                      .toUriString()
-                  + StringUtils.SLASH
-                  + id;
-          Date now = new Date();
-          createMeta(now, id, entity, schema.getName(), location);
-          storageImplementationFactory.getStorageImplementation(schema).create(id, entity);
-          operationResult = composeResultMap(method, bulkId, HttpStatus.CREATED);
-          operationResult.put(Constants.KEY_LOCATION, location);
-          operationResult.put(Constants.KEY_VERSION, createVersion(now));
-        } catch (SchemaException se) {
-          logger.error("error validating", se);
-          operationResult = composeResultMap(method, bulkId, HttpStatus.BAD_REQUEST);
-        } catch (ConstraintViolationException e) {
-          logger.error("constraint error", e);
-          operationResult = composeResultMap(method, bulkId, HttpStatus.BAD_REQUEST);
-        }
-      }
+			if (method.equalsIgnoreCase(Constants.HTTP_METHOD_POST)) {
+				try {
+					schemaReader.validate(schema, entity, true);
+					String id = createId(entity);
+					entity.put(Constants.ID, id);
+					String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + StringUtils.SLASH + id;
+					Date now = new Date();
+					createMeta(now, id, entity, schema.getName(), location);
+					storageImplementationFactory.getStorageImplementation(schema).create(id, entity);
+					operationResult = composeResultMap(method, bulkId, HttpStatus.CREATED);
+					operationResult.put(Constants.KEY_LOCATION, location);
+					operationResult.put(Constants.KEY_VERSION, createVersion(now));
+				}
+				catch (SchemaException se) {
+					logger.error("error validating", se);
+					operationResult = composeResultMap(method, bulkId, HttpStatus.BAD_REQUEST);
+				} 
+				catch (ConstraintViolationException e) {
+					logger.error("constraint error", e);
+					operationResult = composeResultMap(method, bulkId, HttpStatus.BAD_REQUEST);
+				}
+			}
 
-      resultOperations.add(operationResult);
-    }
+			resultOperations.add(operationResult);
+		}
 
-    Map<String, Object> result = new HashMap<String, Object>();
-    result.put(Constants.KEY_SCHEMAS, new String[] {Constants.SCHEMA_BULKRESPONSE});
-    result.put(Constants.KEY_OPERATIONS, resultOperations);
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put(Constants.KEY_SCHEMAS, new String[] { Constants.SCHEMA_BULKRESPONSE });
+		result.put(Constants.KEY_OPERATIONS, resultOperations);
 
-    logger.info(
-        "operation {} {} {} completed in [{}ms]",
-        method,
-        path,
-        bulkId,
-        System.currentTimeMillis() - start);
+		logger.info("operation {} {} {} completed in [{}ms]", method, path, bulkId, System.currentTimeMillis() - start);
 
-    return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
-  }
+		return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
+	}
+	
+	
+	
 
-  private Map<String, Object> composeResultMap(String method, String bulkId, HttpStatus status) {
-    Map<String, Object> result = new HashMap<String, Object>();
-    result.put(Constants.KEY_METHOD, method);
-    result.put(Constants.KEY_BULKID, bulkId);
-    Map<String, String> statusMap = new HashMap<String, String>();
-    statusMap.put(Constants.KEY_CODE, StringUtils.EMPTY_STRING + status.value());
-    result.put(Constants.KEY_STATUS, statusMap);
-    return result;
-  }
+	
+	
+
+	private Map<String, Object> composeResultMap(String method, String bulkId, HttpStatus status) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put(Constants.KEY_METHOD, method);
+		result.put(Constants.KEY_BULKID, bulkId);
+		Map<String, String> statusMap = new HashMap<String, String>();
+		statusMap.put(Constants.KEY_CODE, StringUtils.EMPTY_STRING + status.value());
+		result.put(Constants.KEY_STATUS, statusMap);
+		return result;
+	}
 }

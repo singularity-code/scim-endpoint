@@ -72,7 +72,8 @@ public class AuthenticationUtils implements ApplicationContextAware {
           authenticationType,
           users.size());
       return users;
-    } catch (Exception e) {
+    } 
+    catch (Exception e) {
       logger.error("initializing auth users of type {} ", authenticationType, e);
     }
     return null;
