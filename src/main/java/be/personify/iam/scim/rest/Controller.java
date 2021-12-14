@@ -93,6 +93,7 @@ public class Controller {
 		long start = System.currentTimeMillis();
 		try {
 			// validate
+			logger.info("schema {} ", schema);
 			schemaReader.validate(schema, entity, true);
 			if (!entity.get(Constants.ID).equals(id)) {
 				return showError(400, "id [" + entity.get(Constants.ID)	+ "] given in the data does not match the one in the url [" + id + "]");
@@ -414,10 +415,14 @@ public class Controller {
 	
 	protected void createMeta(Date date, String id, Map<String, Object> user, String resourceType, String location) {
 
+		logger.info("create meta {} {} {} {} {}",  date, id, user, resourceType, location);
 		Map<String, String> map = new HashMap<String, String>();
 		String formattedDate = new SimpleDateFormat(Constants.DATEFORMAT_STRING, Locale.US).format(date);
 		if (user.containsKey(Constants.KEY_META)) {
 			map = (Map<String, String>) user.get(Constants.KEY_META);
+			if ( map == null ) {
+				map = new HashMap<String, String>();
+			}
 		}
 		else {
 			map.put(Constants.KEY_CREATED, formattedDate);
