@@ -50,7 +50,7 @@ Use the integrated [postman collection](https://bitbucket.org/wouter29/personify
 
 For spinning up a scim server from the **[downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/)**: 
 
-> java -jar -Dserver.port=8080 personify-scim-server-1.2.2.RELEASE.jar
+> java -jar -Dserver.port=8080 personify-scim-server-1.2.3.RELEASE.jar
 
 When port 8080 is already taken or other problems occur, adapt the server.port via the commandline.
 
@@ -78,7 +78,7 @@ For running the maven project :
 
 If you **really** do not want to build anything : spin up the **[docker image](https://hub.docker.com/r/personify/personify-scim-server)**
 
-> docker run -p 8080:8080 personify/personify-scim-server:1.2.2.RELEASE
+> docker run -p 8080:8080 personify/personify-scim-server:1.2.3.RELEASE
 
 Or integrate it into your cloud environment.
 
@@ -110,7 +110,7 @@ Different environment variables can be used to choose the storage implementation
 
 In your docker container specify/override environment entries you find in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)
 
->docker run -p 8080:8080 -e scim.storage.implementation=... -e scim.storage.mongo.database=users personify/personify-scim-server:1.2.2.RELEASE
+>docker run -p 8080:8080 -e scim.storage.implementation=... -e scim.storage.mongo.database=users personify/personify-scim-server:1.2.3.RELEASE
 
  
 ##   
@@ -152,7 +152,7 @@ First step is to download the [standard file](https://bitbucket.org/wouter29/per
 
 Second step depends on your deployment but assuming you downloaded the jar.
 
->java -jar -Dserver.port=8080 personify-scim-server-1.2.2.RELEASE.jar -Dscim.schema.location=/tmp/disc_schema_custom.json
+>java -jar -Dserver.port=8080 personify-scim-server-1.2.3.RELEASE.jar -Dscim.schema.location=/tmp/disc_schema_custom.json
 
 ##
 

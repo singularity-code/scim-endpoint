@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>be.personify.iam</groupId>
     <artifactId>personify-scim-server</artifactId>
-    <version>1.2.2.RELEASE</version>
+    <version>1.2.3.RELEASE</version>
     <packaging>jar</packaging>
 
     <name>personify-scim-server</name>
@@ -47,29 +47,22 @@
     </distributionManagement>
 
     <properties>
-        <junit.version>4.12</junit.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <mysql-connector.version>5.1.39</mysql-connector.version>
-        <personify.provisioning.version>1.1.9.RELEASE</personify.provisioning.version>
-        <postgress.version>9.1-901-1.jdbc4</postgress.version>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring-boot-starter-version>2.3.3.RELEASE</spring-boot-starter-version>
-        <spring-security-version>5.3.4.RELEASE</spring-security-version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+
+        <mysql-connector.version>8.0.26</mysql-connector.version>
+        <personify.provisioning.version>1.2.4.RELEASE</personify.provisioning.version>
+        <postgress.version>9.1-901-1.jdbc4</postgress.version>
+        <spring-boot-starter-version>2.5.4</spring-boot-starter-version>
+        <couchbase.version>3.0.2</couchbase.version>
+        <orientdb.version>3.1.2</orientdb.version>
+        <mongo.version>3.12.7</mongo.version>
+        
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot-starter-version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
 
@@ -82,15 +75,16 @@
         <dependency>
             <groupId>com.couchbase.client</groupId>
             <artifactId>java-client</artifactId>
-            <version>3.0.2</version>
+            <version>${couchbase.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-core</artifactId>
-            <version>3.1.2</version>
+            <version>${orientdb.version}</version>
         </dependency>
 
+	
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -100,55 +94,9 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
-            <version>3.12.7</version>
+            <version>${mongo.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j2</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>log4j-to-slf4j</artifactId>
-                    <groupId>org.apache.logging.log4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>logback-core</artifactId>
-                    <groupId>ch.qos.logback</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>logback-classic</artifactId>
-                    <groupId>ch.qos.logback</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                    <groupId>org.springframework.boot</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-crypto</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
-            <scope>test</scope>
-        </dependency>
+        
 
         <dependency>
             <groupId>postgresql</groupId>
