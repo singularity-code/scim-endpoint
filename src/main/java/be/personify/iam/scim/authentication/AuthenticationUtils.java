@@ -20,94 +20,82 @@ import org.springframework.context.ApplicationContextAware;
 
 public class AuthenticationUtils implements ApplicationContextAware {
 
-  private static final Logger logger = LogManager.getLogger(AuthenticationUtils.class);
+	private static final Logger logger = LogManager.getLogger(AuthenticationUtils.class);
 
-  private ApplicationContext applicationContext;
+	private ApplicationContext applicationContext;
 
-  @Value("${scim.authentication.implementation}")
-  private String filterImplementation;
+	@Value("${scim.authentication.implementation}")
+	private String filterImplementation;
 
-  @Autowired private PropertyFactory propertyFactory;
+	@Autowired
+	private PropertyFactory propertyFactory;
 
-  private Map<String, List<String>> basicAuthUsers;
-  private Map<String, List<String>> bearerAuthUsers;
+	private Map<String, List<String>> basicAuthUsers;
+	private Map<String, List<String>> bearerAuthUsers;
 
-  /**
-   * Gets the userlist for a certain authentication type
-   *
-   * @param authenticationType authenticationtype ( basic or bearer )
-   * @return a map containing the user+secret as a key and a list of roles as value
-   */
-  private Map<String, List<String>> getUserList(String authenticationType) {
-    logger.info("initializing users of type {}", authenticationType);
-    try {
-      Map<String, List<String>> users = new HashMap<String, List<String>>();
-      int count = 1;
-      String user = null;
-      List<String> roles = null;
-      while ((user =
-              propertyFactory.getProperty(
-                  "scim.authentication.propertyfile.method."
-                      + authenticationType
-                      + ".user."
-                      + count))
-          != null) {
-        String rolesString =
-            propertyFactory.getProperty(
-                "scim.authentication.propertyfile.method."
-                    + authenticationType
-                    + ".user."
-                    + count
-                    + ".roles");
-        logger.info("adding user {} with roles {}", user.split(StringUtils.COLON)[0], rolesString);
-        roles = new ArrayList<String>();
-        if (!StringUtils.isEmpty(rolesString)) {
-          roles = Arrays.asList(rolesString.split(StringUtils.COMMA));
-        }
-        users.put(user, roles);
-        count++;
-      }
-      logger.info(
-          "initializing auth users of type {} done : found {} users",
-          authenticationType,
-          users.size());
-      return users;
-    } 
-    catch (Exception e) {
-      logger.error("initializing auth users of type {} ", authenticationType, e);
-    }
-    return null;
-  }
+	/**
+	 * Gets the userlist for a certain authentication type
+	 *
+	 * @param authenticationType authenticationtype ( basic or bearer )
+	 * @return a map containing the user+secret as a key and a list of roles as
+	 *         value
+	 */
+	private Map<String, List<String>> getUserList(String authenticationType) {
+		logger.info("initializing users of type {}", authenticationType);
+		try {
+			Map<String, List<String>> users = new HashMap<String, List<String>>();
+			int count = 1;
+			String user = null;
+			List<String> roles = null;
+			while ((user = propertyFactory.getProperty("scim.authentication.propertyfile.method." + authenticationType + ".user." + count)) != null) {
+				String rolesString = propertyFactory.getProperty("scim.authentication.propertyfile.method." + authenticationType + ".user." + count + ".roles");
+				logger.info("adding user {} with roles {}", user.split(StringUtils.COLON)[0], rolesString);
+				roles = new ArrayList<String>();
+				if (!StringUtils.isEmpty(rolesString)) {
+					roles = Arrays.asList(rolesString.split(StringUtils.COMMA));
+				}
+				users.put(user, roles);
+				count++;
+			}
+			logger.info("initializing auth users of type {} done : found {} users", authenticationType, users.size());
+			return users;
+		}
+		catch (Exception e) {
+			logger.error("initializing auth users of type {} ", authenticationType, e);
+		}
+		return null;
+	}
+	
+	
 
-  public Filter getFilterImplementation() throws Exception {
-    logger.info(
-        "trying to initialize authentication filter implementation of type {}",
-        filterImplementation);
-    Class<?> c = Class.forName(filterImplementation);
-    Filter filter = (Filter) c.newInstance();
-    AutowireCapableBeanFactory factory = applicationContext.getAutowireCapableBeanFactory();
-    factory.autowireBean(filter);
-    factory.initializeBean(filter, "authenticationFilter");
-    logger.info("successfully initialized {}", filterImplementation);
-    return filter;
-  }
+	public Filter getFilterImplementation() throws Exception {
+		logger.info("trying to initialize authentication filter implementation of type {}", filterImplementation);
+		Class<?> c = Class.forName(filterImplementation);
+		Filter filter = (Filter) c.getDeclaredConstructor().newInstance();
+		AutowireCapableBeanFactory factory = applicationContext.getAutowireCapableBeanFactory();
+		factory.autowireBean(filter);
+		factory.initializeBean(filter, "authenticationFilter");
+		logger.info("successfully initialized {}", filterImplementation);
+		return filter;
+	}
 
-  @Override
-  public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-    this.applicationContext = applicationContext;
-  }
+	
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
 
-  public Map<String, List<String>> getBasicAuthUsers() {
-    if (basicAuthUsers == null) {
-      basicAuthUsers = getUserList(Constants.BASIC.toLowerCase());
-    }
-    return basicAuthUsers;
-  }
+	public Map<String, List<String>> getBasicAuthUsers() {
+		if (basicAuthUsers == null) {
+			basicAuthUsers = getUserList(Constants.BASIC.toLowerCase());
+		}
+		return basicAuthUsers;
+	}
 
-  public Map<String, List<String>> getBearerAuthUsers() {
-    if (bearerAuthUsers == null) {
-      bearerAuthUsers = getUserList(Constants.BEARER.toLowerCase());
-    }
-    return bearerAuthUsers;
-  }
+	public Map<String, List<String>> getBearerAuthUsers() {
+		if (bearerAuthUsers == null) {
+			bearerAuthUsers = getUserList(Constants.BEARER.toLowerCase());
+		}
+		return bearerAuthUsers;
+	}
 }

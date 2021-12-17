@@ -17,65 +17,62 @@ import org.springframework.stereotype.Component;
 @Component
 public class StorageImplementationFactory implements ApplicationContextAware {
 
-  private static final Logger logger = LogManager.getLogger(StorageImplementationFactory.class);
+	private static final Logger logger = LogManager.getLogger(StorageImplementationFactory.class);
 
-  @Value("${scim.storage.implementation}")
-  private String storageImplementation;
+	@Value("${scim.storage.implementation}")
+	private String storageImplementation;
 
-  private Map<String, Storage> storageMap = new HashMap<String, Storage>();
+	private Map<String, Storage> storageMap = new HashMap<String, Storage>();
 
-  private ApplicationContext applicationContext = null;
+	private ApplicationContext applicationContext = null;
 
-  /**
-   * Gets the storage implementation
-   *
-   * @param schema the schema
-   * @return the storage
-   */
-  public synchronized Storage getStorageImplementation(Schema schema) {
-    String resourceType = schema.getName();
-    Storage storage = storageMap.get(resourceType);
-    if (storage == null) {
-      logger.info("using environment variable [scim.storage.implementation]");
-      logger.info(
-          "initializing storage for type {} with implementation {}",
-          resourceType,
-          storageImplementation);
-      try {
-        Class<?> c = Class.forName(storageImplementation);
-        storage = (Storage) c.newInstance();
-        AutowireCapableBeanFactory factory = applicationContext.getAutowireCapableBeanFactory();
-        factory.autowireBean(storage);
-        factory.initializeBean(storage, "storage" + resourceType);
-        storage.initialize(resourceType);
-        storageMap.put(resourceType, storage);
-        logger.info("storage for type {} initialized", resourceType);
-      } catch (ClassNotFoundException cnfe) {
-        logger.error("error initializing storage implementation " + storageImplementation, cnfe);
-        throw new ConfigurationException(
-            "the storage implementation class [" + storageImplementation + "] is not found");
-      } catch (Exception e) {
-        logger.error("error initializing storage for type " + resourceType, e);
-        throw new ConfigurationException("error configuring [" + storageImplementation + "]");
-      }
-    }
-    return storage;
-  }
+	/**
+	 * Gets the storage implementation
+	 *
+	 * @param schema the schema
+	 * @return the storage
+	 */
+	public synchronized Storage getStorageImplementation(Schema schema) {
+		String resourceType = schema.getName();
+		Storage storage = storageMap.get(resourceType);
+		if (storage == null) {
+			logger.info("using environment variable [scim.storage.implementation]");
+			logger.info("initializing storage for type {} with implementation {}", resourceType, storageImplementation);
+			try {
+				Class<?> c = Class.forName(storageImplementation);
+				storage = (Storage) c.getDeclaredConstructor().newInstance();
+				AutowireCapableBeanFactory factory = applicationContext.getAutowireCapableBeanFactory();
+				factory.autowireBean(storage);
+				factory.initializeBean(storage, "storage" + resourceType);
+				storage.initialize(resourceType);
+				storageMap.put(resourceType, storage);
+				logger.info("storage for type {} initialized", resourceType);
+			} catch (ClassNotFoundException cnfe) {
+				logger.error("error initializing storage implementation " + storageImplementation, cnfe);
+				throw new ConfigurationException(
+						"the storage implementation class [" + storageImplementation + "] is not found");
+			} catch (Exception e) {
+				logger.error("error initializing storage for type " + resourceType, e);
+				throw new ConfigurationException("error configuring [" + storageImplementation + "]");
+			}
+		}
+		return storage;
+	}
 
-  @Scheduled(fixedRateString = "${scim.storage.flushEvery}")
-  public void flush() {
-    for (Storage storage : storageMap.values()) {
-      storage.flush();
-    }
-  }
+	@Scheduled(fixedRateString = "${scim.storage.flushEvery}")
+	public void flush() {
+		for (Storage storage : storageMap.values()) {
+			storage.flush();
+		}
+	}
 
-  @PreDestroy
-  public void destroy() {
-    flush();
-  }
+	@PreDestroy
+	public void destroy() {
+		flush();
+	}
 
-  @Override
-  public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-    this.applicationContext = applicationContext;
-  }
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
 }
