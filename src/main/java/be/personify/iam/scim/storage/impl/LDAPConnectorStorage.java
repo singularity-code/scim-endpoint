@@ -1,6 +1,15 @@
 package be.personify.iam.scim.storage.impl;
 
-import be.personify.iam.model.provisioning.TargetSystem;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import be.personify.iam.provisioning.ProvisionResult;
 import be.personify.iam.provisioning.ProvisionStatus;
 import be.personify.iam.provisioning.ProvisionTask;
@@ -17,14 +26,7 @@ import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
 import be.personify.util.State;
 import be.personify.util.StringUtils;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import be.personify.util.provisioning.TargetSystem;
 
 /**
  * Storage implementation that stores data into a LDAP using the personify connector framework

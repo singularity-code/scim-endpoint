@@ -1,19 +1,22 @@
 package be.personify.iam.scim.schema;
 
-import be.personify.iam.scim.util.Constants;
-import com.fasterxml.jackson.databind.JsonNode;
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.Resource;
+import org.springframework.util.ResourceUtils;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import be.personify.iam.scim.util.Constants;
 
 public class SchemaReader {
 
@@ -24,15 +27,17 @@ public class SchemaReader {
   private Map<String, String> schemaMapper = new HashMap<String, String>();
 
   @Value("${scim.schema.location}")
-  private String schemaLocation;
-
-  @Inject ApplicationContext ctx;
+  private String schemaLocation; 
+  
 
   @PostConstruct
   public void read() throws Exception {
     logger.info("using schema location {} ", schemaLocation);
-    Resource resource = ctx.getResource(schemaLocation);
-    JsonNode root = Constants.objectMapper.readTree(resource.getInputStream());
+    File file = ResourceUtils.getFile(schemaLocation);
+    if ( !file.exists() ) {
+    	throw new Exception("file " + file.getAbsolutePath() + " does not exist");
+    }
+	JsonNode root = Constants.objectMapper.readTree(file);
     if (root.isArray()) {
       Iterator<JsonNode> iterator = root.elements();
       Schema schema = null;
@@ -49,8 +54,7 @@ public class SchemaReader {
   }
 
   public List getSchemas() throws Exception {
-    Resource resource = ctx.getResource(schemaLocation);
-    return Constants.objectMapper.readValue(resource.getInputStream(), List.class);
+	  return Constants.objectMapper.readValue(ResourceUtils.getFile(schemaLocation), List.class);
   }
 
   /**
@@ -92,7 +96,7 @@ public class SchemaReader {
           throw new SchemaException(
               "attribute with name [" + attribute.getName() + "] is required");
         }
-      } else {
+      } else { 
         SchemaAttributeType type = SchemaAttributeType.fromString(attribute.getType());
         if (type.equals(SchemaAttributeType.STRING)) {
           if (attribute.isMultiValued()) {

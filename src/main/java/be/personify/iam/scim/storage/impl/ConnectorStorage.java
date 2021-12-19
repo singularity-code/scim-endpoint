@@ -1,6 +1,20 @@
 package be.personify.iam.scim.storage.impl;
 
-import be.personify.iam.model.provisioning.TargetSystem;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 import be.personify.iam.provisioning.connectors.ConnectorConnection;
 import be.personify.iam.provisioning.connectors.ConnectorPool;
 import be.personify.iam.scim.schema.Schema;
@@ -11,18 +25,7 @@ import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.PropertyFactory;
 import be.personify.util.StringUtils;
 import be.personify.util.io.IOUtils;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import be.personify.util.provisioning.TargetSystem;
 
 public abstract class ConnectorStorage implements Storage {
 
