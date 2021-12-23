@@ -1,6 +1,5 @@
 package be.personify.iam.scim.schema;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,8 +10,9 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.ResourceUtils;
+import org.springframework.core.io.ResourceLoader;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -29,15 +29,18 @@ public class SchemaReader {
   @Value("${scim.schema.location}")
   private String schemaLocation; 
   
+  @Autowired
+  private ResourceLoader resourceLoader;
+  
 
   @PostConstruct
   public void read() throws Exception {
     logger.info("using schema location {} ", schemaLocation);
-    File file = ResourceUtils.getFile(schemaLocation);
-    if ( !file.exists() ) {
-    	throw new Exception("file " + file.getAbsolutePath() + " does not exist");
+    logger.info("resourceloader {}", resourceLoader);
+    if ( !resourceLoader.getResource(schemaLocation).exists() ) {
+    	throw new Exception("schema " + schemaLocation + " does not exist");
     }
-	JsonNode root = Constants.objectMapper.readTree(file);
+	JsonNode root = Constants.objectMapper.readTree(resourceLoader.getResource(schemaLocation).getInputStream());
     if (root.isArray()) {
       Iterator<JsonNode> iterator = root.elements();
       Schema schema = null;
@@ -54,7 +57,7 @@ public class SchemaReader {
   }
 
   public List getSchemas() throws Exception {
-	  return Constants.objectMapper.readValue(ResourceUtils.getFile(schemaLocation), List.class);
+	  return Constants.objectMapper.readValue(resourceLoader.getResource(schemaLocation).getInputStream(), List.class);
   }
 
   /**
