@@ -47,10 +47,12 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<spring-boot-starter-version>2.6.1</spring-boot-starter-version>
-		<personify.provisioning.version>1.3.0.RELEASE</personify.provisioning.version>
+		<spring-boot-starter-version>2.6.2</spring-boot-starter-version>
+		<personify.provisioning.version>1.3.2.RELEASE</personify.provisioning.version>
 		<junit.version>4.12</junit.version>
-		<postgress.version>9.1-901-1.jdbc4</postgress.version>
+<!-- 		<postgress.version>9.1-901-1.jdbc4</postgress.version> -->
+		<postgress.version>42.3.1</postgress.version>
+		
 		<!-- <mysql-connector.version>5.1.39</mysql-connector.version> -->
 		<mysql-connector.version>8.0.26</mysql-connector.version>
 	</properties>
@@ -99,13 +101,13 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-crypto</artifactId>
-			<version>5.3.4.RELEASE</version>
+			<version>5.6.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
-			<version>3.12.7</version>
+			<version>3.12.10</version>
 		</dependency>
 
 		<dependency>
@@ -113,11 +115,12 @@
 			<artifactId>personify-provisioning</artifactId>
 			<version>${personify.provisioning.version}</version>
 		</dependency>
-
+		
+		
 		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>${postgress.version}</version>
+    		<groupId>org.postgresql</groupId>
+    		<artifactId>postgresql</artifactId>
+    		<version>${postgress.version}</version>
 		</dependency>
 
 		<dependency>
@@ -129,13 +132,13 @@
 		<dependency>
 			<groupId>com.orientechnologies</groupId>
 			<artifactId>orientdb-core</artifactId>
-			<version>3.1.2</version>
+			<version>3.1.5</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.couchbase.client</groupId>
 			<artifactId>java-client</artifactId>
-			<version>3.0.2</version>
+			<version>3.2.4</version>
 		</dependency>
 
 
@@ -249,6 +252,19 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			<plugin>
+              <groupId>org.owasp</groupId>
+              <artifactId>dependency-check-maven</artifactId>
+              <version>6.5.1</version>
+              <executions>
+                  <execution>
+                      <goals>
+                          <goal>check</goal>
+                      </goals>
+                  </execution>
+              </executions>
+            </plugin>
 
 
 
