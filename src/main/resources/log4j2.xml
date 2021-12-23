@@ -1,0 +1,33 @@
+<!DOCTYPE log4j:configuration SYSTEM "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd">
+<Configuration status="warn" name="personify-backend-authentication" packages="">
+    <Properties>
+        <Property name="basePath">./</Property>
+    </Properties>
+    <Appenders>
+    	<Console name="stdout" target="SYSTEM_OUT">
+            <PatternLayout><Pattern>%d %p %c{1.} [%t] %m%n</Pattern></PatternLayout>
+        </Console>
+	    <RollingFile name="fileLogger" fileName="${basePath}/scim-server.log" filePattern="${basePath}/scim-server-%d{yyyy-MM-dd}.log">
+            <PatternLayout><Pattern>%d %p %c{1.} [%t] %m%n</Pattern></PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+            </Policies>
+        </RollingFile>
+    </Appenders>
+  <Loggers>
+    <Root level="info">
+      <AppenderRef ref="stdout"/>
+      <AppenderRef ref="fileLogger"/>
+    </Root>
+    <Logger name="org.springframework" level="INFO" additivity="false">
+         <AppenderRef ref="fileLogger" />
+    </Logger>
+    <Logger name="be.personify.iam" level="INFO" additivity="false">
+         <AppenderRef ref="fileLogger" />
+         <AppenderRef ref="stdout"/>
+    </Logger>
+    <Logger name="be.personify.iam.api" level="INFO" additivity="false">
+         <AppenderRef ref="fileLogger" />
+    </Logger>
+  </Loggers>
+</Configuration>

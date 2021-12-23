@@ -415,7 +415,7 @@ public class Controller {
 	
 	protected void createMeta(Date date, String id, Map<String, Object> user, String resourceType, String location) {
 
-		logger.info("create meta {} {} {} {} {}",  date, id, user, resourceType, location);
+		logger.debug("create meta {} {} {} {} {}",  date, id, user, resourceType, location);
 		Map<String, String> map = new HashMap<String, String>();
 		String formattedDate = new SimpleDateFormat(Constants.DATEFORMAT_STRING, Locale.US).format(date);
 		if (user.containsKey(Constants.KEY_META)) {
