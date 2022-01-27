@@ -106,9 +106,7 @@
       "primaryKey" : false
     } ],
     "connectorConfiguration" : {
-      "connectorImplementation" : {
-        "className" : "be.personify.iam.provisioning.connectors.LdapConnector"
-      },
+      "connectorType" : "LDAP",
       "poolSize" : ${scim.storage.ldap.poolSize},
       "configuration" : {
         "password" : "${scim.storage.ldap.password}",
