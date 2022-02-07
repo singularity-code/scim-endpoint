@@ -116,7 +116,9 @@
         "ssl" : "${scim.storage.ldap.ssl}",
         "username" : "${scim.storage.ldap.username}",
         "userObjectClasses" : "${scim.storage.ldap.userObjectClasses}",
-        "groupObjectClasses" : "${scim.storage.ldap.groupObjectClasses}"
+        "groupObjectClasses" : "${scim.storage.ldap.groupObjectClasses}",
+        "truststore" : "${scim.storage.ldap.trustStore}",
+        "truststorePassword" : "${scim.storage.ldap.trustStorePassword}"
       }
     }
   }
