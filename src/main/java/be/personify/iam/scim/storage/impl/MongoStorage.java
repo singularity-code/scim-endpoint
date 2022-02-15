@@ -37,15 +37,11 @@ public class MongoStorage implements Storage {
 	private String constr;
 
 	@Value("${scim.storage.mongo.users.database}")
-	private String userDatabase = "users";
+	private String database = "scim-database";
 
 	@Value("${scim.storage.mongo.users.collection}")
 	private String userCollection = "users";
 	
-	
-	@Value("${scim.storage.mongo.groups.database}")
-	private String groupDatabase = "groups";
-
 	@Value("${scim.storage.mongo.groups.collection}")
 	private String groupCollection = "groups";
 	
@@ -157,9 +153,11 @@ public class MongoStorage implements Storage {
 			List<String> includeAttributes) {
 
 		Document query = new Document();
-		if (searchCriteria != null && searchCriteria.getCriteria() != null && searchCriteria.getCriteria().size() > 0) {
-			searchCriteria.getCriteria().forEach(sc -> genQuery(query, sc));
+		if ( searchCriteria == null ) {
+			searchCriteria = new SearchCriteria();
 		}
+		//searchCriteria.getCriteria().add(new SearchCriterium("resourceType", type));
+		searchCriteria.getCriteria().forEach(sc -> genQuery(query, sc));
 
 		FindIterable<Document> finds = find(start, count, includeAttributes, query);
 		sort(sortBy, sortOrder, finds);
@@ -257,7 +255,7 @@ public class MongoStorage implements Storage {
 		logger.info("initializing store of type {}", type);
 		MongoClient client = MongoClients.create(constr);
 		if ( type.equals(Constants.RESOURCE_TYPE_USER)) {
-			col = client.getDatabase(userDatabase).getCollection(userCollection);
+			col = client.getDatabase(database).getCollection(userCollection);
 			try {
 				col.createIndex(Indexes.descending(userName), new IndexOptions().background(true).unique(true));
 			} catch (Exception e) {
@@ -265,7 +263,7 @@ public class MongoStorage implements Storage {
 			}
 		}
 		else if ( type.equalsIgnoreCase(Constants.RESOURCE_TYPE_GROUP)) {
-			col = client.getDatabase(groupDatabase).getCollection(groupCollection);
+			col = client.getDatabase(database).getCollection(groupCollection);
 			try {
 				//col.createIndex(Indexes.descending(userName), new IndexOptions().background(true).unique(true));
 			} catch (Exception e) {
