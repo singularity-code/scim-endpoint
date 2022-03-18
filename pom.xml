@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>be.personify.iam</groupId>
 	<artifactId>personify-scim-server</artifactId>
-	<version>1.2.8.RELEASE</version>
+	<version>1.2.9.RELEASE</version>
 	<packaging>jar</packaging>
 	<licenses>
 		<license>
@@ -268,27 +268,27 @@
 
 
 
-<!-- 			<plugin> -->
-<!-- 				<groupId>com.spotify</groupId> -->
-<!-- 				<artifactId>dockerfile-maven-plugin</artifactId> -->
-<!-- 				<version>1.4.13</version> -->
-<!-- 				<executions> -->
-<!-- 					<execution> -->
-<!-- 						<id>default</id> -->
-<!-- 						<goals> -->
-<!-- 							<goal>build</goal> -->
-<!-- 							<goal>push</goal> -->
-<!-- 						</goals> -->
-<!-- 					</execution> -->
-<!-- 				</executions> -->
-<!-- 				<configuration> -->
-<!-- 					<repository>personify/${project.artifactId}</repository> -->
-<!-- 					<tag>${project.version}</tag> -->
-<!-- 					<buildArgs> -->
-<!-- 						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE> -->
-<!-- 					</buildArgs> -->
-<!-- 				</configuration> -->
-<!-- 			</plugin> -->
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<version>1.4.13</version>
+				<executions>
+					<execution>
+						<id>default</id>
+						<goals>
+							<goal>build</goal>
+							<goal>push</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<repository>personify/${project.artifactId}</repository>
+					<tag>${project.version}</tag>
+					<buildArgs>
+						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+					</buildArgs>
+				</configuration>
+			</plugin>
 
 		</plugins>
 	</build>

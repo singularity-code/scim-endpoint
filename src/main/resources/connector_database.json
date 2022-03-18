@@ -6,7 +6,7 @@
     "familyname" : "name.familyName",
     "firstname" : "name.givenName",
     "externalid" : "externalId",
-    "mail" : "emails.value",
+    "mail" : "emails",
     "datecreated" : "meta.created"
   },
   "targetSystem" : {
@@ -67,7 +67,7 @@
     }, 
     {
       "name" : "mail",
-      "attributeType" : "STRING",
+      "attributeType" : "MAP",
       "readable" : true,
       "writable" : true,
       "multiValued" : true,
@@ -83,9 +83,7 @@
     }
    ],
     "connectorConfiguration" : {
-      "connectorImplementation" : {
-        "className" : "be.personify.iam.provisioning.connectors.DatabaseConnector"
-      },
+      "connectorType" : "DATABASE",
       "poolSize" : ${scim.storage.database.poolSize},
       "configuration" : {
         "jdbcUrl" : "${scim.storage.database.jdbcUrl}",
@@ -93,7 +91,12 @@
         "password" : "${scim.storage.database.password}",
         "driver" : "${scim.storage.database.driver}",
         "table" : "${scim.storage.database.table}",
-        "test-query" : "${scim.storage.database.test-query}"
+        "test-query" : "${scim.storage.database.test-query}",
+        "mail_table" : "create table scim_personify_email ( id INT PRIMARY KEY AUTO_INCREMENT, userid varchar(255), value varchar(255), type varchar(255), primary_ boolean, display varchar(255) )",
+        "mail_select" : "select value, type, display, primary_ as 'primary' from scim_personify_email where userid = '${id}'",
+		"mail_insert" : "insert into scim_personify_email ( userid, value, type, primary_,display ) values ('${id}', '${value}', '${type}', ${primary}, '${display}')",
+		"mail_delete" : "delete from scim_personify_email where userid = '${id}'",
+		"mail_index_1" : "create index idx_scim_personify_email_userid on scim_personify_email (userid)"
       }
     }
   }

@@ -1,3 +1,3 @@
-docker tag personify/personify-scim-server:1.2.8.RELEASE personify/personify-scim-server:latest
-docker push personify/personify-scim-server:1.2.8.RELEASE
+docker tag personify/personify-scim-server:1.2.9.RELEASE personify/personify-scim-server:latest
+docker push personify/personify-scim-server:1.2.9.RELEASE
 docker push personify/personify-scim-server:latest

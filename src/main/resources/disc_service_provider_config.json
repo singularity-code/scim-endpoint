@@ -1,6 +1,7 @@
 {
-    "schemas":
-      ["urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig"],
+    "schemas": [
+    	"urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig"
+    ],
     "documentationUri": "https://scim.personify.be/public/index.html",
     "patch": {
       "supported":true
@@ -26,8 +27,7 @@
     "authenticationSchemes": [
       {
         "name": "OAuth Bearer Token",
-        "description":
-          "Authentication scheme using the OAuth Bearer Token Standard",
+        "description": "Authentication scheme using the OAuth Bearer Token Standard",
         "specUri": "http://www.rfc-editor.org/info/rfc6750",
         "documentationUri": "http://example.com/help/oauth.html",
         "type": "oauthbearertoken",
@@ -35,8 +35,7 @@
       },
       {
         "name": "HTTP Basic",
-        "description":
-          "Authentication scheme using the HTTP Basic Standard",
+        "description": "Authentication scheme using the HTTP Basic Standard",
         "specUri": "http://www.rfc-editor.org/info/rfc2617",
         "documentationUri": "https://scim.personify.be/public/httpBasic.html",
         "type": "httpbasic"
