@@ -48,7 +48,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<spring-boot-starter-version>2.6.2</spring-boot-starter-version>
-		<personify.provisioning.version>1.3.2.RELEASE</personify.provisioning.version>
+		<personify.provisioning.version>1.3.4.RELEASE</personify.provisioning.version>
 		<junit.version>4.12</junit.version>
 <!-- 		<postgress.version>9.1-901-1.jdbc4</postgress.version> -->
 		<postgress.version>42.3.1</postgress.version>

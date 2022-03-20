@@ -37,18 +37,21 @@ public abstract class ConnectorStorage implements Storage {
 	private PropertyFactory propertyFactory;
 
 	protected void testConnection(TargetSystem targetSystem) {
+		ConnectorConnection connection = null;
 		try {
-			ConnectorConnection connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
+			connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
 			if (connection != null) {
 				connection.getConnector().ping();
 				connection.close();
 				logger.info("successfully tested connection");
-			} else {
-				throw new ConfigurationException("can not lease connection");
 			}
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			logger.error("can not test connection", e);
 			throw new ConfigurationException("can not lease connection " + e.getMessage());
+		}
+		if (connection == null) {
+			throw new ConfigurationException("can not lease connection");
 		}
 	}
 
@@ -69,8 +72,8 @@ public abstract class ConnectorStorage implements Storage {
 		return mm;
 	}
 
-	protected Map<String, Object> convertNativeMap(Map<String, Object> nativeMap, Map<String, String> mapping,
-			Map<String, String> depthMapping, List<String> excludes, Schema schema) {
+	protected Map<String, Object> convertNativeMap(Map<String, Object> nativeMap, Map<String, String> mapping, Map<String, String> depthMapping, List<String> excludes, Schema schema) {
+		
 		Map<String, Object> scimMap = new HashMap<String, Object>();
 		for (String key : mapping.keySet()) {
 			if (nativeMap.containsKey(key)) {
