@@ -7,13 +7,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.util.Assert;
 
+import be.personify.iam.scim.init.Application;
 import be.personify.iam.scim.storage.impl.MemoryStorage;
+import be.personify.util.SearchCriteria;
+
 
 public class MemoryStorageTest {
 	
 	private static final MemoryStorage storage = new MemoryStorage();
+	
+	private static final Logger logger = LogManager.getLogger(MemoryStorageTest.class);
+	
+	static {
+		storage.initialize("Users");
+	}
 	
 	
 
@@ -85,6 +98,65 @@ public class MemoryStorageTest {
 		if ( !storage.getRecursiveObject(m, "name.familyName").equals("Simpson")) {
 			fail("not equals");
 		};
+	}
+	
+	
+	
+	@Test
+	public void testCreateSearchDelete() {
+		Map<String,Object> map = new HashMap<String, Object>();
+		map.put("userName", "username");
+		map.put("externalId", "externalId");
+		
+		//create
+		try {
+			storage.create("atest", map);
+		}
+		catch( Exception e) {
+			e.printStackTrace();
+			fail("can not create " +  e.getMessage());
+			return;
+		}
+		
+		//test get
+		try {
+			Assert.notNull(storage.get("atest"), "can not be null");
+		}
+		catch( Exception e) {
+			fail("can not get " +  e.getMessage());
+			return;
+		}
+		
+		//test search
+		try {
+			List<Map> search = storage.search(new SearchCriteria(), 1, 10, null, null);
+			long count = storage.count(new SearchCriteria());
+			logger.info(" count {} search {}", count, search);
+		}
+		catch( Exception e) {
+			e.printStackTrace();
+			fail("can not get " +  e.getMessage());
+			return;
+		}
+		
+		//delete
+		try {
+			Assert.isTrue(storage.delete("atest"), "delete is not truel");
+		}
+		catch( Exception e) {
+			fail("can not delete " +  e.getMessage());
+			return;
+		}
+		
+		//test delete
+		try {
+			Assert.isNull(storage.get("atest"), "must be null");
+		}
+		catch( Exception e) {
+			fail("can not get " +  e.getMessage());
+			return;
+		}
+		
 	}
 	
 	
