@@ -142,17 +142,27 @@
 			<version>${mysql-connector.version}</version>
 		</dependency>
 
+		<!--  they first have top check their dependencies, jar becomes too big includes graal stuuf -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.orientechnologies</groupId> -->
+<!-- 			<artifactId>orientdb-core</artifactId> -->
+<!-- 			<version>${orientdb-core}</version> -->
+<!-- 			<exclusions> -->
+<!-- 				<exclusion> -->
+<!-- 					<groupId>com.fasterxml.jackson.core</groupId> -->
+<!-- 					<artifactId>jackson-core</artifactId> -->
+<!-- 				</exclusion> -->
+<!-- 			</exclusions> -->
+<!-- 			<scope>provided</scope> -->
+<!-- 		</dependency> -->
+		
+		
 		<dependency>
 			<groupId>com.orientechnologies</groupId>
 			<artifactId>orientdb-core</artifactId>
-			<version>${orientdb-core}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.core</groupId>
-					<artifactId>jackson-core</artifactId>
-				</exclusion>
-			</exclusions>
+			<version>3.1.5</version>
 		</dependency>
+		
 
 		<dependency>
 			<groupId>com.couchbase.client</groupId>

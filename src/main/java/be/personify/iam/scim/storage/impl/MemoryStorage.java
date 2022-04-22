@@ -147,7 +147,7 @@ public class MemoryStorage implements Storage {
 		}
 
 		if (count < searchCriteria.size()) {
-			logger.info("not all criteria are found in contraints");
+			logger.debug("not all criteria are found in contraints");
 			for (Map<String, Object> object : storage.values()) {
 				if ( MemoryStorageUtil.objectMatchesCriteria(searchCriteria, object)) {
 					totalCount++;

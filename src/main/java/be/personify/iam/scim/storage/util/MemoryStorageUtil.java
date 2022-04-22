@@ -104,7 +104,7 @@ public class MemoryStorageUtil {
 	
 	
 	private static boolean evaluate(Object firstValue, Object secondValue, SearchOperation searchOperation) {
-		logger.info("evaluating {} {} {} ", firstValue, secondValue, searchOperation);
+		logger.debug("evaluating {} {} {} ", firstValue, secondValue, searchOperation);
 		if (searchOperation == SearchOperation.EQUALS) {
 			return firstValue.equals(secondValue);
 		} else if (searchOperation == SearchOperation.NOT_EQUALS) {
