@@ -1,15 +1,5 @@
 package be.personify.iam.scim.storage.impl;
 
-import be.personify.iam.scim.storage.ConstraintViolationException;
-import be.personify.iam.scim.storage.DataException;
-import be.personify.iam.scim.storage.SortOrder;
-import be.personify.iam.scim.storage.Storage;
-import be.personify.iam.scim.util.Constants;
-import be.personify.iam.scim.util.PropertyFactory;
-import be.personify.util.SearchCriteria;
-import be.personify.util.SearchCriterium;
-import be.personify.util.SearchOperation;
-import be.personify.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,9 +9,20 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import be.personify.iam.scim.storage.ConstraintViolationException;
+import be.personify.iam.scim.storage.SortOrder;
+import be.personify.iam.scim.storage.Storage;
+import be.personify.iam.scim.storage.util.MemoryStorageUtil;
+import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.PropertyFactory;
+import be.personify.util.SearchCriteria;
+import be.personify.util.SearchCriterium;
+import be.personify.util.StringUtils;
 
 /**
  * Sample storage implementation that stores data into a volatile memory store
@@ -84,16 +85,16 @@ public class MemoryStorage implements Storage {
 	}
 
 	@Override
-	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy,
-			String sortOrderString) {
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString) {
 		return search(searchCriteria, start, count, sortBy, sortOrderString, null);
 	}
 	
 
+	
 	@Override
-	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString, 	List<String> includeAttributes) {
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString, List<String> includeAttributes) {
 		List<Map> result = null;
-		if (searchCriteria == null || searchCriteria.getCriteria() == null || searchCriteria.getCriteria().size() == 0) {
+		if (searchCriteria == null || searchCriteria.getCriteria() == null || searchCriteria.size() == 0) {
 			result = new ArrayList<Map>(storage.values());
 		}
 		else {
@@ -148,14 +149,7 @@ public class MemoryStorage implements Storage {
 		if (count < searchCriteria.size()) {
 			logger.info("not all criteria are found in contraints");
 			for (Map<String, Object> object : storage.values()) {
-				int criteriaCount = 0;
-				for (SearchCriterium criterium : searchCriteria.getCriteria()) {
-					Object value = getRecursiveObject(object, criterium.getKey());
-					if (matchValue(value, criterium)) {
-						criteriaCount++;
-					}
-				}
-				if (criteriaCount == searchCriteria.getCriteria().size()) {
+				if ( MemoryStorageUtil.objectMatchesCriteria(searchCriteria, object)) {
 					totalCount++;
 				}
 			}
@@ -192,14 +186,7 @@ public class MemoryStorage implements Storage {
 		if (count < searchCriteria.size()) {
 			logger.info("not all criteria are found in contraints");
 			for (Map<String, Object> object : storage.values()) {
-				int criteriaCount = 0;
-				for (SearchCriterium criterium : searchCriteria.getCriteria()) {
-					Object value = getRecursiveObject(object, criterium.getKey());
-					if (matchValue(value, criterium)) {
-						criteriaCount++;
-					}
-				}
-				if (criteriaCount == searchCriteria.getCriteria().size()) {
+				if ( MemoryStorageUtil.objectMatchesCriteria(searchCriteria, object)) {
 					result.add(object);
 				}
 			}
@@ -215,81 +202,9 @@ public class MemoryStorage implements Storage {
 
 	
 	
-	private boolean matchValue(Object value, SearchCriterium criterium) {
-		Object criteriumValue = criterium.getValue();
-		if (value instanceof List) {
-			List<Object> l = (List) value;
-			boolean found = false;
-			for (Object o : l) {
-				if (evaluate(o, criteriumValue, criterium.getSearchOperation())) {
-					found = true;
-				}
-			}
-			return found;
-		} else {
-			if (value == null) {
-				throw new DataException("criterium with key " + criterium.getKey() + " not valid");
-			}
-			return evaluate(value, criteriumValue, criterium.getSearchOperation());
-		}
-	}
+	
 
 	
-	
-	private boolean evaluate(Object firstValue, Object secondValue, SearchOperation searchOperation) {
-		if (searchOperation == SearchOperation.EQUALS) {
-			return firstValue.equals(secondValue);
-		} else if (searchOperation == SearchOperation.NOT_EQUALS) {
-			return !firstValue.equals(secondValue);
-		} else if (searchOperation == SearchOperation.STARTS_WITH) {
-			return firstValue.toString().startsWith(secondValue.toString());
-		} else if (searchOperation == SearchOperation.CONTAINS) {
-			return firstValue.toString().contains(secondValue.toString());
-		} else if (searchOperation == SearchOperation.ENDS_WITH) {
-			return firstValue.toString().endsWith(secondValue.toString());
-		} else if (searchOperation == SearchOperation.PRESENT) {
-			return firstValue != null;
-		} else if (searchOperation == SearchOperation.GREATER_THEN) {
-			return firstValue.toString().compareTo(secondValue.toString()) > 0 ? true : false;
-		} else if (searchOperation == SearchOperation.GREATER_THEN_OR_EQUAL) {
-			return firstValue.toString().compareTo(secondValue.toString()) >= 0 ? true : false;
-		} else if (searchOperation == SearchOperation.LESS_THEN) {
-			return firstValue.toString().compareTo(secondValue.toString()) < 0 ? true : false;
-		} else if (searchOperation == SearchOperation.LESS_THEN_EQUAL) {
-			return firstValue.toString().compareTo(secondValue.toString()) <= 0 ? true : false;
-		}
-		return false;
-	}
-
-	public Object getRecursiveObject(Map<String, Object> object, String key) {
-		if (key.contains(StringUtils.DOT)) {
-			Object o = null;
-			int index = 0;
-			while ((index = key.indexOf(StringUtils.DOT)) > 0) {
-				String part = key.substring(0, index);
-				if (o == null) {
-					o = object.get(part);
-				} else {
-					// TODO
-				}
-				key = key.substring(index, key.length());
-			}
-			key = key.substring(1, key.length());
-			if (o instanceof List) {
-				List<Object> valueList = new ArrayList<>();
-				List<Map> mapList = (List) o;
-				for (Map m : mapList) {
-					valueList.add(m.get(key));
-				}
-				return valueList;
-			} else if (o instanceof Map) {
-				Map map = (Map) o;
-				return map.get(key);
-			}
-			return o;
-		}
-		return object.get(key);
-	}
 
 	private List<Map> sort(List<Map> result, String sortBy, SortOrder sortOrder) {
 
@@ -414,7 +329,7 @@ public class MemoryStorage implements Storage {
 			try {
 				long start = System.currentTimeMillis();
 				synchronized (storage) {
-					Constants.objectMapper.writeValue(f, storage);
+					Constants.objectMapper.writeValue(f, storage); 
 				}
 				logger.debug("{} saved in {} ms", f.getAbsolutePath(), (System.currentTimeMillis() - start));
 			} catch (IOException e) {

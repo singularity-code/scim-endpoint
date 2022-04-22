@@ -62,6 +62,7 @@ public class MongoStorage implements Storage {
 
 	private MongoCollection<Document> col;
 
+	
 	@Override
 	public Map<String, Object> get(String id) {
 		Document query = new Document(oid, new BsonBinary(UUID.fromString(id)));
@@ -72,11 +73,11 @@ public class MongoStorage implements Storage {
 		}
 		return doc;
 	}
+	
 
 	@Override
 	public Map<String, Object> get(String id, String version) {
-		Document query = new Document(oid, new BsonBinary(UUID.fromString(id))).append(Constants.KEY_META,
-				new Document(Constants.KEY_VERSION, version));
+		Document query = new Document(oid, new BsonBinary(UUID.fromString(id))).append(Constants.KEY_META, new Document(Constants.KEY_VERSION, version));
 		Document doc = col.find(query).first();
 		if (doc != null) {
 			doc.remove(oid);
@@ -135,6 +136,7 @@ public class MongoStorage implements Storage {
 		col.insertOne(doc);
 	}
 
+	
 	@Override
 	public void update(String id, Map<String, Object> object) {
 		Document doc = new Document(object);
@@ -149,8 +151,7 @@ public class MongoStorage implements Storage {
 	}
 
 	@Override
-	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder,
-			List<String> includeAttributes) {
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes) {
 
 		Document query = new Document();
 		if ( searchCriteria == null ) {
@@ -172,6 +173,7 @@ public class MongoStorage implements Storage {
 		return all;
 	}
 
+	
 	private FindIterable<Document> find(int start, int count, List<String> includeAttributes, Document query) {
 		FindIterable<Document> finds;
 		int skip = (start - 1) * count;
@@ -187,6 +189,7 @@ public class MongoStorage implements Storage {
 		return finds;
 	}
 
+	
 	private void sort(String sortBy, String sortOrder, FindIterable<Document> finds) {
 		if (sortBy != null) {
 			int order = 1;
@@ -199,6 +202,7 @@ public class MongoStorage implements Storage {
 		}
 	}
 
+	
 	@Override
 	public long count(SearchCriteria searchCriteria) {
 		Document query = new Document();

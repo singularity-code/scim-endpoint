@@ -11,6 +11,7 @@ import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.ScimErrorType;
+import be.personify.iam.scim.util.SearchCriteriaUtil;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
 import be.personify.util.SearchOperation;
@@ -52,6 +53,8 @@ public class Controller {
 
 	@Autowired
 	private StorageImplementationFactory storageImplementationFactory;
+	
+	private SearchCriteriaUtil searchCriteriaUtil = new SearchCriteriaUtil();
 
 	@Autowired
 	private SchemaReader schemaReader;
@@ -294,7 +297,7 @@ public class Controller {
 		long start = System.currentTimeMillis();
 
 		try {
-			SearchCriteria searchCriteria = composeSearchCriteria(filter);
+			SearchCriteria searchCriteria = searchCriteriaUtil.composeSearchCriteria(filter);
 			Storage storage = storageImplementationFactory.getStorageImplementation(schema);
 
 			List<String> includeList = getListFromString(attributes);
@@ -336,55 +339,7 @@ public class Controller {
 	
 	
 
-	private SearchCriteria composeSearchCriteria(String filter) throws InvalidFilterException {
-		SearchCriteria searchCriteria = new SearchCriteria();
-		if (!StringUtils.isEmpty(filter)) {
-			if (filter.contains(Constants.AND_WITH_SPACES)) {
-				String[] filterComponent = filter.split(Constants.AND_WITH_SPACES);
-				for (String c : filterComponent) {
-					searchCriteria.getCriteria().add(extractCriteriumFromString(c, searchCriteria));
-				}
-			} 
-			else {
-				searchCriteria.getCriteria().add(extractCriteriumFromString(filter, searchCriteria));
-			}
-		}
-		return searchCriteria;
-	}
 	
-	
-
-	private SearchCriterium extractCriteriumFromString(String filter, SearchCriteria searchCriteria) throws InvalidFilterException {
-
-		String[] filterParts = filter.split(StringUtils.SPACE);
-		SearchOperation operation = null;
-
-		if (filterParts.length != 3) {
-			if (filterParts.length == 2) {
-				operation = SearchOperation.operationFromString(filterParts[1]);
-				if (operation != SearchOperation.PRESENT) {
-					throw new InvalidFilterException("when a filterpart consists out of 2 parts, the present operator (pr) has to be used");
-				}
-			} 
-			else {
-				throw new InvalidFilterException("a filterpart should consist out of 3 parts separated by a space or 2 parts if present operator (pr) is used");
-			}
-		}
-		else {
-			operation = SearchOperation.operationFromString(filterParts[1]);
-		}
-
-		if (operation == null) {
-			throw new InvalidFilterException("no valid operator found for [" + filterParts[1] + "]");
-		}
-		if (filterParts.length == 3) {
-			String value = filterParts[2].replaceAll("\"", StringUtils.EMPTY_STRING);
-			return new SearchCriterium(filterParts[0], value, operation);
-		}
-		else {
-			return new SearchCriterium(filterParts[0], null, operation);
-		}
-	}
 	
 	
 

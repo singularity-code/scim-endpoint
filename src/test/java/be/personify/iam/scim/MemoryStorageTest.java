@@ -10,11 +10,10 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.Assert;
 
-import be.personify.iam.scim.init.Application;
 import be.personify.iam.scim.storage.impl.MemoryStorage;
+import be.personify.iam.scim.storage.util.MemoryStorageUtil;
 import be.personify.util.SearchCriteria;
 
 
@@ -45,7 +44,7 @@ public class MemoryStorageTest {
 		m.put("emails", list);
 		
 				
-		Object ss = storage.getRecursiveObject(m, "emails.mail");
+		Object ss = MemoryStorageUtil.getRecursiveObject(m, "emails.mail");
 		if ( ss instanceof List ) {
 			if (!((List)ss).contains("mail1")) {
 				fail("not equals");
@@ -74,7 +73,7 @@ public class MemoryStorageTest {
 		m.put("emails", list);
 		
 				
-		Object ss = storage.getRecursiveObject(m, "emails.mail");
+		Object ss = MemoryStorageUtil.getRecursiveObject(m, "emails.mail");
 		if ( ss instanceof List ) {
 			if (!((List)ss).contains("mail2")) {
 				fail("not equals");
@@ -95,7 +94,7 @@ public class MemoryStorageTest {
 		
 		m.put("name", v1);
 		
-		if ( !storage.getRecursiveObject(m, "name.familyName").equals("Simpson")) {
+		if ( !MemoryStorageUtil.getRecursiveObject(m, "name.familyName").equals("Simpson")) {
 			fail("not equals");
 		};
 	}
