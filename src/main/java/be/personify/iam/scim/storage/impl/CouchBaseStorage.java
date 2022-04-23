@@ -23,11 +23,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 
-/** 
+/**
  * 
- * @author wouter vdb 
+ * @author wouter vdb
  * 
- * Couchbase storage implementation
+ *         Couchbase storage implementation
  * 
  *
  **/
@@ -70,13 +70,11 @@ public class CouchBaseStorage implements Storage {
 	public void create(String id, Map<String, Object> object) throws ConstraintViolationException {
 		try {
 			bucket.defaultCollection().insert(id, object);
-		}
-		catch (DocumentExistsException dup) {
+		} catch (DocumentExistsException dup) {
 			throw new ConstraintViolationException(dup.getMessage());
 		}
 	}
 
-	
 	/**
 	 * Gets the entry by id
 	 */
@@ -86,8 +84,6 @@ public class CouchBaseStorage implements Storage {
 		return bucket.defaultCollection().get(id).contentAs(Map.class);
 	}
 
-	
-	
 	/**
 	 * Delete the entry by id
 	 */
@@ -97,8 +93,6 @@ public class CouchBaseStorage implements Storage {
 		return true;
 	}
 
-	
-	
 	/**
 	 * Updates the thing
 	 */
@@ -106,23 +100,21 @@ public class CouchBaseStorage implements Storage {
 	public void update(String id, Map<String, Object> object) {
 		try {
 			bucket.defaultCollection().upsert(id, object);
-		} 
-		catch (Exception dup) {
+		} catch (Exception dup) {
 			throw new DataException(dup.getMessage());
 		}
 	}
 
-	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder) {
 		return search(searchCriteria, start, count, sortBy, sortOrder, null);
 	}
-	
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes) {
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder,
+			List<String> includeAttributes) {
 		String query = queryAll;
 		if (includeAttributes != null) {
 			logger.info("includeAttributes present");
@@ -142,7 +134,8 @@ public class CouchBaseStorage implements Storage {
 		builder.append(LIMIT_WITH_SPACES + count + OFFSET_WITH_SPACES + (start - 1));
 		logger.info("query {}", builder);
 		try {
-			QueryResult result = cluster.query(builder.toString(),QueryOptions.queryOptions().parameters(namedParameters));
+			QueryResult result = cluster.query(builder.toString(),
+					QueryOptions.queryOptions().parameters(namedParameters));
 			List<Map> list = new ArrayList<>();
 			List<Map> maps = result.rowsAs(Map.class);
 			Iterator<Map> iter = maps.iterator();
@@ -150,16 +143,18 @@ public class CouchBaseStorage implements Storage {
 				Map m = iter.next();
 				if (m.containsKey(type)) {
 					list.add((Map) m.get(type));
-				}
+				} 
 				else {
 					list.add(m);
 				}
 			}
 			return list;
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new DataException(e.getMessage());
 		}
 	}
+	
 
 	@Override
 	public long count(SearchCriteria searchCriteria) {
@@ -169,6 +164,7 @@ public class CouchBaseStorage implements Storage {
 		QueryResult result = cluster.query(builder.toString(), QueryOptions.queryOptions().parameters(namedParameters));
 		return (Integer) result.rowsAs(Map.class).get(0).get(Constants.COUNT);
 	}
+	
 
 	private JsonObject composeNamedParameters(SearchCriteria searchCriteria) {
 		JsonObject namedParameters = JsonObject.create();
@@ -198,10 +194,14 @@ public class CouchBaseStorage implements Storage {
 		}
 		return sb;
 	}
+	
+	
 
 	private String safeSubAttribute(String s) {
 		return s.replace(StringUtils.DOT, StringUtils.EMPTY_STRING);
 	}
+	
+	
 
 	private Object searchOperationToString(SearchOperation searchOperation) {
 		if (searchOperation.equals(SearchOperation.EQUALS)) {
@@ -237,8 +237,7 @@ public class CouchBaseStorage implements Storage {
 			bucket = cluster.bucket(type);
 			queryAll = "select * from `" + type + "`";
 			querySelectCount = "select count(id) as count from `" + type + "`";
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ConfigurationException(e.getMessage());
 		}
