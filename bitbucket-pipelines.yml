@@ -5,11 +5,20 @@
 # You can specify a custom docker image from Docker Hub as your build environment.
 image: maven:3.6.1
 
+
+
 pipelines:
+
   default:
     - step:
-        caches:
-          - maven
-        script: # Modify the commands below to build your repository.
-          - mvn -B clean install -Dgpg.skip # -B batch mode makes Maven less verbose
-          - curl -X POST --user "${BB_AUTH_STRING}" "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"target/personify-scim-server-1.3.2.RELEASE.jar"
+        script:
+          - echo "This script runs on all branches that don't have any specific pipeline assigned in 'branches'."
+
+  branches:
+    main:
+      - step:
+          caches:
+            - maven
+          script: # Modify the commands below to build your repository.
+            - mvn -B clean install -Dgpg.skip # -B batch mode makes Maven less verbose
+            - curl -X POST --user "${BB_AUTH_STRING}" "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/downloads" --form files=@"target/personify-scim-server-1.3.2.RELEASE.jar"
