@@ -131,6 +131,34 @@ public class FilterTest {
 		}
 	}
 	
+	@Test
+	public void testFiveBis() {
+		String filter = "(emails co \"example.com\" or emails.value co \"example.org\") and userType eq \"Employee\"";
+		try {
+			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteria(filter);
+			Assert.assertTrue("size of the criteria", criteria.size() == 2 );
+			Assert.assertTrue("logical operator of the criteria", criteria.getOperator() == LogicalOperator.AND);
+			logger.info("crit {}", criteria);
+		}
+		catch( Exception e ) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testFiveTris() {
+		String filter = "(emails co \"example.com\" or emails.value co \"example.org\") or userType eq \"Employee\"";
+		try {
+			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteria(filter);
+			Assert.assertTrue("size of the criteria", criteria.size() == 2 );
+			Assert.assertTrue("logical operator of the criteria", criteria.getOperator() == LogicalOperator.OR);
+			logger.info("crit {}", criteria);
+		}
+		catch( Exception e ) {
+			e.printStackTrace();
+		}
+	}
+	
 	
 	@Test
 	public void testSix() {

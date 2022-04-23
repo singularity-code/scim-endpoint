@@ -41,6 +41,8 @@ public class SearchCriteriaUtil {
 		if ( StringUtils.isEmpty(filter)) {
 			return filter;
 		}
+		filter = filter.trim();
+		//logger.info("filter 1 {}", filter);
 		if ( filter.startsWith("and")) {
 			searchCriteria.setOperator(LogicalOperator.AND);
 			filter = filter.substring(3, filter.length());
@@ -51,6 +53,7 @@ public class SearchCriteriaUtil {
 		}
 		filter = filter.trim();
 		//it's a group
+		//logger.info("filter 2 {}", filter);
 		if ( filter.startsWith("(")) {
 			int closing = filter.indexOf(")");
 			String subFilter = filter.substring(1, closing);
