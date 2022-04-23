@@ -15,7 +15,7 @@ pipelines:
           - echo "This script runs on all branches that don't have any specific pipeline assigned in 'branches'."
 
   branches:
-    main:
+    master:
       - step:
           caches:
             - maven
