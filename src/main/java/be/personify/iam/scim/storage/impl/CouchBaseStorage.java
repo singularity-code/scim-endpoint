@@ -1,5 +1,25 @@
 package be.personify.iam.scim.storage.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+
+import com.couchbase.client.core.error.DocumentExistsException;
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Cluster;
+import com.couchbase.client.java.json.JsonObject;
+import com.couchbase.client.java.manager.bucket.BucketSettings;
+import com.couchbase.client.java.manager.bucket.BucketType;
+import com.couchbase.client.java.manager.query.CreatePrimaryQueryIndexOptions;
+import com.couchbase.client.java.query.QueryOptions;
+import com.couchbase.client.java.query.QueryResult;
+
 import be.personify.iam.scim.storage.ConfigurationException;
 import be.personify.iam.scim.storage.ConstraintViolationException;
 import be.personify.iam.scim.storage.DataException;
@@ -9,25 +29,12 @@ import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
 import be.personify.util.SearchOperation;
 import be.personify.util.StringUtils;
-import com.couchbase.client.core.error.DocumentExistsException;
-import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.Cluster;
-import com.couchbase.client.java.json.JsonObject;
-import com.couchbase.client.java.query.QueryOptions;
-import com.couchbase.client.java.query.QueryResult;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Value;
 
-/** 
+/**
  * 
- * @author wouter vdb 
+ * @author wouter vdb
  * 
- * Couchbase storage implementation
+ *         Couchbase storage implementation
  * 
  *
  **/
@@ -43,6 +50,7 @@ public class CouchBaseStorage implements Storage {
 	private static final String COUCHBASE_OPERATOR_GTE = " >= ";
 	private static final String COUCHBASE_OPERATOR_LT = " < ";
 	private static final String COUCHBASE_OPERATOR_LTE = " <= ";
+	private static final String COUCHBASE_OPERATOR_CONTAINS = " like ";
 
 	private static final Logger logger = LogManager.getLogger(CouchBaseStorage.class);
 
@@ -54,6 +62,9 @@ public class CouchBaseStorage implements Storage {
 
 	@Value("${scim.storage.couchbase.password}")
 	private String password;
+	
+	@Value("${scim.storage.couchbase.indexes}")
+	private String indexes;
 
 	private String type;
 
@@ -69,14 +80,14 @@ public class CouchBaseStorage implements Storage {
 	@Override
 	public void create(String id, Map<String, Object> object) throws ConstraintViolationException {
 		try {
-			bucket.defaultCollection().insert(id, object);
-		}
+			//bucket.defaultCollection().insert(id, object);
+			bucket.defaultCollection().upsert(id, object);
+		} 
 		catch (DocumentExistsException dup) {
 			throw new ConstraintViolationException(dup.getMessage());
 		}
 	}
 
-	
 	/**
 	 * Gets the entry by id
 	 */
@@ -86,8 +97,6 @@ public class CouchBaseStorage implements Storage {
 		return bucket.defaultCollection().get(id).contentAs(Map.class);
 	}
 
-	
-	
 	/**
 	 * Delete the entry by id
 	 */
@@ -97,8 +106,6 @@ public class CouchBaseStorage implements Storage {
 		return true;
 	}
 
-	
-	
 	/**
 	 * Updates the thing
 	 */
@@ -112,13 +119,11 @@ public class CouchBaseStorage implements Storage {
 		}
 	}
 
-	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder) {
 		return search(searchCriteria, start, count, sortBy, sortOrder, null);
 	}
-	
 
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -136,13 +141,16 @@ public class CouchBaseStorage implements Storage {
 			b.append(" from `" + type + "` ");
 			query = b.toString();
 		}
-		StringBuilder builder = constructQuery(searchCriteria, new StringBuilder(query));
-		JsonObject namedParameters = composeNamedParameters(searchCriteria);
+		if (searchCriteria != null && searchCriteria.size() > 0) {
+			query = query + Constants.WHERE;
+		}
+		StringBuilder builder = constructQuery(searchCriteria, new StringBuilder(query),0);
+		JsonObject namedParameters = composeNamedParameters(searchCriteria,0,null);
 
 		builder.append(LIMIT_WITH_SPACES + count + OFFSET_WITH_SPACES + (start - 1));
 		logger.info("query {}", builder);
 		try {
-			QueryResult result = cluster.query(builder.toString(),QueryOptions.queryOptions().parameters(namedParameters));
+			QueryResult result = cluster.query(builder.toString(), QueryOptions.queryOptions().parameters(namedParameters));
 			List<Map> list = new ArrayList<>();
 			List<Map> maps = result.rowsAs(Map.class);
 			Iterator<Map> iter = maps.iterator();
@@ -150,58 +158,91 @@ public class CouchBaseStorage implements Storage {
 				Map m = iter.next();
 				if (m.containsKey(type)) {
 					list.add((Map) m.get(type));
-				}
+				} 
 				else {
 					list.add(m);
 				}
 			}
 			return list;
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new DataException(e.getMessage());
 		}
 	}
+	
 
 	@Override
 	public long count(SearchCriteria searchCriteria) {
 		StringBuilder builder = new StringBuilder(querySelectCount);
-		builder = constructQuery(searchCriteria, builder);
-		JsonObject namedParameters = composeNamedParameters(searchCriteria);
+		if (searchCriteria != null && searchCriteria.size() > 0) {
+			builder.append(Constants.WHERE);
+		}
+		builder = constructQuery(searchCriteria, builder,0);
+		JsonObject namedParameters = composeNamedParameters(searchCriteria,0, null);
 		QueryResult result = cluster.query(builder.toString(), QueryOptions.queryOptions().parameters(namedParameters));
 		return (Integer) result.rowsAs(Map.class).get(0).get(Constants.COUNT);
 	}
+	
 
-	private JsonObject composeNamedParameters(SearchCriteria searchCriteria) {
-		JsonObject namedParameters = JsonObject.create();
+	private JsonObject composeNamedParameters(SearchCriteria searchCriteria, int count, JsonObject namedParameters) {
+		if ( namedParameters == null ) {
+			namedParameters = JsonObject.create();
+		}
 		for (SearchCriterium c : searchCriteria.getCriteria()) {
 			if (c.getSearchOperation().getParts() == 3) {
-				namedParameters.put(safeSubAttribute(c.getKey()), c.getValue());
+				if ( c.getSearchOperation() == SearchOperation.CONTAINS) {
+					namedParameters.put(safeSubAttribute(c.getKey() + StringUtils.UNDERSCORE + count), "%" + c.getValue() + "%");
+				}
+				else {
+					namedParameters.put(safeSubAttribute(c.getKey() + StringUtils.UNDERSCORE + count), c.getValue());
+				}
+				
+				count++;
 			}
+		}
+		for (SearchCriteria sc : searchCriteria.getGroupedCriteria()) {
+			namedParameters = composeNamedParameters( sc, count, namedParameters);
+			count = count + 100;
 		}
 		return namedParameters;
 	}
 
-	private StringBuilder constructQuery(SearchCriteria searchCriteria, StringBuilder sb) {
+	
+	private StringBuilder constructQuery(SearchCriteria searchCriteria, StringBuilder sb, int count) {
 		if (searchCriteria != null && searchCriteria.size() > 0) {
-			sb.append(Constants.WHERE);
 			SearchCriterium criterium = null;
-			for (int i = 0; i < searchCriteria.size(); i++) {
+			SearchCriteria sc = null;
+			for (int i = 0; i < searchCriteria.getCriteria().size(); i++) {
 				criterium = searchCriteria.getCriteria().get(i);
 				sb.append(criterium.getKey());
 				sb.append(searchOperationToString(criterium.getSearchOperation()));
 				if (criterium.getSearchOperation().getParts() == 3) {
-					sb.append("$" + safeSubAttribute(criterium.getKey()));
+					sb.append("$" + safeSubAttribute(criterium.getKey() + StringUtils.UNDERSCORE + count));
+					count++;
 				}
-				if (i < (searchCriteria.size() - 1)) {
-					sb.append(Constants.AND_WITH_SPACES);
+				if (i < (searchCriteria.size() - 1) || searchCriteria.getGroupedCriteria().size() > 1 ) {
+					sb.append(StringUtils.SPACE + searchCriteria.getOperator() + StringUtils.SPACE);
 				}
+			}
+			for (int i = 0; i < searchCriteria.getGroupedCriteria().size(); i++) {
+				sc = searchCriteria.getGroupedCriteria().get(i);
+				if ( i > 0 ) {
+					sb.append(StringUtils.SPACE + searchCriteria.getOperator() + StringUtils.SPACE);
+				}
+				sb.append("( " + constructQuery(sc, new StringBuilder(), count) + " )");
+				count = count + 100;
 			}
 		}
 		return sb;
 	}
+	
+	
 
 	private String safeSubAttribute(String s) {
 		return s.replace(StringUtils.DOT, StringUtils.EMPTY_STRING);
 	}
+	
+	
 
 	private Object searchOperationToString(SearchOperation searchOperation) {
 		if (searchOperation.equals(SearchOperation.EQUALS)) {
@@ -219,6 +260,9 @@ public class CouchBaseStorage implements Storage {
 		} else if (searchOperation.equals(SearchOperation.LESS_THEN_EQUAL)) {
 			return COUCHBASE_OPERATOR_LTE;
 		}
+		else if (searchOperation.equals(SearchOperation.CONTAINS)) {
+			return COUCHBASE_OPERATOR_CONTAINS;
+		}
 		throw new DataException("search operation " + searchOperation.name() + " not implemented");
 	}
 
@@ -234,7 +278,28 @@ public class CouchBaseStorage implements Storage {
 		try {
 			this.type = type;
 			cluster = Cluster.connect(host, user, password);
+			
+			//check if the bucket exists
+			Map<String, BucketSettings> allBuckets = cluster.buckets().getAllBuckets();
+			if ( !allBuckets.containsKey(type)) {
+				
+				//create bucket
+				cluster.buckets().createBucket(BucketSettings.create(type).bucketType(BucketType.COUCHBASE).ramQuotaMB(120).numReplicas(1).replicaIndexes(true).flushEnabled(true));
+				cluster.queryIndexes().createPrimaryIndex(type, CreatePrimaryQueryIndexOptions.createPrimaryQueryIndexOptions().indexName("ix_" + type));
+				
+				//create indexes
+				String[] splitted = indexes.split(StringUtils.COMMA);
+				for ( String s : splitted ) {
+					String[] pp = s.split(StringUtils.COLON);
+					if ( pp[0].toLowerCase().equals(type.toLowerCase())) {
+						cluster.queryIndexes().createIndex(type, "ix_" + pp[1], Arrays.asList(new String[] {pp[1]}));
+					}
+				}
+				
+			}
+			
 			bucket = cluster.bucket(type);
+			
 			queryAll = "select * from `" + type + "`";
 			querySelectCount = "select count(id) as count from `" + type + "`";
 		}

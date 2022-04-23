@@ -44,6 +44,7 @@ You can either choose to **download the binaries** or **clone the project** or *
 ## 
 
 Use the integrated [postman collection](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json) to test.
+Credentials : scim-user:changeit
 
 
 ##  
@@ -76,9 +77,9 @@ For running the maven project :
 ##  
  
 
-If you **really** do not want to build anything : spin up the **[docker image](https://hub.docker.com/r/personify/personify-scim-server)**
+If you **really** do not want to build anything : spin up the latest **[docker image](https://hub.docker.com/r/personify/personify-scim-server)**
 
-> docker run -p 8080:8080 personify/personify-scim-server:1.3.2.RELEASE
+> docker run -p 8080:8080 personify/personify-scim-server
 
 Or integrate it into your cloud environment.
 
