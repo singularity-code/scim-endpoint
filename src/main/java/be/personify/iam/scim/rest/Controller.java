@@ -1,5 +1,28 @@
 package be.personify.iam.scim.rest;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaAttribute;
 import be.personify.iam.scim.schema.SchemaException;
@@ -13,29 +36,7 @@ import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.ScimErrorType;
 import be.personify.iam.scim.util.SearchCriteriaUtil;
 import be.personify.util.SearchCriteria;
-import be.personify.util.SearchCriterium;
-import be.personify.util.SearchOperation;
 import be.personify.util.StringUtils;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Main controller class for the SCIM operations
@@ -63,8 +64,8 @@ public class Controller {
 		long start = System.currentTimeMillis();
 		try {
 			// validate
-			schemaReader.validate(schema, entity, true);
-
+			schemaReader.validate(schema, entity, true, request.getMethod());
+			
 			// prepare
 			String id = createId(entity);
 			entity.put(Constants.ID, id);
@@ -97,7 +98,7 @@ public class Controller {
 		try {
 			// validate
 			logger.info("schema {} ", schema);
-			schemaReader.validate(schema, entity, true);
+			schemaReader.validate(schema, entity, true, request.getMethod());
 			if (!entity.get(Constants.ID).equals(id)) {
 				return showError(400, "id [" + entity.get(Constants.ID)	+ "] given in the data does not match the one in the url [" + id + "]");
 			}
@@ -142,7 +143,7 @@ public class Controller {
 		long start = System.currentTimeMillis();
 		try {
 			// validate
-			schemaReader.validate(schema, entity, false);
+			schemaReader.validate(schema, entity, false, request.getMethod());
 			if (!entity.containsKey(Constants.KEY_OPERATIONS)) {
 				return showError(400, "no operations present");
 			}
@@ -178,6 +179,7 @@ public class Controller {
 				case "add":
 					logger.debug("adding {} to {} in {}", value, path, entity);
 					Object entry = getPath(path, existingEntity);
+					logger.info(entry.getClass().getName() + " {} ", entry);
 					if (entry instanceof List) {
 						((List) entry).addAll((List) value);
 					} 
@@ -321,7 +323,7 @@ public class Controller {
 
 				result = new ResponseEntity<>(responseObject, HttpStatus.OK);
 
-				logger.info("resources of type {} fetched in {} ms", schema.getName(), (System.currentTimeMillis() - start));
+				logger.info("resources of type {} start [{}] count[{}] filter [{}] fetched in {} ms", schema.getName(), startIndex, count, filter, (System.currentTimeMillis() - start));
 
 				return result;
 			} 
@@ -485,7 +487,11 @@ public class Controller {
 	}
 
 	protected ResponseEntity<Map<String, Object>> invalidSchemaForResource(List<String> schemas, String resourceType) {
-		return showError(400, "schemas contains no " + resourceType + " schema " + schemas.toString(), ScimErrorType.invalidSyntax);
+		return showError(400, "for type " + resourceType + " content is not compliant with schemas " + schemas.toString(), ScimErrorType.invalidSyntax);
+	}
+	
+	protected ResponseEntity<Map<String, Object>> invalidSchemaForResource(String resourceType, String requiredSchema) {
+		return showError(400, "for patching " + resourceType + ", given schemas is not containing " + requiredSchema, ScimErrorType.invalidSyntax);
 	}
 
 	/**

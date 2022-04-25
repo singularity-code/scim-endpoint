@@ -111,9 +111,17 @@ public class MemoryStorage implements Storage {
 		result = sort(result, sortBy, sortOrder);
 
 		count = count > result.size() ? result.size() : count;
-		logger.debug("count {} start {}", count, start);
-		int newStart = (start - 1) * count;
-		List<Map> sublist = result.subList(newStart, newStart + count);
+		logger.info("count {} start {}", count, start);
+		int newStart = (start - 1);
+		if ( newStart > result.size()) {
+			newStart = result.size();
+		}
+		int newEnd = newStart + count;
+		if ( newEnd > result.size()) {
+			newEnd = result.size();
+		}
+		
+		List<Map> sublist = result.subList(newStart, newEnd);
 
 		return sublist;
 	}

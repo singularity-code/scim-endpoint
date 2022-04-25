@@ -1,6 +1,9 @@
 package be.personify.iam.scim.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import be.personify.util.StringUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +12,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +37,12 @@ public class LoadTest {
 	private static int requests;
 
 	private static final DecimalFormat format = new DecimalFormat("#.##");
+	
+	private static final String OPERATION_CREATE = "CREATE";
+	private static final String OPERATION_GET = "GET";
+	private static final String OPERATION_SEARCH = "SEARCH";
+	private static final String OPERATION_FIND_IDS = "FIND_IDS";
+	private static final String OPERATION_DELETE = "DELETE";
 
 	public static void main(String[] args) throws Exception {
 
@@ -41,48 +51,77 @@ public class LoadTest {
 		String password = args[2];
 		int threads = Integer.parseInt(args[3]);
 		requests = Integer.parseInt(args[4]);
+		
+		List<String> operations = new ArrayList<>();
+		if ( args.length == 6 ) {
+			operations = Arrays.asList(args[5].split(StringUtils.ESCAPED_PIPE)); 
+			System.out.println("operations :" + operations);
+		}
+		else {
+			operations.add(OPERATION_CREATE);
+			operations.add(OPERATION_GET);
+			operations.add(OPERATION_SEARCH);
+			operations.add(OPERATION_FIND_IDS);
+			operations.add(OPERATION_DELETE);
+			System.out.println("operations :" + operations);
+		}
 
 		LoadTest test = new LoadTest();
 
-		System.out.println("starting load test to " + endpoint + " with " + threads + " threads and " + requests	+ " requests....");
-
-		Map<Integer, List<Map<String, Object>>> threadMap = test.loadTestCreate(endpoint, user, password, threads,	requests);
-
-		while (createFinished != threads) {
-			System.out.println("create finished " + createFinished);
-			Thread.sleep(1000);
-		}
-
-		test.loadTestGet(endpoint, user, password, threadMap);
-
-		while (getFinished != threads) {
-			System.out.println("get finished " + getFinished);
-			Thread.sleep(1000);
-		}
-
-		test.loadTestSearch(endpoint, user, password, threadMap);
-
-		while (searchFinished != threads) {
-			System.out.println("search finished " + searchFinished);
-			Thread.sleep(1000);
-		}
-
-		test.loadTestFindAllIds(endpoint, user, password, threadMap);
-		System.out.println("findAllIds finished " + searchFinished);
-
-		test.loadTestDelete(endpoint, user, password, threadMap);
-
-		while (deleteFinished != threads) {
-			System.out.println("deleteFinished finished " + deleteFinished);
-			Thread.sleep(1000);
-		}
-	}
-
-	private Map<Integer, List<Map<String, Object>>> loadTestCreate(String endpoint, String user, String password,int nrOfThreads, int nrOfRequests) throws Exception {
-
-		String body = new String(readFileAsBytes(new FileInputStream(new File("src/test/resources/load_test_user_create.json"))));
+		System.out.println("starting load test to " + endpoint + " with " + threads + " threads and " + requests + " requests....");
+		
+		String body = new String( readFileAsBytes(new FileInputStream(new File("src/test/resources/load_test_user_create.json"))));
 		Map<String, Object> userObject = objectMapper.readValue(body, Map.class);
 
+		Map<Integer, List<Map<String, Object>>> threadMap = getThreadMap(threads, requests, userObject);
+
+		//CREATE
+		if ( operations.contains(OPERATION_CREATE)) {
+			test.loadTestCreate(endpoint, user, password, threadMap,requests, threads);
+
+			while (createFinished != threads) {
+				System.out.println("create finished " + createFinished);
+				Thread.sleep(1000);
+			}
+		}
+
+		//GET
+		if ( operations.contains(OPERATION_GET)) {
+			test.loadTestGet(endpoint, user, password, threadMap);
+
+			while (getFinished != threads) {
+				System.out.println("get finished " + getFinished);
+				Thread.sleep(1000);
+			}
+		}
+		
+		if ( operations.contains(OPERATION_SEARCH)) {
+			test.loadTestSearch(endpoint, user, password, threadMap);
+
+			while (searchFinished != threads) {
+				System.out.println("search finished " + searchFinished);
+				Thread.sleep(1000);
+			}
+		}
+		
+		if ( operations.contains(OPERATION_FIND_IDS)) {
+			test.loadTestFindAllIds(endpoint, user, password, threadMap);
+			System.out.println("findAllIds finished " + searchFinished);
+		}
+
+		if ( operations.contains(OPERATION_DELETE)) {
+			test.loadTestDelete(endpoint, user, password, threadMap);
+
+			while (deleteFinished != threads) {
+				System.out.println("deleteFinished finished " + deleteFinished);
+				Thread.sleep(1000);
+			}
+		}
+	}
+	
+	
+	
+	private static Map<Integer, List<Map<String, Object>>> getThreadMap(int nrOfThreads, int nrOfRequests,	Map<String, Object> userObject) {
 		Map<Integer, List<Map<String, Object>>> threadMap = new HashMap<>();
 		for (int i = 0; i < nrOfThreads; i++) {
 			List<Map<String, Object>> users = new ArrayList<>();
@@ -97,6 +136,13 @@ public class LoadTest {
 			}
 			threadMap.put(i, users);
 		}
+		return threadMap;
+	}
+
+	
+	
+	private Map<Integer, List<Map<String, Object>>> loadTestCreate(String endpoint, String user, String password, final Map<Integer,List<Map<String, Object>>> threadMap, int nrOfRequests, int nrOfThreads) throws Exception {
+
 
 		long mainStart = System.currentTimeMillis();
 		HttpHeaders headers = new HttpHeaders();
@@ -117,7 +163,8 @@ public class LoadTest {
 							entity = new HttpEntity(userList.get(j), headers);
 							response = restTemplate.exchange(endpoint + "/Users", HttpMethod.POST, entity, Object.class);
 
-						} catch (Exception e) {
+						}
+						catch (Exception e) {
 							e.printStackTrace();
 							break;
 						}
@@ -141,8 +188,13 @@ public class LoadTest {
 		return threadMap;
 	}
 
-	private void loadTestGet(String endpoint, String user, String password,
-			Map<Integer, List<Map<String, Object>>> threadMap) throws Exception {
+
+
+	
+	
+	
+
+	private void loadTestGet(String endpoint, String user, String password,	Map<Integer, List<Map<String, Object>>> threadMap) throws Exception {
 
 		long mainStart = System.currentTimeMillis();
 		HttpHeaders headers = new HttpHeaders();
@@ -165,8 +217,7 @@ public class LoadTest {
 							break;
 						}
 					}
-					System.out.println("thread [" + zz + "] " + userList.size() + " records processed in "
-							+ (System.currentTimeMillis() - start));
+					System.out.println("thread [" + zz + "] " + userList.size() + " records processed in " + (System.currentTimeMillis() - start));
 					getFinished++;
 				}
 			}.start();
@@ -187,8 +238,9 @@ public class LoadTest {
 		}
 	}
 
-	private void loadTestSearch(String endpoint, String user, String password,
-			Map<Integer, List<Map<String, Object>>> threadMap) throws Exception {
+	
+	
+	private void loadTestSearch(String endpoint, String user, String password,	Map<Integer, List<Map<String, Object>>> threadMap) throws Exception {
 
 		long mainStart = System.currentTimeMillis();
 		HttpHeaders headers = new HttpHeaders();
@@ -245,8 +297,7 @@ public class LoadTest {
 		}
 	}
 
-	private void loadTestFindAllIds(String endpoint, String user, String password,
-			Map<Integer, List<Map<String, Object>>> threadMap) throws Exception {
+	private void loadTestFindAllIds(String endpoint, String user, String password, Map<Integer, List<Map<String, Object>>> threadMap) throws Exception {
 
 		long mainStart = System.currentTimeMillis();
 		HttpHeaders headers = new HttpHeaders();
@@ -264,52 +315,62 @@ public class LoadTest {
 			long time = 0;
 			for (int i = 0; i < count; i++) {
 				long cstart = System.currentTimeMillis();
-				response = restTemplate.exchange(
-						endpoint + "/Users?attributes=id&startIndex=1&count=" + findIdsFinished, HttpMethod.GET, entity,
-						Map.class);
+				response = restTemplate.exchange(endpoint + "/Users?attributes=id&startIndex=1&count=" + findIdsFinished, HttpMethod.GET, entity, Map.class);
 				time = time + (System.currentTimeMillis() - cstart);
 				// System.out.println(response.getBody());
 			}
 			System.out.println("all " + findIdsFinished + " ids fetched in average " + (time / count) + " ms");
 
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void loadTestDelete(String endpoint, String user, String password,
-			Map<Integer, List<Map<String, Object>>> threadMap) throws Exception {
-
-		String body = new String(
-				readFileAsBytes(new FileInputStream(new File("src/test/resources/load_test_user_create.json"))));
-		Map<String, Object> userObject = objectMapper.readValue(body, Map.class);
+	private void loadTestDelete(String endpoint, String user, String password, Map<Integer, List<Map<String, Object>>> threadMap) throws Exception {
 
 		long mainStart = System.currentTimeMillis();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setBasicAuth(user, password);
+		
+		HttpEntity entity = new HttpEntity(headers);
+		RestTemplate restTemplateOne = new RestTemplate();
+		ResponseEntity<Map> response = restTemplateOne.exchange(endpoint + "/Users?attributes=id", HttpMethod.GET,	entity, Map.class);
+		// System.out.println(response.getBody());
+		int findIdsFinished = (int) response.getBody().get("totalResults");
+		response = restTemplateOne.exchange(endpoint + "/Users?attributes=id&startIndex=1&count=" + findIdsFinished, HttpMethod.GET, entity, Map.class);
+		List<Map> resources = (List)response.getBody().get("Resources");
+		
+		System.out.println("got total ids " + resources.size());
 
+		int count = 0;
+		Object lock = new Object();
+		
 		for (int i = 0; i < threadMap.size(); i++) {
 			final int zz = i;
-			final List<Map<String, Object>> userList = threadMap.get(i);
 			new Thread() {
 				public void run() {
-					long start = System.currentTimeMillis();
-					for (int j = 0; j < userList.size(); j++) {
+					String id = null;
+					while ( resources.size() > 0) {
+						long start = System.currentTimeMillis();
+						synchronized (lock) {
+							id = (String)((Map)resources.get(count)).get("id");
+							resources.remove(count);
+						}
+						
 						RestTemplate restTemplate = new RestTemplate();
 						try {
-							HttpEntity entity = new HttpEntity(headers);
-							ResponseEntity<Object> response = restTemplate.exchange(
-									endpoint + "/Users/" + userList.get(j).get(Constants.ID), HttpMethod.DELETE, entity,
-									Object.class);
-						} catch (Exception e) {
-							e.printStackTrace();
-							break;
+							ResponseEntity<Object> response = restTemplate.exchange(endpoint + "/Users/" + id, HttpMethod.DELETE, entity,Object.class);
 						}
+						catch (Exception e) {
+							e.printStackTrace();
+						}
+						System.out.println("thread [" + zz + "] " + " record with id [" + id + "] deleted in "	+ (System.currentTimeMillis() - start));
+						
 					}
-					System.out.println("thread [" + zz + "] " + userList.size() + " records processed in "
-							+ (System.currentTimeMillis() - start));
 					deleteFinished++;
+						
 				}
 			}.start();
 		}
@@ -322,7 +383,8 @@ public class LoadTest {
 		System.out.println(requests * threadMap.size() + " records processed in " + ms + " ms");
 		if (ms < 1000) {
 			System.out.println("loadTestDelete() " + (requests * threadMap.size()) + " per second");
-		} else {
+		}
+		else {
 			double dd = ms / 1000d;
 			double dc = requests * threadMap.size();
 			System.out.println("--------------- loadTestDelete() --- " + format.format(dc / dd) + " req/sec");

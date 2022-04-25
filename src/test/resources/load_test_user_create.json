@@ -12,8 +12,12 @@
     "externalId": "loadt",
     "emails": [
         {
-            "value": "load@personify.be",
+            "value": "loadtest@springfield.com",
             "type": "work"
         }
-    ]
+    ],
+    "title" : "Mr",
+    "userType" : "Student",
+    "locale" : "en",
+    "active" : true
 }
