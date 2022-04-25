@@ -32,7 +32,7 @@ public class SchemaTest {
 		Schema userSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> map = new HashMap<String, Object>();
 		try {
-			schemaReader.validate(userSchema, map,true);
+			schemaReader.validate(userSchema, map,true, "GET");
 		}
 		catch ( SchemaException se ) {
 			return ;
@@ -49,7 +49,7 @@ public class SchemaTest {
 		map.put("externalId", "externalId");
 		Schema userSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
 		try {
-			schemaReader.validate(userSchema, map, true);
+			schemaReader.validate(userSchema, map, true,"GET");
 		}
 		catch ( SchemaException se ) {
 			fail("No schema exception thrown " + se.getMessage());
@@ -65,7 +65,7 @@ public class SchemaTest {
 		map.put("emails", "another email");
 		Schema userSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
 		try {
-			schemaReader.validate(userSchema, map, true);
+			schemaReader.validate(userSchema, map, true, "GET");
 		}
 		catch ( SchemaException se ) {
 			//se.printStackTrace();
@@ -84,7 +84,7 @@ public class SchemaTest {
 		map.put("emails", emails);
 		Schema userSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
 		try {
-			schemaReader.validate(userSchema, map, true);
+			schemaReader.validate(userSchema, map, true, "GET");
 		}
 		catch ( SchemaException se ) {
 			//se.printStackTrace();
@@ -110,7 +110,7 @@ public class SchemaTest {
 		
 		map.put("emails", mailList);
 		try {
-			schemaReader.validate(userSchema, map, true);
+			schemaReader.validate(userSchema, map, true, "GET");
 		}
 		catch ( SchemaException se ) {
 			//se.printStackTrace();
@@ -136,7 +136,7 @@ public class SchemaTest {
 		
 		map.put("emails", mailList);
 		try {
-			schemaReader.validate(userSchema, map, true);
+			schemaReader.validate(userSchema, map, true, "GET");
 		}
 		catch ( SchemaException se ) {
 			fail("schema exception thrown " + se.getMessage());
