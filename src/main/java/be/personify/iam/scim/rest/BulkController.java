@@ -100,7 +100,7 @@ public class BulkController extends Controller {
 
 			if (method.equalsIgnoreCase(Constants.HTTP_METHOD_POST)) {
 				try {
-					schemaReader.validate(schema, entity, true);
+					schemaReader.validate(schema, entity, true, request.getMethod());
 					String id = createId(entity);
 					entity.put(Constants.ID, id);
 					String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + StringUtils.SLASH + id;

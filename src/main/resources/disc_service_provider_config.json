@@ -13,7 +13,7 @@
     },
     "filter": {
       "supported":true,
-      "maxResults": 200
+      "maxResults": 50
     },
     "changePassword": {
       "supported":true

@@ -120,7 +120,7 @@ public class SchemaController extends Controller {
 			if (schemas.contains(Constants.SCHEMA_PATCHOP)) {
 				return patch(id, entity, request, response, schema, attributes, excludedAttributes);
 			}
-			return invalidSchemaForResource(schemas, resourceType);
+			return invalidSchemaForResource(resourceType, Constants.SCHEMA_PATCHOP);
 		}
 		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
 	}

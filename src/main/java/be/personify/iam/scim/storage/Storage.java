@@ -60,8 +60,7 @@ public interface Storage {
    * @param object the entity itself
    * @throws ConstraintViolationException indicating if constraints are violated
    */
-  public void create(String id, final Map<String, Object> object)
-      throws ConstraintViolationException;
+  public void create(String id, final Map<String, Object> object) throws ConstraintViolationException;
 
   /**
    * Updates a entity
@@ -70,8 +69,7 @@ public interface Storage {
    * @param object the entity itself
    * @throws ConstraintViolationException indicating if constraints are violated
    */
-  public void update(String id, final Map<String, Object> object)
-      throws ConstraintViolationException;
+  public void update(String id, final Map<String, Object> object) throws ConstraintViolationException;
 
   /**
    * Searches entities
@@ -83,16 +81,9 @@ public interface Storage {
    * @param sortOrder the sortorder ( ascending or descending )
    * @return a list containing the entities
    */
-  public List<Map> search(
-      SearchCriteria searchCriteria,
-      int start,
-      int count,
-      String sortBy,
-      String sortOrder,
-      List<String> includeAttributes);
+  public List<Map> search( SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes);
 
-  public List<Map> search(
-      SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder);
+  public List<Map> search( SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder);
 
   /**
    * Counts the results giving a searchcrtieria
