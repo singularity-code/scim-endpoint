@@ -2,9 +2,9 @@
 
 Lean, mean and high performant open source Spring Boot Java SCIM server implementation with pluggable persistence layer and customizable authorization filter.
 
-Useful for exposing a company's identities using the SCIM protocol and target point for your provisioning engine.
+Useful for exposing a company's identities using the SCIM protocol and target point for your provisioning engine or source for authentication or authorization providers. 
 
-You can reuse the integrated storage layers (mongo,ldap,...) or write a custom java implementation and wire it via configuration.
+You can reuse the integrated storage layers (couchbase,mongo,ldap,database,rest...) or write a custom java implementation and wire it via configuration.
 
 
 ## intro
@@ -15,20 +15,16 @@ basic server implementation.
 
 - create, get, put, delete, search, patch ( with attributes and excludedAttributes )
 - bulk with circular reference processing, maxOperations and maxPayloadSize 
-- paging
-- filtering (all operators,and,sort)
+- paging and sorting
+- filtering (all operators,and,sort), should be compliant with RFC 7644 section 3.4.2.2
 - discovery
 - schema validation
 - uniqueness constraint validation
 - authentication : basic and OAUTH bearer token ( with roles )
 - bearer token endpoint created and verified with Forgerock IDM SCIM connector (compatible)
 - /ME endpoint
+- return groups in get user
 
-
-
-**on the list :**
-
-- filtering : complete specification
 
 ##  
 
@@ -44,7 +40,9 @@ You can either choose to **download the binaries** or **clone the project** or *
 ## 
 
 Use the integrated [postman collection](https://bitbucket.org/wouter29/personify-scim-server/src/master/scim.postman_collection.json) to test.
-Credentials : scim-user:changeit
+Credentials : scim-user:changeit.
+
+For users of **[insomnia rest](https://insomnia.rest/)** there is also a importable collection to **[download](https://bitbucket.org/wouter29/personify-scim-server/src/master/personify-insomnia_2022-04-23.json)**.
 
 
 ##  
