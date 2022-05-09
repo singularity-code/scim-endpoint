@@ -33,9 +33,12 @@ import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.PropertyFactory;
 import be.personify.iam.scim.util.ScimErrorType;
 import be.personify.iam.scim.util.SearchCriteriaUtil;
 import be.personify.util.SearchCriteria;
+import be.personify.util.SearchCriterium;
+import be.personify.util.SearchOperation;
 import be.personify.util.StringUtils;
 
 /**
@@ -45,12 +48,33 @@ import be.personify.util.StringUtils;
  */
 public class Controller {
 
+	private static final String SORT_ORDER = "SortOrder";
+	private static final String SORT_BY = "SortBy";
+
 	private static final String SCHEMA_VALIDATION = "schema validation : ";
 
 	private static final Logger logger = LogManager.getLogger(Controller.class);
 
 	@Value("${scim.allowIdOnCreate:true}")
 	private boolean allowIdOnCreate;
+	
+	@Value("${scim.returnGroupsOnUser:true}")
+	private boolean returnGroupsOnUser;
+	
+	@Value("${scim.returnGroupsOnUser.max:100}")
+	private int returnGroupsMax;
+	
+	@Value("${scim.returnGroupsOnUser.includedFields:id,displayName}")
+	private String returnGroupsIncludedFields;
+	
+	@Autowired
+	private PropertyFactory propertyFactory;
+	
+	private Map<String,String> defaultSort = new HashMap<String,String>();
+	
+	
+	
+	private List<String> returnGroupsIncludedFieldsArray = null;
 
 	@Autowired
 	private StorageImplementationFactory storageImplementationFactory;
@@ -60,6 +84,8 @@ public class Controller {
 	@Autowired
 	private SchemaReader schemaReader;
 
+	
+	//POST
 	protected ResponseEntity<Map<String, Object>> post(Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes) {
 		long start = System.currentTimeMillis();
 		try {
@@ -93,6 +119,8 @@ public class Controller {
 	}
 
 	
+	
+	//PUT
 	protected ResponseEntity<Map<String, Object>> put(String id, Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes) {
 		long start = System.currentTimeMillis();
 		try {
@@ -137,6 +165,8 @@ public class Controller {
 	}
 
 	
+	
+	//PATCH
 	@SuppressWarnings("unchecked")
 	protected ResponseEntity<Map<String, Object>> patch(String id, Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes) {
 
@@ -253,16 +283,31 @@ public class Controller {
 
 	
 	
+	
+	//GET
 	protected ResponseEntity<Map<String, Object>> get(String id, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes) {
 		long start = System.currentTimeMillis();
 		try {
-			Map<String, Object> user = storageImplementationFactory.getStorageImplementation(schema).get(id);
+			Map<String, Object> object = storageImplementationFactory.getStorageImplementation(schema).get(id);
 
 			ResponseEntity<Map<String, Object>> result = null;
-			if (user != null) {
+			if (object != null) {
 				List<String> includeList = getListFromString(attributes);
-				user = filterAttributes(schema, user, includeList, excludedAttributes);
-				result = new ResponseEntity<>(user, HttpStatus.OK);
+				object = filterAttributes(schema, object, includeList, excludedAttributes);
+				//include groups
+				if ( haveToIncludeGroups(schema,includeList,excludedAttributes)) {
+					Schema groupsSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_GROUP);
+					List<Map> groupSearch = storageImplementationFactory.getStorageImplementation(groupsSchema).search(new SearchCriteria(new SearchCriterium("members.$ref", id, SearchOperation.ENDS_WITH)), 1, returnGroupsMax, null, null);
+					if ( returnGroupsIncludedFieldsArray == null ) {
+						returnGroupsIncludedFieldsArray = Arrays.asList(returnGroupsIncludedFields.split(StringUtils.COMMA));
+					}
+					List<Map<String, Object>> filteredGroups = new ArrayList<Map<String, Object>>();
+					for( Map m : groupSearch ) {
+						filteredGroups.add(filterAttributes(groupsSchema, m, returnGroupsIncludedFieldsArray, null));
+					}
+					object.put("groups", filteredGroups);
+				}
+				result = new ResponseEntity<>(object, HttpStatus.OK);
 				response.addHeader(Constants.HEADER_LOCATION, UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString());
 			}
 			else {
@@ -277,6 +322,17 @@ public class Controller {
 	}
 
 	
+	private boolean haveToIncludeGroups(Schema schema, List<String> includeList, String excludedAttributes) {
+		if ( schema.getName().equalsIgnoreCase(Constants.RESOURCE_TYPE_USER) && returnGroupsOnUser ){
+			if ( excludedAttributes== null || !excludedAttributes.contains("groups")) {
+				logger.debug("have to return groups");
+				return true;
+			}
+		}
+		return false;
+	}
+
+
 	protected ResponseEntity<Map<String, Object>> search(Integer startIndex, Integer count, Schema schema, String filter) {
 		return search(startIndex, count, schema, filter, null, null, null, null);
 	}
@@ -303,6 +359,14 @@ public class Controller {
 			Storage storage = storageImplementationFactory.getStorageImplementation(schema);
 
 			List<String> includeList = getListFromString(attributes);
+			
+			if ( StringUtils.isEmpty(sortBy)) {
+				sortBy = getSearchDefault(schema, SORT_BY);
+			}
+			
+			if ( StringUtils.isEmpty(sortOrder)) {
+				sortOrder = getSearchDefault(schema, SORT_ORDER);
+			}
 
 			List<Map> dataFetched = storage.search(searchCriteria, startIndex, count, sortBy, sortOrder, includeList);
 			List<Map<String, Object>> data = new ArrayList<>();
@@ -344,6 +408,10 @@ public class Controller {
 	
 	
 	
+
+	
+	
+
 
 	protected ResponseEntity<?> delete(String id, Schema schema) {
 		long start = System.currentTimeMillis();
@@ -393,6 +461,25 @@ public class Controller {
 	}
 	
 	
+	
+	private String getSearchDefault(Schema schema, String type) {
+		String kk = schema.getName() + StringUtils.DOT + type;
+		if ( defaultSort.containsKey(kk)) {
+			return defaultSort.get(kk);
+		}
+		else {
+			String key = "scim.search." + schema.getName() + ".default" + type;
+			String value = propertyFactory.getProperty(key);
+			if ( StringUtils.isEmpty(value)) {
+				value = StringUtils.EMPTY_STRING;
+			}
+			logger.info("putting default sort for type {} schema {} to value {}", type, schema.getName(), value);
+			defaultSort.put(kk, value);
+			return value;
+		}
+	}
+	
+	
 
 	protected String createVersion(Date date) {
 		return StringUtils.EMPTY_STRING + date.getTime();
@@ -413,6 +500,7 @@ public class Controller {
 		return new ResponseEntity<Map<String, Object>>(error, HttpStatus.valueOf(status));
 	}
 
+	
 	
 	protected Map<String, Object> filterAttributes(Schema schema, Map<String, Object> entity, List<String> includeList, String excludedAttributes) {
 		Map<String, Object> copy = new HashMap<>();
@@ -472,8 +560,8 @@ public class Controller {
 		return rest;
 	}
 
-	protected String createId(Map<String, Object> user) {
-		Object id = user.get(Constants.ID);
+	protected String createId(Map<String, Object> object) {
+		Object id = object.get(Constants.ID);
 		if (allowIdOnCreate) {
 			return id != null ? id.toString() : UUID.randomUUID().toString();
 		}

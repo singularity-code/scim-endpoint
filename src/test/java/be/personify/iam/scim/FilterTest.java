@@ -192,6 +192,21 @@ public class FilterTest {
 	
 	
 	
+	@Test
+	public void testEight() {
+		String filter = "(id eq \"df7af4be-6851-423d-a41e-e32dc3e5a17e\") or (id eq \"01f91eaf-b2fe-4781-8c21-f0644b8db62d\") or (id eq \"7d8cbb88-4c75-4dd5-94e1-12b48632fbdc\")";
+		try {
+			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteria(filter);
+			Assert.assertTrue("size of the criteria should be 3 and is " + criteria.size(), criteria.size() == 3 );
+			Assert.assertTrue("logical operator of the criteria", criteria.getOperator() == LogicalOperator.OR);
+			logger.info("crit {}", criteria);
+		}
+		catch( Exception e ) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 	
 	
 

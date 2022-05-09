@@ -8,9 +8,11 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.couchbase.client.core.error.DocumentExistsException;
+import com.couchbase.client.core.error.DocumentNotFoundException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.json.JsonObject;
@@ -20,10 +22,15 @@ import com.couchbase.client.java.manager.query.CreatePrimaryQueryIndexOptions;
 import com.couchbase.client.java.query.QueryOptions;
 import com.couchbase.client.java.query.QueryResult;
 
+import be.personify.iam.scim.schema.Schema;
+import be.personify.iam.scim.schema.SchemaAttribute;
+import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.storage.ConfigurationException;
 import be.personify.iam.scim.storage.ConstraintViolationException;
 import be.personify.iam.scim.storage.DataException;
+import be.personify.iam.scim.storage.SortOrder;
 import be.personify.iam.scim.storage.Storage;
+import be.personify.iam.scim.storage.util.CouchBaseUtil;
 import be.personify.iam.scim.util.Constants;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
@@ -53,6 +60,9 @@ public class CouchBaseStorage implements Storage {
 	private static final String COUCHBASE_OPERATOR_CONTAINS = " like ";
 
 	private static final Logger logger = LogManager.getLogger(CouchBaseStorage.class);
+	
+	@Autowired
+	private SchemaReader schemaReader;
 
 	@Value("${scim.storage.couchbase.host}")
 	private String host;
@@ -73,6 +83,7 @@ public class CouchBaseStorage implements Storage {
 
 	private String queryAll = null;
 	private String querySelectCount = null;
+	
 
 	/**
 	 * Creates the entry
@@ -94,7 +105,13 @@ public class CouchBaseStorage implements Storage {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> get(String id) {
-		return bucket.defaultCollection().get(id).contentAs(Map.class);
+		try {
+			return bucket.defaultCollection().get(id).contentAs(Map.class);
+		}
+		catch( DocumentNotFoundException dnfe ) {
+			logger.debug("document with id " + id + "not found", dnfe);
+			return null;
+		}
 	}
 
 	/**
@@ -141,12 +158,18 @@ public class CouchBaseStorage implements Storage {
 			b.append(" from `" + type + "` ");
 			query = b.toString();
 		}
+		
+		
+		query = query + constructUnnestString(searchCriteria);
+		
 		if (searchCriteria != null && searchCriteria.size() > 0) {
 			query = query + Constants.WHERE;
 		}
 		StringBuilder builder = constructQuery(searchCriteria, new StringBuilder(query),0);
 		JsonObject namedParameters = composeNamedParameters(searchCriteria,0,null);
-
+		
+		builder.append(CouchBaseUtil.getSort(sortBy, sortOrder, SortOrder.ascending));
+		
 		builder.append(LIMIT_WITH_SPACES + count + OFFSET_WITH_SPACES + (start - 1));
 		logger.info("query {}", builder);
 		try {
@@ -171,6 +194,8 @@ public class CouchBaseStorage implements Storage {
 	}
 	
 
+	
+
 	@Override
 	public long count(SearchCriteria searchCriteria) {
 		StringBuilder builder = new StringBuilder(querySelectCount);
@@ -190,8 +215,15 @@ public class CouchBaseStorage implements Storage {
 		}
 		for (SearchCriterium c : searchCriteria.getCriteria()) {
 			if (c.getSearchOperation().getParts() == 3) {
+			
 				if ( c.getSearchOperation() == SearchOperation.CONTAINS) {
-					namedParameters.put(safeSubAttribute(c.getKey() + StringUtils.UNDERSCORE + count), "%" + c.getValue() + "%");
+					namedParameters.put(safeSubAttribute( c.getKey() + StringUtils.UNDERSCORE + count), "%" + c.getValue() + "%");
+				}
+				else if ( c.getSearchOperation() == SearchOperation.ENDS_WITH) {
+					namedParameters.put(safeSubAttribute( c.getKey() + StringUtils.UNDERSCORE + count), "%" + c.getValue());
+				}
+				else if ( c.getSearchOperation() == SearchOperation.STARTS_WITH) {
+					namedParameters.put(safeSubAttribute(c.getKey() + StringUtils.UNDERSCORE + count), c.getValue() + "%");
 				}
 				else {
 					namedParameters.put(safeSubAttribute(c.getKey() + StringUtils.UNDERSCORE + count), c.getValue());
@@ -214,7 +246,18 @@ public class CouchBaseStorage implements Storage {
 			SearchCriteria sc = null;
 			for (int i = 0; i < searchCriteria.getCriteria().size(); i++) {
 				criterium = searchCriteria.getCriteria().get(i);
-				sb.append(criterium.getKey());
+				int lastindexOfDOt = criterium.getKey().lastIndexOf(".");
+				String modifiedKey = null;
+				if ( lastindexOfDOt < 0 ) {
+					modifiedKey = "t.`" + criterium.getKey() + "`";
+				}
+				else {
+					String firstPart = criterium.getKey().substring(0,lastindexOfDOt +1);
+					String secoString = criterium.getKey().substring(lastindexOfDOt + 1,criterium.getKey().length());
+					logger.debug("firstp {} lastp {}", firstPart, secoString);
+					modifiedKey = firstPart + "`" + secoString + "`";
+				}
+				sb.append(modifiedKey);
 				sb.append(searchOperationToString(criterium.getSearchOperation()));
 				if (criterium.getSearchOperation().getParts() == 3) {
 					sb.append("$" + safeSubAttribute(criterium.getKey() + StringUtils.UNDERSCORE + count));
@@ -238,12 +281,17 @@ public class CouchBaseStorage implements Storage {
 	
 	
 
+	
+
 	private String safeSubAttribute(String s) {
-		return s.replace(StringUtils.DOT, StringUtils.EMPTY_STRING);
+		s =  s.replace(StringUtils.DOT, StringUtils.EMPTY_STRING);
+		s =  s.replace("$", StringUtils.EMPTY_STRING);
+		return s;
 	}
 	
 	
 
+	
 	private Object searchOperationToString(SearchOperation searchOperation) {
 		if (searchOperation.equals(SearchOperation.EQUALS)) {
 			return COUCHBASE_OPERATOR_EQUALS;
@@ -260,7 +308,7 @@ public class CouchBaseStorage implements Storage {
 		} else if (searchOperation.equals(SearchOperation.LESS_THEN_EQUAL)) {
 			return COUCHBASE_OPERATOR_LTE;
 		}
-		else if (searchOperation.equals(SearchOperation.CONTAINS)) {
+		else if (searchOperation.equals(SearchOperation.CONTAINS) || searchOperation.equals(SearchOperation.ENDS_WITH) || searchOperation.equals(SearchOperation.STARTS_WITH)) {
 			return COUCHBASE_OPERATOR_CONTAINS;
 		}
 		throw new DataException("search operation " + searchOperation.name() + " not implemented");
@@ -300,13 +348,31 @@ public class CouchBaseStorage implements Storage {
 			
 			bucket = cluster.bucket(type);
 			
-			queryAll = "select * from `" + type + "`";
-			querySelectCount = "select count(id) as count from `" + type + "`";
+			queryAll = "select t.* from `" + type + "` as t";
+			querySelectCount = "select count(id) as count from `" + type + "` as t";
+			
+			
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 			throw new ConfigurationException(e.getMessage());
 		}
+	}
+
+	private String constructUnnestString(SearchCriteria criteria ) {
+		Schema schema = schemaReader.getSchemaByResourceType(type);
+		StringBuffer u = new StringBuffer(StringUtils.SPACE);
+		if ( criteria != null ) {
+			for ( SchemaAttribute a : schema.getAttributes()) {
+				if ( a.getType().equals("complex") && a.isMultiValued()) {
+					if ( criteria.containsKey(a.getName())) {
+						logger.debug("criteria contains [{}], adding unnest", a.getName());
+						u.append("unnest t.`").append(a.getName()).append("` as `").append(a.getName()).append("` ");
+					}
+				}
+			}
+		}
+		return u.toString();
 	}
 
 	@Override

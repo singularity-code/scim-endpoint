@@ -26,9 +26,12 @@ import org.springframework.web.client.RestTemplate;
 
 public class LoadTest {
 
+	private static final String EXCLUDED_ATTRIBUTES_GROUPS = "excludedAttributes=groups";
+
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
 	private static int createFinished = 0;
+	private static int createGroupsFinished = 0;
 	private static int getFinished = 0;
 	private static int searchFinished = 0;
 	private static int findIdsFinished = 0;
@@ -72,6 +75,9 @@ public class LoadTest {
 		
 		String body = new String( readFileAsBytes(new FileInputStream(new File("src/test/resources/load_test_user_create.json"))));
 		Map<String, Object> userObject = objectMapper.readValue(body, Map.class);
+		
+		body = new String( readFileAsBytes(new FileInputStream(new File("src/test/resources/load_test_group_create.json"))));
+		Map<String, Object> groupObject = objectMapper.readValue(body, Map.class);
 
 		Map<Integer, List<Map<String, Object>>> threadMap = getThreadMap(threads, requests, userObject);
 
@@ -83,11 +89,29 @@ public class LoadTest {
 				System.out.println("create finished " + createFinished);
 				Thread.sleep(1000);
 			}
+			
+			test.loadTestCreateGroups(endpoint, user, password, threadMap,requests, threads, groupObject);
+
+			while (createGroupsFinished != threads) {
+				System.out.println("create finished " + createGroupsFinished);
+				Thread.sleep(1000);
+			}
 		}
 
-		//GET
+		//GET WITHOUT GROUPS
 		if ( operations.contains(OPERATION_GET)) {
-			test.loadTestGet(endpoint, user, password, threadMap);
+			test.loadTestGet(endpoint, user, password, threadMap, true);
+
+			while (getFinished != threads) {
+				System.out.println("get finished " + getFinished);
+				Thread.sleep(1000);
+			}
+		}
+		getFinished = 0;
+		
+		//GET WITH GROUPS
+		if ( operations.contains(OPERATION_GET)) {
+			test.loadTestGet(endpoint, user, password, threadMap,false );
 
 			while (getFinished != threads) {
 				System.out.println("get finished " + getFinished);
@@ -106,16 +130,25 @@ public class LoadTest {
 		
 		if ( operations.contains(OPERATION_FIND_IDS)) {
 			test.loadTestFindAllIds(endpoint, user, password, threadMap);
-			System.out.println("findAllIds finished " + searchFinished);
 		}
 
 		if ( operations.contains(OPERATION_DELETE)) {
-			test.loadTestDelete(endpoint, user, password, threadMap);
+			test.loadTestDelete(endpoint, user, password, threadMap, "User");
 
 			while (deleteFinished != threads) {
-				System.out.println("deleteFinished finished " + deleteFinished);
+				System.out.println("deleteFinished finished for type User " + deleteFinished);
 				Thread.sleep(1000);
 			}
+			
+			deleteFinished = 0;
+			
+			test.loadTestDelete(endpoint, user, password, threadMap, "Group");
+
+			while (deleteFinished != threads) {
+				System.out.println("deleteFinished finished for type Group" + deleteFinished);
+				Thread.sleep(1000);
+			}
+			
 		}
 	}
 	
@@ -148,6 +181,8 @@ public class LoadTest {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setBasicAuth(user, password);
+		
+		Object lock = new Object();
 
 		for (int i = 0; i < threadMap.size(); i++) {
 			final int zz = i;
@@ -162,15 +197,16 @@ public class LoadTest {
 						try {
 							entity = new HttpEntity(userList.get(j), headers);
 							response = restTemplate.exchange(endpoint + "/Users", HttpMethod.POST, entity, Object.class);
-
 						}
 						catch (Exception e) {
 							e.printStackTrace();
-							break;
+							continue;
 						}
 					}
-					System.out.println("thread [" + zz + "] " + nrOfRequests + " records processed in "	+ (System.currentTimeMillis() - start));
-					createFinished++;
+					//System.out.println("thread [" + zz + "] " + nrOfRequests + " records processed in "	+ (System.currentTimeMillis() - start));
+					synchronized (lock) {
+						createFinished++;
+					}
 				}
 			}.start();
 		}
@@ -180,7 +216,6 @@ public class LoadTest {
 		}
 
 		long ms = System.currentTimeMillis() - mainStart;
-		System.out.println(nrOfRequests * nrOfThreads + " records processed in " + ms + " ms");
 		double dd = ms / 1000d;
 		double dc = nrOfRequests * nrOfThreads;
 
@@ -188,18 +223,75 @@ public class LoadTest {
 		return threadMap;
 	}
 
+	
+	
+	
+	private Map<Integer, List<Map<String, Object>>> loadTestCreateGroups(String endpoint, String user, String password, final Map<Integer,List<Map<String, Object>>> threadMap, int nrOfRequests, int nrOfThreads, Map<String, Object> groupObject) throws Exception {
+
+
+		long mainStart = System.currentTimeMillis();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.setBasicAuth(user, password);
+		
+		Object lock = new Object();
+
+		for (int i = 0; i < threadMap.size(); i++) {
+			final int zz = i;
+			final List<Map<String, Object>> userList = threadMap.get(i);
+			new Thread() {
+				public void run() {
+					long start = System.currentTimeMillis();
+					for (int j = 0; j < userList.size(); j++) {
+						RestTemplate restTemplate = new RestTemplate();
+						HttpEntity entity = null;
+						ResponseEntity<Object> response = null;
+						try {
+							Map<String,Object> group = new HashMap(groupObject);
+							group.put("id", "organisation" + zz + j);
+							group.put("displayName", "organisation" + zz + j);
+							entity = new HttpEntity(group, headers);
+							response = restTemplate.exchange(endpoint + "/Groups", HttpMethod.POST, entity, Object.class);
+						}
+						catch (Exception e) {
+							e.printStackTrace();
+							continue;
+						}
+					}
+					//System.out.println("thread [" + zz + "] " + nrOfRequests + " records processed in "	+ (System.currentTimeMillis() - start));
+					synchronized (lock) {
+						createGroupsFinished++;
+					}
+				}
+			}.start();
+		}
+
+		while (createGroupsFinished != nrOfThreads) {
+			Thread.sleep(100);
+		}
+
+		long ms = System.currentTimeMillis() - mainStart;
+		double dd = ms / 1000d;
+		double dc = nrOfRequests * nrOfThreads;
+
+		System.out.println("--------------- loadTestCreateGroups() --- " + format.format(dc / dd) + " req/sec");
+		return threadMap;
+	}
 
 
 	
 	
 	
 
-	private void loadTestGet(String endpoint, String user, String password,	Map<Integer, List<Map<String, Object>>> threadMap) throws Exception {
+	private void loadTestGet(String endpoint, String user, String password,	Map<Integer, List<Map<String, Object>>> threadMap, boolean excludeGroups) throws Exception {
 
 		long mainStart = System.currentTimeMillis();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setBasicAuth(user, password);
 		HttpEntity entity = new HttpEntity(headers);
+		
+		Object lock = new Object();
+		 
 		for (int i = 0; i < threadMap.size(); i++) {
 			final int zz = i;
 			final List<Map<String, Object>> userList = threadMap.get(i);
@@ -210,15 +302,21 @@ public class LoadTest {
 						RestTemplate restTemplate = new RestTemplate();
 						ResponseEntity<Object> response = null;
 						try {
-							response = restTemplate.exchange(endpoint + "/Users/" + userList.get(j).get(Constants.ID), HttpMethod.GET, entity, Object.class);
+							String uri = endpoint + "/Users/" + userList.get(j).get(Constants.ID);
+							if ( excludeGroups ) {
+								uri = uri + StringUtils.QUESTION_MARK + EXCLUDED_ATTRIBUTES_GROUPS;
+							}
+							response = restTemplate.exchange(uri, HttpMethod.GET, entity, Object.class);
 						}
 						catch (Exception e) {
 							e.printStackTrace();
-							break;
+							continue;
 						}
 					}
-					System.out.println("thread [" + zz + "] " + userList.size() + " records processed in " + (System.currentTimeMillis() - start));
-					getFinished++;
+					//System.out.println("thread [" + zz + "] " + userList.size() + " records processed in " + (System.currentTimeMillis() - start));
+					synchronized (lock) {
+						getFinished++;
+					}
 				}
 			}.start();
 		}
@@ -228,13 +326,12 @@ public class LoadTest {
 		}
 
 		long ms = System.currentTimeMillis() - mainStart;
-		System.out.println(requests * threadMap.size() + " records processed in " + ms + " ms");
 		if (ms < 1000) {
-			System.out.println("loadTestGet() " + (requests * threadMap.size()) + " per second");
+			System.out.println("loadTestGet() excludeGroups [" + excludeGroups + "] - " + (requests * threadMap.size()) + " per second");
 		} else {
 			double dd = ms / 1000d;
 			double dc = requests * threadMap.size();
-			System.out.println("--------------- loadTestGet()    --- " + format.format(dc / dd) + " req/sec");
+			System.out.println("--------------- loadTestGet()  excludeGroups [" + excludeGroups + "] --- " + format.format(dc / dd) + " req/sec");
 		}
 	}
 
@@ -246,6 +343,8 @@ public class LoadTest {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setBasicAuth(user, password);
 		HttpEntity entity = new HttpEntity(headers);
+		
+		Object lock = new Object();
 
 		String sortBy = "&sortBy=externalId&sortOrder=ascending";
 		for (int i = 0; i < threadMap.size(); i++) {
@@ -270,14 +369,17 @@ public class LoadTest {
 								System.out.println("number of results " + results);
 								throw new Exception("no result found");
 							}
-						} catch (Exception e) {
+						}
+						catch (Exception e) {
 							e.printStackTrace();
-							break;
+							continue;
 						}
 					}
-					System.out.println("thread [" + zz + "] " + userList.size() + " records processed in "
-							+ (System.currentTimeMillis() - start));
-					searchFinished++;
+					//System.out.println("thread [" + zz + "] " + userList.size() + " records processed in "	+ (System.currentTimeMillis() - start));
+					
+					synchronized (lock) {
+						searchFinished++;
+					}
 				}
 			}.start();
 		}
@@ -287,7 +389,6 @@ public class LoadTest {
 		}
 
 		long ms = System.currentTimeMillis() - mainStart;
-		System.out.println(requests * threadMap.size() + " records processed in " + ms + " ms");
 		if (ms < 1000) {
 			System.out.println("loadTestSearch() " + (requests * threadMap.size()) + " per second");
 		} else {
@@ -319,7 +420,7 @@ public class LoadTest {
 				time = time + (System.currentTimeMillis() - cstart);
 				// System.out.println(response.getBody());
 			}
-			System.out.println("all " + findIdsFinished + " ids fetched in average " + (time / count) + " ms");
+			System.out.println("--------------- loadTestAllIds() average   --- " + (time / count) + " ms");
 
 		}
 		catch (Exception e) {
@@ -327,7 +428,7 @@ public class LoadTest {
 		}
 	}
 
-	private void loadTestDelete(String endpoint, String user, String password, Map<Integer, List<Map<String, Object>>> threadMap) throws Exception {
+	private void loadTestDelete(String endpoint, String user, String password, Map<Integer, List<Map<String, Object>>> threadMap, String type) throws Exception {
 
 		long mainStart = System.currentTimeMillis();
 		HttpHeaders headers = new HttpHeaders();
@@ -336,58 +437,62 @@ public class LoadTest {
 		
 		HttpEntity entity = new HttpEntity(headers);
 		RestTemplate restTemplateOne = new RestTemplate();
-		ResponseEntity<Map> response = restTemplateOne.exchange(endpoint + "/Users?attributes=id", HttpMethod.GET,	entity, Map.class);
+		ResponseEntity<Map> response = restTemplateOne.exchange(endpoint + "/" + type + "s?attributes=id", HttpMethod.GET,	entity, Map.class);
 		// System.out.println(response.getBody());
 		int findIdsFinished = (int) response.getBody().get("totalResults");
-		response = restTemplateOne.exchange(endpoint + "/Users?attributes=id&startIndex=1&count=" + findIdsFinished, HttpMethod.GET, entity, Map.class);
+		response = restTemplateOne.exchange(endpoint + "/" + type + "s?attributes=id&startIndex=1&count=" + findIdsFinished, HttpMethod.GET, entity, Map.class);
 		List<Map> resources = (List)response.getBody().get("Resources");
 		
-		System.out.println("got total ids " + resources.size());
+		//System.out.println("got total ids " + resources.size());
 
-		int count = 0;
 		Object lock = new Object();
 		
 		for (int i = 0; i < threadMap.size(); i++) {
-			final int zz = i;
 			new Thread() {
 				public void run() {
 					String id = null;
 					while ( resources.size() > 0) {
 						long start = System.currentTimeMillis();
 						synchronized (lock) {
-							id = (String)((Map)resources.get(count)).get("id");
-							resources.remove(count);
+							if ( resources.size() > 0 ) {
+								id = (String)((Map)resources.get(0)).get("id");
+								resources.remove(0);
+							}
+							else {
+								continue;
+							}
 						}
 						
 						RestTemplate restTemplate = new RestTemplate();
 						try {
-							ResponseEntity<Object> response = restTemplate.exchange(endpoint + "/Users/" + id, HttpMethod.DELETE, entity,Object.class);
+							ResponseEntity<Object> response = restTemplate.exchange(endpoint + "/" + type + "s/" + id, HttpMethod.DELETE, entity,Object.class);
 						}
 						catch (Exception e) {
 							e.printStackTrace();
 						}
-						System.out.println("thread [" + zz + "] " + " record with id [" + id + "] deleted in "	+ (System.currentTimeMillis() - start));
 						
 					}
-					deleteFinished++;
-						
+					synchronized (lock) {
+						deleteFinished++;
+					}
 				}
 			}.start();
 		}
 
 		while (deleteFinished != threadMap.size()) {
+			//System.out.println("deleteF " + deleteFinished + " - threadm " + threadMap.size() );
 			Thread.sleep(100);
 		}
 
 		long ms = System.currentTimeMillis() - mainStart;
-		System.out.println(requests * threadMap.size() + " records processed in " + ms + " ms");
+		//System.out.println(requests * threadMap.size() + " records for type " + type + " processed in " + ms + " ms");
 		if (ms < 1000) {
 			System.out.println("loadTestDelete() " + (requests * threadMap.size()) + " per second");
 		}
 		else {
 			double dd = ms / 1000d;
 			double dc = requests * threadMap.size();
-			System.out.println("--------------- loadTestDelete() --- " + format.format(dc / dd) + " req/sec");
+			System.out.println("--------------- loadTestDelete() --- type [" + type +  "] " + format.format(dc / dd) + " req/sec");
 		}
 	}
 
