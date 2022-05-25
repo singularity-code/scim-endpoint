@@ -21,6 +21,7 @@ public class SearchCriteriaUtil {
 		if (!StringUtils.isEmpty(filter)) {
 			logger.info("composing searchcriteria from filter {}", filter);
 			filter = filter.trim();
+			filter = checkDoubleParentheses(filter);
 			while( !StringUtils.isEmpty(filter)) {
 				try {
 					filter = addNextPart(filter,searchCriteria, null);
@@ -36,6 +37,10 @@ public class SearchCriteriaUtil {
 	
 	
 	
+
+
+
+
 
 	private String addNextPart(String filter, SearchCriteria searchCriteria, String keyPrefix) {
 		if ( StringUtils.isEmpty(filter)) {
@@ -123,6 +128,27 @@ public class SearchCriteriaUtil {
 	}
 
 
+	
+	
+
+	private String checkDoubleParentheses(String filter) {
+		if ( filter.startsWith(StringUtils.LEFT_PARENTHESE)) {
+			boolean nextCharFound = false;
+			int position = 1;
+			while ( !nextCharFound ) {
+				char nextChar = filter.charAt(position);
+				position++;
+				if ( nextChar != ' ') {
+					nextCharFound = true;
+					if ( nextChar == '(') {
+						filter = filter.substring(position -1, filter.length() -1);
+						filter.trim();
+					}
+				}
+			}
+		}
+		return filter;
+	}
 
 
 }
