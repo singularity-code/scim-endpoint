@@ -179,16 +179,16 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 	public long count(SearchCriteria searchCriteria) {
 		ConnectorConnection connection = null;
 		try {
-
 			SearchCriteria nativeSearchCriteria = getNativeSearchCriteria(searchCriteria);
-
 			connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
 			List<String> nativeList = connection.getConnector().findIds(nativeSearchCriteria, 0, 0, null);
 			return Long.valueOf(nativeList.size());
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 			throw new DataException(e.getMessage());
-		} finally {
+		}
+		finally {
 			if (connection != null) {
 				connection.close();
 			}
@@ -199,8 +199,7 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 		SearchCriteria nativeSearchCriteria = new SearchCriteria();
 		for (SearchCriterium criterium : searchCriteria.getCriteria()) {
 			String nativeKey = (String) MapUtils.getKeyByValue(mapping, criterium.getKey());
-			nativeSearchCriteria.getCriteria()
-					.add(new SearchCriterium(nativeKey, criterium.getValue(), criterium.getSearchOperation()));
+			nativeSearchCriteria.getCriteria().add(new SearchCriterium(nativeKey, criterium.getValue(), criterium.getSearchOperation()));
 		}
 		return nativeSearchCriteria;
 	}

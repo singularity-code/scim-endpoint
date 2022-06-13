@@ -35,11 +35,12 @@ import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.PropertyFactory;
 import be.personify.iam.scim.util.ScimErrorType;
-import be.personify.iam.scim.util.SearchCriteriaUtil;
 import be.personify.util.SearchCriteria;
+import be.personify.util.SearchCriteriaUtil;
 import be.personify.util.SearchCriterium;
 import be.personify.util.SearchOperation;
 import be.personify.util.StringUtils;
+import be.personify.util.exception.InvalidFilterException;
 
 /**
  * Main controller class for the SCIM operations
@@ -355,7 +356,7 @@ public class Controller {
 		long start = System.currentTimeMillis();
 
 		try {
-			SearchCriteria searchCriteria = searchCriteriaUtil.composeSearchCriteria(filter);
+			SearchCriteria searchCriteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
 			Storage storage = storageImplementationFactory.getStorageImplementation(schema);
 
 			List<String> includeList = getListFromString(attributes);

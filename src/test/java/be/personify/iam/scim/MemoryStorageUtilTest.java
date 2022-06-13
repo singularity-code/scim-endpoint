@@ -10,8 +10,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import be.personify.iam.scim.storage.util.MemoryStorageUtil;
-import be.personify.iam.scim.util.SearchCriteriaUtil;
 import be.personify.util.SearchCriteria;
+import be.personify.util.SearchCriteriaUtil;
 
 public class MemoryStorageUtilTest {
 	
@@ -23,7 +23,7 @@ public class MemoryStorageUtilTest {
 	public void testOne() {
 		String filter = "userName eq \"bjensen\"";
 		try {
-			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteria(filter);
+			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
 			Map<String,Object> object = new HashMap<>();
 			object.put("userName", "homer");
 			Assert.assertFalse("must not match", MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
@@ -41,7 +41,7 @@ public class MemoryStorageUtilTest {
 	public void testOneCaseInsensitivityLogicalOperator() {
 		String filter = "userName Eq \"bjensen\"";
 		try {
-			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteria(filter);
+			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
 			Map<String,Object> object = new HashMap<>();
 			object.put("userName", "homer");
 			Assert.assertFalse("must not match", MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
@@ -60,7 +60,7 @@ public class MemoryStorageUtilTest {
 	public void testTwo() {
 		String filter = "title pr";
 		try {
-			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteria(filter);
+			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
 			Map<String,Object> object = new HashMap<>();
 			Assert.assertFalse("not must match",MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
 			object.put("title", "mister");
@@ -77,7 +77,7 @@ public class MemoryStorageUtilTest {
 	public void testThree() {
 		String filter = "title pr and userType eq \"Employee\"";
 		try {
-			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteria(filter);
+			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
 			
 			Map<String,Object> object = new HashMap<>();
 			Assert.assertFalse("not must match",MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
@@ -99,7 +99,7 @@ public class MemoryStorageUtilTest {
 	public void testFour() {
 		String filter = "title pr or userType eq \"Intern\"";
 		try {
-			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteria(filter);
+			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
 			Map<String,Object> object = new HashMap<>();
 			Assert.assertFalse("not must match",MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
 			object.put("userType", "external");
@@ -117,7 +117,7 @@ public class MemoryStorageUtilTest {
 	public void testFive() {
 		String filter = "userType eq \"Employee\" and (emails co \"example.com\" or emails.value co \"example.org\")";
 		try {
-			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteria(filter);
+			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
 			Map<String,Object> object = new HashMap<>();
 			Assert.assertFalse("not must match",MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
 			object.put("userType", "Employee");
@@ -146,7 +146,7 @@ public class MemoryStorageUtilTest {
 	public void testSix() {
 		String filter = "userType eq \"Employee\" and (emails.type eq \"work\")";
 		try {
-			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteria(filter);
+			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
 			Map<String,Object> object = new HashMap<>();
 			Assert.assertFalse("not must match",MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
 			object.put("userType", "Employee");
@@ -177,7 +177,7 @@ public class MemoryStorageUtilTest {
 	public void testSeven() {
 		String filter = "emails[type eq \"work\" and value co \"@example.com\"] or ims[type eq \"xmpp\" and value co \"@foo.com\"]";
 		try {
-			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteria(filter);
+			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
 		
 			Map<String,Object> object = new HashMap<>();
 			Assert.assertFalse("not must match",MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
