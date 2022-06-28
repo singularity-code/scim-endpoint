@@ -197,9 +197,13 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 
 	private SearchCriteria getNativeSearchCriteria(SearchCriteria searchCriteria) {
 		SearchCriteria nativeSearchCriteria = new SearchCriteria();
+		nativeSearchCriteria.setOperator(searchCriteria.getOperator());
 		for (SearchCriterium criterium : searchCriteria.getCriteria()) {
 			String nativeKey = (String) MapUtils.getKeyByValue(mapping, criterium.getKey());
 			nativeSearchCriteria.getCriteria().add(new SearchCriterium(nativeKey, criterium.getValue(), criterium.getSearchOperation()));
+		}
+		for (int i = 0; i < searchCriteria.getGroupedCriteria().size(); i++) {
+			nativeSearchCriteria.getGroupedCriteria().add(getNativeSearchCriteria(searchCriteria.getGroupedCriteria().get(i)));
 		}
 		return nativeSearchCriteria;
 	}

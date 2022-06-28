@@ -12,6 +12,7 @@ import org.junit.Test;
 import be.personify.iam.scim.storage.util.MemoryStorageUtil;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriteriaUtil;
+import be.personify.util.exception.InvalidFilterException;
 
 public class MemoryStorageUtilTest {
 	
@@ -20,39 +21,30 @@ public class MemoryStorageUtilTest {
 	
 	
 	@Test
-	public void testOne() {
+	public void testOne() throws InvalidFilterException {
 		String filter = "userName eq \"bjensen\"";
-		try {
-			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
-			Map<String,Object> object = new HashMap<>();
-			object.put("userName", "homer");
-			Assert.assertFalse("must not match", MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
-			object.put("userName", "bjensen");
-			Assert.assertTrue("must match", MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
-			object.put("username", "bjensen");
-			Assert.assertTrue("must match", MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
-		}
-		catch( Exception e ) {
-			e.printStackTrace();
-		}
+		SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
+		Map<String,Object> object = new HashMap<>();
+		object.put("userName", "homer");
+		Assert.assertFalse("must not match", MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
+		object.put("userName", "bjensen");
+		Assert.assertTrue("must match", MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
+		object.put("username", "bjensen");
+		Assert.assertTrue("must match", MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
+		
 	}
 	
 	@Test
-	public void testOneCaseInsensitivityLogicalOperator() {
+	public void testOneCaseInsensitivityLogicalOperator() throws InvalidFilterException {
 		String filter = "userName Eq \"bjensen\"";
-		try {
-			SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
-			Map<String,Object> object = new HashMap<>();
-			object.put("userName", "homer");
-			Assert.assertFalse("must not match", MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
-			object.put("userName", "bjensen");
-			Assert.assertTrue("must match", MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
-			object.put("username", "bjensen");
-			Assert.assertTrue("must match", MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
-		}
-		catch( Exception e ) {
-			e.printStackTrace();
-		}
+		SearchCriteria criteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
+		Map<String,Object> object = new HashMap<>();
+		object.put("userName", "homer");
+		Assert.assertFalse("must not match", MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
+		object.put("userName", "bjensen");
+		Assert.assertTrue("must match", MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
+		object.put("username", "bjensen");
+		Assert.assertTrue("must match", MemoryStorageUtil.objectMatchesCriteria(criteria, object) );
 	}
 	
 	

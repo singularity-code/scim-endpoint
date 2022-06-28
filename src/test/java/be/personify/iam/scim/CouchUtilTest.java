@@ -23,14 +23,9 @@ public class CouchUtilTest {
 	public void testOne() {
 		String sortBy = "userName";
 		String sortOrder = null;
-		try {
-			String s = CouchBaseUtil.getSort(sortBy, sortOrder, SortOrder.ascending);
-			logger.info("value returned [{}] ", s);
-			Assert.isTrue(s.equals(" ORDER BY userName asc"), "has to be equal");
-		}
-		catch( Exception e ) {
-			e.printStackTrace();
-		}
+		String s = CouchBaseUtil.getSort(sortBy, sortOrder, SortOrder.ascending);
+		logger.info("value returned [{}] ", s);
+		Assert.isTrue(s.equals(" ORDER BY t.userName asc"), "has to be equal");
 	}
 	
 	
@@ -38,14 +33,9 @@ public class CouchUtilTest {
 	public void testTwo() {
 		String sortBy = "userName";
 		String sortOrder = "descending";
-		try {
-			String s = CouchBaseUtil.getSort(sortBy, sortOrder, SortOrder.ascending);
-			logger.info("value returned [{}] ", s);
-			Assert.isTrue(s.equals(" ORDER BY userName desc"), "has to be equal");
-		}
-		catch( Exception e ) {
-			e.printStackTrace();
-		}
+		String s = CouchBaseUtil.getSort(sortBy, sortOrder, SortOrder.ascending);
+		logger.info("value returned [{}] ", s);
+		Assert.isTrue(s.equals(" ORDER BY t.userName desc"), "has to be equal");
 	}
 	
 	
@@ -54,14 +44,9 @@ public class CouchUtilTest {
 	public void testThree() {
 		String sortBy = "userName,externalId";
 		String sortOrder = "descending";
-		try {
-			String s = CouchBaseUtil.getSort(sortBy, sortOrder, SortOrder.ascending);
-			logger.info("value returned [{}] ", s);
-			Assert.isTrue(s.equals(" ORDER BY userName desc, externalId asc"), "has to be equal");
-		}
-		catch( Exception e ) {
-			e.printStackTrace();
-		}
+		String s = CouchBaseUtil.getSort(sortBy, sortOrder, SortOrder.ascending);
+		logger.info("value returned [{}] ", s);
+		Assert.isTrue(s.equals(" ORDER BY t.userName desc, t.externalId asc"), "has to be equal");
 	}
 	
 	

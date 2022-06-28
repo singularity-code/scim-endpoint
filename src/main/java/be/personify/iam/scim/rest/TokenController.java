@@ -35,7 +35,7 @@ import be.personify.util.StringUtils;
 @RestController
 public class TokenController extends Controller {
 
-	private static final Logger logger = LogManager.getLogger(SchemaReader.class);
+	private static final Logger logger = LogManager.getLogger(TokenController.class);
 
 	@Autowired
 	private AuthenticationUtils authenticationUtils;
