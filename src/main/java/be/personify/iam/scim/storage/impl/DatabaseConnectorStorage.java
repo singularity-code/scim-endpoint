@@ -24,6 +24,9 @@ import be.personify.iam.scim.util.Constants;
 import be.personify.util.MapUtils;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
+import be.personify.util.SortCriteria;
+import be.personify.util.SortCriterium;
+import be.personify.util.SortOrder;
 import be.personify.util.State;
 import be.personify.util.StringUtils;
 import be.personify.util.provisioning.TargetSystem;
@@ -57,7 +60,8 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 			Map<String, Object> extra = new HashMap<String, Object>();
 			extra.put(Constants.ID, id);
 			scimObject = processMapping(id, scimObject, extra, depthMapping, schema);
-			ProvisionResult result = new ProvisionTask().provision(State.PRESENT, scimObject, mapping, targetSystem);
+			logger.info("mapping {}", mapping);
+			ProvisionResult result = new ProvisionTask().provision(State.PRESENT, scimObject, invertMap(mapping), targetSystem);
 			if (!result.getStatus().equals(ProvisionStatus.SUCCESS)) {
 				throw new DataException(result.getErrorCode() + StringUtils.SPACE + result.getErrorDetail());
 			}
@@ -102,7 +106,7 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 			Map<String, Object> extra = new HashMap<String, Object>();
 			extra.put(Constants.ID, id);
 			scimObject = processMapping(id, scimObject, extra, depthMapping, schema);
-			ProvisionResult result = new ProvisionTask().provision(State.PRESENT, scimObject, mapping, targetSystem);
+			ProvisionResult result = new ProvisionTask().provision(State.PRESENT, scimObject, invertMap(mapping), targetSystem);
 			if (!result.getStatus().equals(ProvisionStatus.SUCCESS)) {
 				throw new DataException(result.getErrorCode() + StringUtils.SPACE + result.getErrorDetail());
 			}
@@ -149,10 +153,20 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 		ConnectorConnection connection = null;
 		try {
 
-			SearchCriteria nativeSearchCriteria = getNativeSearchCriteria(searchCriteria);
-
 			connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
-			List<Map<String, Object>> nativeList = connection.getConnector().find(nativeSearchCriteria, start, count, null);
+			
+			logger.info("sortBy {} string {}", sortBy, sortOrderString);
+			SortCriteria sortCriteria = null;
+			if ( !StringUtils.isEmpty(sortBy)) {
+				if ( StringUtils.isEmpty(sortOrderString)) {
+					sortOrderString = SortOrder.ascending.name();
+				}
+				sortCriteria = getNativeSortCriteria(new SortCriteria(new SortCriterium(sortBy, SortOrder.valueOf(sortOrderString))));
+			}
+			
+			logger.info("sortCriteria {}", sortCriteria);
+			
+			List<Map<String, Object>> nativeList = connection.getConnector().find(getNativeSearchCriteria(searchCriteria), start, count, sortCriteria );
 			List<Map> scimList = new ArrayList<>();
 			Map<String, Object> scimMap = null;
 			List<String> excludes = Arrays.asList(new String[] {});
@@ -174,14 +188,14 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 			}
 		}
 	}
+	
 
 	@Override
 	public long count(SearchCriteria searchCriteria) {
 		ConnectorConnection connection = null;
 		try {
-			SearchCriteria nativeSearchCriteria = getNativeSearchCriteria(searchCriteria);
 			connection = ConnectorPool.getInstance().getConnectorForTargetSystem(targetSystem);
-			List<String> nativeList = connection.getConnector().findIds(nativeSearchCriteria, 0, 0, null);
+			List<String> nativeList = connection.getConnector().findIds(getNativeSearchCriteria(searchCriteria), 0, 0, null);
 			return Long.valueOf(nativeList.size());
 		}
 		catch (Exception e) {
@@ -206,6 +220,17 @@ public class DatabaseConnectorStorage extends ConnectorStorage {
 			nativeSearchCriteria.getGroupedCriteria().add(getNativeSearchCriteria(searchCriteria.getGroupedCriteria().get(i)));
 		}
 		return nativeSearchCriteria;
+	}
+	
+	
+	private SortCriteria getNativeSortCriteria(SortCriteria sortCriteria) {
+		SortCriteria nativeSortCriteria = new SortCriteria();
+		for (SortCriterium criterium : sortCriteria.getCriteria()) {
+			String nativeKey = (String) MapUtils.getKeyByValue(mapping, criterium.getAttributeName());
+			logger.info("native key {}", nativeKey);
+			nativeSortCriteria.getCriteria().add(new SortCriterium(nativeKey, criterium.getSortOrder()));
+		}
+		return nativeSortCriteria;
 	}
 	
 

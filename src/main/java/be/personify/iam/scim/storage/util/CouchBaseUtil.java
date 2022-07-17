@@ -4,10 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import be.personify.iam.scim.storage.DataException;
-import be.personify.iam.scim.storage.SortOrder;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
 import be.personify.util.SearchOperation;
+import be.personify.util.SortOrder;
 import be.personify.util.StringUtils;
 
 /**

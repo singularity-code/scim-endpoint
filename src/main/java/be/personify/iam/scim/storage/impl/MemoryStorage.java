@@ -15,13 +15,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import be.personify.iam.scim.storage.ConstraintViolationException;
-import be.personify.iam.scim.storage.SortOrder;
 import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.storage.util.MemoryStorageUtil;
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.PropertyFactory;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
+import be.personify.util.SortOrder;
 import be.personify.util.StringUtils;
 
 /**

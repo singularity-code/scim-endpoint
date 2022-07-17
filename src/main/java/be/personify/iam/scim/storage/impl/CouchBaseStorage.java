@@ -28,13 +28,13 @@ import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.storage.ConfigurationException;
 import be.personify.iam.scim.storage.ConstraintViolationException;
 import be.personify.iam.scim.storage.DataException;
-import be.personify.iam.scim.storage.SortOrder;
 import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.storage.util.CouchBaseUtil;
 import be.personify.iam.scim.util.Constants;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
 import be.personify.util.SearchOperation;
+import be.personify.util.SortOrder;
 import be.personify.util.StringUtils;
 
 /**

@@ -3,13 +3,11 @@ package be.personify.iam.scim;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import org.junit.Test;
 import org.springframework.util.Assert;
 
-import org.junit.Test;
-
-import be.personify.iam.scim.storage.SortOrder;
 import be.personify.iam.scim.storage.util.CouchBaseUtil;
+import be.personify.util.SortOrder;
 
 
 

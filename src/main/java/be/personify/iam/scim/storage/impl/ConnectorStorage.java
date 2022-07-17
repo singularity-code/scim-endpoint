@@ -178,4 +178,14 @@ public abstract class ConnectorStorage implements Storage {
 		logger.debug("{}", fileContent);
 		return Constants.objectMapper.readValue(fileContent, Map.class);
 	}
+	
+	
+	protected Map<String,String> invertMap( Map<String,String> map ){
+		Map<String, String> invertedMap = new HashMap<>();
+		for(Map.Entry<String, String> entry : map.entrySet()){
+		    invertedMap.put(entry.getValue(), entry.getKey());
+		}
+		return invertedMap;
+	}
+	
 }
