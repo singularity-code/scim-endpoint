@@ -205,6 +205,10 @@ public class Controller {
 				opType = ((String) operation.get(Constants.KEY_OP)).toLowerCase();
 				path = (String) operation.get(Constants.KEY_PATH);
 				value = operation.get(Constants.KEY_VALUE);
+				
+				if ( !canPerformAction(schema,opType,path)){
+					return showError(403, "operation " + opType + " is not allowed for path " + path);
+				}
 
 				switch (opType) {
 				case "add":
@@ -615,4 +619,37 @@ public class Controller {
 		}
 		return current;
 	}
+	
+	
+	private boolean canPerformAction(Schema schema, String operation, String path) {
+		if ( path.indexOf(StringUtils.DOT) != -1){
+			SchemaAttribute attribute = schema.getAttribute(path);
+			if ( attribute != null && !StringUtils.isEmpty(attribute.getMutability())){
+				ScimMutability mutability = ScimMutability.valueOf(attribute.getMutability());
+				if ( operation == ScimPatchOperation.add.name()) {
+					if ( mutability == ScimMutability.immutable || mutability == ScimMutability.readOnly){
+						return false;
+					}
+				}
+				else if ( operation == ScimPatchOperation.remove.name()) {
+					if ( mutability == ScimMutability.immutable || mutability == ScimMutability.readOnly){
+						return false;
+					}
+				}
+				else if ( operation == ScimPatchOperation.replace.name()) {
+					if ( mutability == ScimMutability.immutable || mutability == ScimMutability.readOnly){
+						return false;
+					}
+				}
+				
+			}
+			//required attributes can not be removed according to spec
+			if ( attribute.isRequired() && operation == ScimPatchOperation.remove.name() ){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	
 }
