@@ -3,7 +3,6 @@ package be.personify.iam.scim.rest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -21,10 +20,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import be.personify.iam.provisioning.connectors.scim.schema.SchemaAttributeType;
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaAttribute;
 import be.personify.iam.scim.schema.SchemaException;
@@ -37,13 +34,14 @@ import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
 import be.personify.iam.scim.util.PropertyFactory;
 import be.personify.iam.scim.util.ScimErrorType;
-import be.personify.iam.scim.util.ScimOperation;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriteriaUtil;
 import be.personify.util.SearchCriterium;
 import be.personify.util.SearchOperation;
 import be.personify.util.StringUtils;
 import be.personify.util.exception.InvalidFilterException;
+import be.personify.util.scim.PatchOperation;
+import be.personify.util.scim.ScimMutability;
 
 /**
  * Main controller class for the SCIM operations
@@ -197,7 +195,7 @@ public class Controller {
 
 			List<Map<String, Object>> operations = (List<Map<String, Object>>) patchRequest.get(Constants.KEY_OPERATIONS);
 			
-			ScimOperation opType = null;
+			PatchOperation opType = null;
 			String path = null;
 			Object value = null;
 
@@ -206,71 +204,19 @@ public class Controller {
 					return showError(404, "Invalid Operation : " + operation);
 				}
 
-				opType = ScimOperation.parse(((String) operation.get(Constants.KEY_OP)).toLowerCase());
+				opType = PatchOperation.valueOf(((String)operation.get(Constants.KEY_OP)).toLowerCase());
 				if ( opType == null ) {
 					return showError(404, "Invalid Operation" + operation);
 				}
 				path = (String) operation.get(Constants.KEY_PATH);
 				value = operation.get(Constants.KEY_VALUE);
 				
+				if ( !canPerformAction(schema,opType,path)){
+					return showError(403, "operation " + opType + " is not allowed for path " + path);
+				}
+				
 				patchUtils.patchEntity( existingEntity, opType, path, value, schema);
 
-//				switch (opType) {
-//				case "add":
-//					logger.debug("adding {} to {} in {}", value, path, patchRequest);
-//					Object entry = getPath(path, existingEntity, true, schema);
-//					logger.info(entry.getClass().getName() + " {} ", entry);
-//					if (entry instanceof List) {
-//						((List) entry).addAll((List) value);
-//					} 
-//					else if (entry instanceof Map) {
-//						Map<String, Object> eMap = (Map) entry;
-//						Map<String, Object> aMap = (Map) value;
-//						for (String key : aMap.keySet()) {
-//							if (eMap.containsKey(key)) {
-//								Object e1 = eMap.get(key);
-//								if (e1 instanceof List) {
-//									((List) e1).addAll((Collection) aMap.get(key));
-//								} else {
-//									eMap.put(key, aMap.get(key));
-//								}
-//							} else {
-//								eMap.put(key, aMap.get(key));
-//							}
-//						}
-//					} 
-//					else {
-//						logger.error("Cannot perform add patch: path {} value {} on {}", path, value, patchRequest);
-//					}
-//					break;
-//				case "remove":
-//					logger.debug("removing {} from {} in {}", value, path, patchRequest);
-//					List<String> segs = getPathSegments(path);
-//					if (segs.size() == 1) {
-//						existingEntity.remove(path);
-//					}
-//					else {
-//						logger.error("Cannot perform remove patch: path {} value {} on {}", path, value, patchRequest);
-//					}
-//					break;
-//				case "replace":
-//					logger.debug("replace {} with {} in {}", path, value, patchRequest);
-//					entry = getPath(path, existingEntity, false, schema);
-//					if (entry instanceof Map) {
-//						((Map) entry).putAll((Map) value);
-//					}
-//					else if (entry instanceof List) {
-//						List list = (List) entry;
-//						list.clear();
-//						list.addAll((List) value);
-//					} else {
-//						logger.error("Cannot perform replace patch: path {} value {} on {}", path, value, patchRequest);
-//					}
-//					break;
-//
-//				default:
-//					return showError(404, "Invalid Operation");
-//				}
 			}
 
 			createMeta(new Date(), id, existingEntity, schema.getName(), location);
@@ -580,6 +526,38 @@ public class Controller {
 	
 	protected ResponseEntity<Map<String, Object>> invalidSchemaForResource(String resourceType, String requiredSchema) {
 		return showError(400, "for patching " + resourceType + ", given schemas is not containing " + requiredSchema, ScimErrorType.invalidSyntax);
+	}
+	
+	
+	
+	private boolean canPerformAction(Schema schema, PatchOperation operation, String path) {
+		if ( path.indexOf(StringUtils.DOT) != -1){
+			SchemaAttribute attribute = schema.getAttribute(path);
+			if ( attribute != null && !StringUtils.isEmpty(attribute.getMutability())){
+				ScimMutability mutability = ScimMutability.valueOf(attribute.getMutability());
+				if ( operation == PatchOperation.add) {
+					if ( mutability == ScimMutability.immutable || mutability == ScimMutability.readOnly){
+						return false;
+					}
+				}
+				else if ( operation == PatchOperation.remove) {
+					if ( mutability == ScimMutability.immutable || mutability == ScimMutability.readOnly){
+						return false;
+					}
+				}
+				else if ( operation == PatchOperation.replace) {
+					if ( mutability == ScimMutability.immutable || mutability == ScimMutability.readOnly){
+						return false;
+					}
+				}
+				
+			}
+			//required attributes can not be removed according to spec
+			if ( attribute.isRequired() && operation == PatchOperation.remove ){
+				return false;
+			}
+		}
+		return true;
 	}
 
 	
