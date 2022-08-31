@@ -57,13 +57,13 @@ public class PatchUtils {
 							Object e1 = eMap.get(key);
 							if (e1 instanceof List) {
 								Collection c = (Collection) aMap.get(key);
-								((List) e1).addAll(c);
-//								List currentList = ((List) e1);
-//								for ( Object co : c ) {
-//									if ( !currentList.contains(co) ){
-//										((List) e1).add(co);
-//									}
-//								}
+								//((List) e1).addAll(c);
+								List currentList = ((List) e1);
+								for ( Object co : c ) {
+									if ( !currentList.contains(co) ){
+										((List) e1).add(co);
+									}
+								}
 							} 
 							else {
 								eMap.put(key, aMap.get(key));
