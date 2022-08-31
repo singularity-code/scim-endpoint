@@ -30,6 +30,9 @@ public class SchemaController extends Controller {
 
 	@Autowired
 	private SchemaReader schemaReader;
+	
+	
+
 
 	/**
 	 * POST of a entity
@@ -89,7 +92,8 @@ public class SchemaController extends Controller {
 					return put(id, entity, request, response, schema, attributes, excludedAttributes);
 				}
 				return invalidSchemaForResource(schemas, resourceType);
-			} else {
+			} 
+			else {
 				return put(id, entity, request, response, schema, attributes, excludedAttributes);
 			}
 		}

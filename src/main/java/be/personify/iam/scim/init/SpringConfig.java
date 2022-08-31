@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
 import be.personify.iam.scim.authentication.AuthenticationUtils;
+import be.personify.iam.scim.rest.PatchUtils;
 import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.util.CryptUtils;
 import be.personify.iam.scim.util.PropertyFactory;
@@ -58,6 +59,12 @@ public class SpringConfig {
 	public SchemaReader schemaReader() {
 		return new SchemaReader();
 	}
+	
+	@Bean
+	public PatchUtils patchUtils() {
+		return new PatchUtils();
+	}
+
 
 //  @Bean
 //  public CommonsRequestLoggingFilter requestLoggingFilter() {
