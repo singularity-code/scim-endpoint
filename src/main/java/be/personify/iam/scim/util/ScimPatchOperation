@@ -1,0 +1,9 @@
+package be.personify.iam.scim.util;
+
+public enum ScimPatchOperation {
+	
+	add,
+	remove,
+	replace
+
+}
