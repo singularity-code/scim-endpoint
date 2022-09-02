@@ -254,8 +254,9 @@ public class Controller {
 				object = filterAttributes(schema, object, includeList, excludedAttributes);
 				//include groups
 				if ( haveToIncludeGroups(schema,includeList,excludedAttributes)) {
+					logger.debug("have to include groups");
 					Schema groupsSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_GROUP);
-					List<Map> groupSearch = storageImplementationFactory.getStorageImplementation(groupsSchema).search(new SearchCriteria(new SearchCriterium("members.$ref", id, SearchOperation.ENDS_WITH)), 1, returnGroupsMax, null, null);
+					List<Map> groupSearch = storageImplementationFactory.getStorageImplementation(groupsSchema).search(new SearchCriteria(new SearchCriterium("members.value", id, SearchOperation.ENDS_WITH)), 1, returnGroupsMax, null, null);
 					if ( returnGroupsIncludedFieldsArray == null ) {
 						returnGroupsIncludedFieldsArray = Arrays.asList(returnGroupsIncludedFields.split(StringUtils.COMMA));
 					}
@@ -531,7 +532,7 @@ public class Controller {
 	
 	
 	private boolean canPerformAction(Schema schema, PatchOperation operation, String path) {
-		if ( path.indexOf(StringUtils.DOT) != -1){
+		if ( path != null && path.indexOf(StringUtils.DOT) != -1){
 			SchemaAttribute attribute = schema.getAttribute(path);
 			if ( attribute != null && !StringUtils.isEmpty(attribute.getMutability())){
 				ScimMutability mutability = ScimMutability.valueOf(attribute.getMutability());

@@ -203,7 +203,9 @@ public class MongoStorage implements Storage {
 	@Override
 	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes) {
 
+		logger.info("searchcriteria {}", searchCriteria);
 		FindIterable<Document> finds = find(start, count, includeAttributes, getCriteria(searchCriteria));
+		logger.info("finds {}", finds);
 		sort(sortBy, sortOrder, finds);
 
 		List<Map> all = new ArrayList<>();
@@ -286,35 +288,36 @@ public class MongoStorage implements Storage {
 	
 	private Bson getCriterium( SearchCriterium sc ) {
 		SearchOperation op = sc.getSearchOperation();
+		String key = safeName(sc.getKey());
 		if (SearchOperation.EQUALS.equals(op)) {
-			return Filters.eq(sc.getKey(), sc.getValue());
+			return Filters.eq(key, sc.getValue());
 		}
 		else if (SearchOperation.NOT_EQUALS.equals(op)) {
-			return Filters.ne(sc.getKey(), sc.getValue());
+			return Filters.ne(key, sc.getValue());
 		}
 		else if (SearchOperation.CONTAINS.equals(op)) {
-			return Filters.eq(sc.getKey(), new Document($regex, sc.getValue()));
+			return Filters.eq(key, new Document($regex, sc.getValue()));
 		}
 		else if (SearchOperation.STARTS_WITH.equals(op)) {
-			return Filters.eq(sc.getKey(), new Document($regex, startRgx((String) sc.getValue())));
+			return Filters.eq(key, new Document($regex, startRgx((String) sc.getValue())));
 		}
 		else if (SearchOperation.ENDS_WITH.equals(op)) {
-			return Filters.eq(sc.getKey(), new Document($regex, endRgx((String) sc.getValue())));
+			return Filters.eq(key, new Document($regex, endRgx((String) sc.getValue())));
 		}
 		else if (SearchOperation.PRESENT.equals(op)) {
-			return Filters.exists(sc.getKey());
+			return Filters.exists(key);
 		}
 		else if (SearchOperation.GREATER_THEN.equals(op)) {
-			return Filters.gt(sc.getKey(), sc.getValue());
+			return Filters.gt(key, sc.getValue());
 		} 
 		else if (SearchOperation.GREATER_THEN_OR_EQUAL.equals(op)) {
-			return Filters.gte(sc.getKey(), sc.getValue());
+			return Filters.gte(key, sc.getValue());
 		}
 		else if (SearchOperation.LESS_THEN.equals(op)) {
-			return Filters.lt(sc.getKey(), sc.getValue());
+			return Filters.lt(key, sc.getValue());
 		} 
 		else if (SearchOperation.LESS_THEN_EQUAL.equals(op)) {
-			return Filters.lte(sc.getKey(), sc.getValue());
+			return Filters.lte(key, sc.getValue());
 		}
 		else {
 			throw new DataException("the operator " + op.name() + " is not implemented");
@@ -417,10 +420,7 @@ public class MongoStorage implements Storage {
 					o = newList;
 					
 				}
-				if ( key.startsWith("$")) {
-					key = StringUtils.UNDERSCORE + key;
-				}
-				newMap.put(key, o);
+				newMap.put(safeName(key), o);
 			}
 			return newMap;
 		}
@@ -429,9 +429,18 @@ public class MongoStorage implements Storage {
 	
 	
 	
+	private String safeName( String name ) {
+		if ( name.startsWith("$")) {
+			name = StringUtils.UNDERSCORE + name;
+		}
+		return name;
+	}
+	
+	
+	
 	
 	public Document unsafetyfyAttributes( Document map) {
-		if ( type.equalsIgnoreCase(Constants.RESOURCE_TYPE_GROUP)) {
+		if ( type.equalsIgnoreCase(Constants.RESOURCE_TYPE_GROUP) && map != null) {
 			Document newMap = new Document();
 			for (String key :  map.keySet() ) {
 				Object o = map.get(key);

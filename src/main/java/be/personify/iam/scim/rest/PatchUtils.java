@@ -39,7 +39,12 @@ public class PatchUtils {
 				List eList = (List)entry;
 				logger.info("its a list {}", eList);
 				if ( value instanceof List ) {
-					eList.addAll((List) value);
+					List ll = (List)value;
+					for ( Object o : ll ) {
+						if ( !eList.contains(o)) {
+							eList.add(o);
+						}
+					}
 				}
 				else if ( value instanceof Map ) {
 					eList.add(value);
@@ -58,8 +63,11 @@ public class PatchUtils {
 							if (e1 instanceof List) {
 								Collection c = (Collection) aMap.get(key);
 								//((List) e1).addAll(c);
+								logger.info("c {}", c);
 								List currentList = ((List) e1);
+								logger.info("currentList {}", currentList);
 								for ( Object co : c ) {
+									logger.info("co {}", co);
 									if ( !currentList.contains(co) ){
 										((List) e1).add(co);
 									}
@@ -84,10 +92,44 @@ public class PatchUtils {
 			
 		}
 		else if ( opType == PatchOperation.remove) {
-			logger.debug("removing {} from {}", value, path);
+			logger.info("removing {} from {}", value, path);
 			List<String> segs = getPathSegments(path);
 			if (segs.size() == 1) {
-				existingEntity.remove(path);
+				if ( value instanceof List ) {
+					List entriesToRemove = (List)value;
+					logger.info("entriesToRemove {}", entriesToRemove);
+					Object existingAttribute = existingEntity.get(path);
+					if ( existingAttribute instanceof List ) {
+						logger.info("existing attribute is a list", existingAttribute);
+						List existingAttributeList = (List)existingAttribute;
+						List newList = new ArrayList();
+						for (Object oo : existingAttributeList ) {
+							logger.info("oo {}", oo);
+							if ( oo instanceof Map ) {
+								logger.info("oo is a map");
+								Map ooo = (Map)oo;
+								for ( Object ee : entriesToRemove ) {
+									if ( ee instanceof Map) {
+										if ( !areEqual(ooo, (Map)ee)) {
+											logger.info("ooo {} not equals ee {}", ooo, (Map)ee );
+											newList.add(oo);
+										}
+									}
+								}
+							}
+							
+							
+							if( !entriesToRemove.contains(oo)) {
+								
+								
+							}
+						}
+						existingEntity.put(path, newList);
+					}
+				}
+				else {
+					existingEntity.remove(path);
+				}
 			}
 			else {
 				logger.error("Cannot perform remove patch: path {} value {} ", path, value);
@@ -210,18 +252,20 @@ public class PatchUtils {
 					SchemaAttribute attribute = schema.getAttribute(seg);
 					if ( attribute.isMultiValued()) {
 						logger.info("multivalued {}", attribute.isMultiValued());
-						List<Object> list = new ArrayList<>();
+						
 						logger.info("attribute {} type {}", attribute , attribute.getType());
 						if ( SchemaAttributeType.fromString(attribute.getType()) == SchemaAttributeType.COMPLEX) {
 							logger.info("it's complex");
-							Map<String,Object> newObject = new HashMap<>();
-							list.add(newObject);
+							
 							if ( current instanceof Map ) {
+								List<Object> list = new ArrayList<>();
+								Map<String,Object> newObject = new HashMap<>();
+								list.add(newObject);
 								((Map)current).put(seg, list);
 								current = newObject;
 							}
 							else if ( current instanceof List ) {
-								((List)current).add(list);
+								//((List)current).add(list);
 							}
 						}
 					}
@@ -246,15 +290,38 @@ public class PatchUtils {
 	
 	public List<String> getPathSegments(String path) {
 		List<String> rest = new ArrayList<>();
-		if (!path.contains(StringUtils.DOT)) {
+		if (!StringUtils.isEmpty(path) && !path.contains(StringUtils.DOT)) {
 			rest.add(path);
 			return rest;
 		}
-		if (!StringUtils.isEmpty(path)) {
+		else if (!StringUtils.isEmpty(path)) {
 			rest.addAll(Arrays.asList(path.split("\\.")));
 			return rest;
 		}
 		return rest;
+	}
+	
+	
+	
+	
+	private boolean areEqual(Map first, Map second) {
+	    if (first.size() != second.size()) {
+	        return false;
+	    }
+	    
+	    for (Object key :  first.keySet()) {
+	    	if (second.containsKey(key)) {
+	    		if (!first.get(key).equals(second.get(key))){
+	    			return false;
+	    		}
+	    	}
+	    	else {
+	    		return false;
+	    	}
+	    }
+	    
+	    return true;
+
 	}
 
 }
