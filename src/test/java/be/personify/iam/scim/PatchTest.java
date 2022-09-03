@@ -36,55 +36,98 @@ public class PatchTest {
 	
 
 	private static final Logger logger = LogManager.getLogger(PatchTest.class);
+
+	
 	
 	@Test
-	public void testNothing() {
+	public void testPatchRolesSingleRoleRolesNotPresent() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
 		
+		Map<String,Object> role = new HashMap<>();
+		role.put("value", "role1");
+		
+		patchUtils.patchEntity(entity, PatchOperation.add, "roles", role, schema );
+		
+		logger.info("patched entity {}", entity );
+		
+		Assert.isTrue( ((List)entity.get("roles")).size() == 1 , "has to have one role");
 	}
 	
 	
-//	@Test
-//	public void testPatchRole() {
-//		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
-//		Map<String,Object> entity = new HashMap<String,Object>();
-//		entity.put("roles", new ArrayList());
-//		
-//		Map<String,Object> role = new HashMap<>();
-//		role.put("value", "role1");
-//		
-//		patchUtils.patchEntity(entity, PatchOperation.add, "roles", role, schema );
-//		
-//		logger.info("patched entity {}", entity );
-//		
-//		Assert.isTrue( ((List)entity.get("roles")).size() == 1 , "has to have one role");
-//	}
-//	
-//	
-//	@Test
-//	public void testPatchRoleList() {
-//		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
-//		Map<String,Object> entity = new HashMap<String,Object>();
-//		entity.put("roles", new ArrayList());
-//		
-//		Map<String,Object> role_one = new HashMap<>();
-//		role_one.put("value", "role1");
-//		
-//		Map<String,Object> role_two = new HashMap<>();
-//		role_two.put("value", "role2");
-//		
-//		List roleList = new ArrayList<>();
-//		roleList.add(role_one);
-//		roleList.add(role_two);
-//		
-//		patchUtils.patchEntity(entity, PatchOperation.add, "roles", roleList, schema );
-//		
-//		logger.info("entity {}", entity);
-//		Assert.isTrue( ((List)entity.get("roles")).size() == 2 , "has to have two roles");
-//	}
-//	
-//	
-//	
-//	
+	@Test
+	public void testPatchRolesSingleRoleRolesPresentButEmpty() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		entity.put("roles", new ArrayList());
+		
+		Map<String,Object> role = new HashMap<>();
+		role.put("value", "role1");
+		
+		patchUtils.patchEntity(entity, PatchOperation.add, "roles", role, schema );
+		
+		logger.info("patched entity {}", entity );
+		
+		Assert.isTrue( ((List)entity.get("roles")).size() == 1 , "has to have one role");
+	}
+	
+	
+	
+	@Test
+	public void testPatchRoleList() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		entity.put("roles", new ArrayList());
+		
+		Map<String,Object> role_one = new HashMap<>();
+		role_one.put("value", "role1");
+		
+		Map<String,Object> role_two = new HashMap<>();
+		role_two.put("value", "role2");
+		
+		List roleList = new ArrayList<>();
+		roleList.add(role_one);
+		roleList.add(role_two);
+		
+		patchUtils.patchEntity(entity, PatchOperation.add, "roles", roleList, schema );
+		
+		logger.info("entity {}", entity);
+		Assert.isTrue( ((List)entity.get("roles")).size() == 2 , "has to have two roles");
+	}
+	
+	
+	
+	@Test
+	public void testPatchRoleListWithRolesPresent() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		List currentRoleList = new ArrayList<>();
+		Map<String,Object> role_zero = new HashMap<>();
+		role_zero.put("value", "role0");
+		currentRoleList.add(role_zero);
+		entity.put("roles", currentRoleList);
+		
+		Map<String,Object> role_one = new HashMap<>();
+		role_one.put("value", "role1");
+		
+		Map<String,Object> role_two = new HashMap<>();
+		role_two.put("value", "role2");
+		
+		List roleList = new ArrayList<>();
+		roleList.add(role_one);
+		roleList.add(role_two);
+		
+		patchUtils.patchEntity(entity, PatchOperation.add, "roles", roleList, schema );
+		
+		logger.info("entity {}", entity);
+		Assert.isTrue( ((List)entity.get("roles")).size() == 3 , "has to have 3 roles");
+	}
+	
+	
+	
+	
+	
+	//for azure?
 //	@Test
 //	public void testGetPathTwo() {
 //		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);

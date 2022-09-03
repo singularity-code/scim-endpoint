@@ -26,7 +26,7 @@ items:
           deploymentconfig: personify-scim-server
       spec:
         containers:
-        - image: 172.30.1.1:5000/personify/personify-scim-server:1.4.4.RELEASE
+        - image: 172.30.1.1:5000/personify/personify-scim-server:1.4.8.RELEASE
           name: personify-scim-server
           ports:
           - containerPort: 8080
@@ -47,7 +47,7 @@ items:
         - personify-scim-server
         from:
           kind: ImageStreamTag
-          name: personify-scim-server:1.4.4.RELEASE
+          name: personify-scim-server:1.4.8.RELEASE
           namespace: personify
       type: ImageChange
   status:

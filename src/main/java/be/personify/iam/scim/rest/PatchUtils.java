@@ -264,9 +264,13 @@ public class PatchUtils {
 								((Map)current).put(seg, list);
 								current = newObject;
 							}
-							else if ( current instanceof List ) {
+							else if ( current == null || current instanceof List ) {
+								List l = new ArrayList();
+								entity.put(path, l);
+								current = l;
 								//((List)current).add(list);
 							}
+							
 						}
 					}
 					logger.info("seg {} attribute {}", seg, attribute);
