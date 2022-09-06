@@ -60,8 +60,11 @@ public class Controller {
 	@Value("${scim.allowIdOnCreate:true}")
 	private boolean allowIdOnCreate;
 	
-	@Value("${scim.returnGroupsOnUser:true}")
-	private boolean returnGroupsOnUser;
+	@Value("${scim.returnGroupsOnUserGet:true}")
+	private boolean returnGroupsOnUserGet;
+	
+	@Value("${scim.returnGroupsOnUserSearch:true}")
+	private boolean returnGroupsOnUserSearch;
 	
 	@Value("${scim.returnGroupsOnUser.max:100}")
 	private int returnGroupsMax;
@@ -253,18 +256,9 @@ public class Controller {
 				List<String> includeList = getListFromString(attributes);
 				object = filterAttributes(schema, object, includeList, excludedAttributes);
 				//include groups
-				if ( haveToIncludeGroups(schema,includeList,excludedAttributes)) {
+				if ( haveToIncludeGroups(schema,includeList,excludedAttributes, "GET")) {
 					logger.debug("have to include groups");
-					Schema groupsSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_GROUP);
-					List<Map> groupSearch = storageImplementationFactory.getStorageImplementation(groupsSchema).search(new SearchCriteria(new SearchCriterium("members.value", id, SearchOperation.ENDS_WITH)), 1, returnGroupsMax, null, null);
-					if ( returnGroupsIncludedFieldsArray == null ) {
-						returnGroupsIncludedFieldsArray = Arrays.asList(returnGroupsIncludedFields.split(StringUtils.COMMA));
-					}
-					List<Map<String, Object>> filteredGroups = new ArrayList<Map<String, Object>>();
-					for( Map m : groupSearch ) {
-						filteredGroups.add(filterAttributes(groupsSchema, m, returnGroupsIncludedFieldsArray, null));
-					}
-					object.put("groups", filteredGroups);
+					includeGroups(id, object);
 				}
 				result = new ResponseEntity<>(object, HttpStatus.OK);
 				response.addHeader(Constants.HEADER_LOCATION, UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString());
@@ -280,12 +274,35 @@ public class Controller {
 		}
 	}
 
+
+
+	private void includeGroups(String id, Map<String, Object> object ) {
+		Schema groupsSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_GROUP);
+		List<Map> groupSearch = storageImplementationFactory.getStorageImplementation(groupsSchema).search(new SearchCriteria(new SearchCriterium("members.value", id, SearchOperation.ENDS_WITH)), 1, returnGroupsMax, null, null);
+		if ( returnGroupsIncludedFieldsArray == null ) {
+			returnGroupsIncludedFieldsArray = Arrays.asList(returnGroupsIncludedFields.split(StringUtils.COMMA));
+		}
+		List<Map<String, Object>> filteredGroups = new ArrayList<Map<String, Object>>();
+		for( Map m : groupSearch ) {
+			filteredGroups.add(filterAttributes(groupsSchema, m, returnGroupsIncludedFieldsArray, null));
+		}
+		object.put("groups", filteredGroups);
+	}
+
 	
-	private boolean haveToIncludeGroups(Schema schema, List<String> includeList, String excludedAttributes) {
-		if ( schema.getName().equalsIgnoreCase(Constants.RESOURCE_TYPE_USER) && returnGroupsOnUser ){
+	
+	
+	private boolean haveToIncludeGroups(Schema schema, List<String> includeList, String excludedAttributes, String operation ) {
+		if ( schema.getName().equalsIgnoreCase(Constants.RESOURCE_TYPE_USER)){
 			if ( excludedAttributes== null || !excludedAttributes.contains("groups")) {
-				logger.debug("have to return groups");
-				return true;
+				if ( operation.equalsIgnoreCase("GET") && returnGroupsOnUserGet ) {
+					logger.debug("have to return groups for get");
+					return true;
+				}
+				else if ( operation.equalsIgnoreCase("SEARCH") && returnGroupsOnUserSearch) {
+					logger.debug("have to return groups for search");
+					return true;
+				}
 			}
 		}
 		return false;
@@ -332,6 +349,9 @@ public class Controller {
 			
 			if (dataFetched != null) {
 				for (Map<String, Object> entity : dataFetched) {
+					if ( haveToIncludeGroups(schema, includeList, excludedAttributes, "SEARCH")) {
+						includeGroups( (String)entity.get("id"), entity );
+					}
 					data.add(filterAttributes(schema, entity, includeList, excludedAttributes));
 				}
 
