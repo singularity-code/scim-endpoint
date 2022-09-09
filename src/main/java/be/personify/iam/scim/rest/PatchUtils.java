@@ -83,7 +83,7 @@ public class PatchUtils {
 				}
 				else if ( value instanceof List ) {
 					logger.info("entry {} path {} list {}", entry , path, value );
-					eMap.put(path, value);
+					eMap.put(removeUrnFromString(path), value);
 				}
 			} 
 			else {
@@ -93,7 +93,8 @@ public class PatchUtils {
 		}
 		else if ( opType == PatchOperation.remove) {
 			logger.info("removing {} from {}", value, path);
-			List<String> segs = getPathSegments(path);
+			List<String> segs = getPathSegments(path, schema);
+			logger.info("segs {} {}", segs, segs.size());
 			if (segs.size() == 1) {
 				if ( value instanceof List ) {
 					List entriesToRemove = (List)value;
@@ -138,6 +139,7 @@ public class PatchUtils {
 		else if ( opType == PatchOperation.replace) {
 			logger.debug("replace {} with {}", path, value);
 			entry = getPath(path, existingEntity, false, schema);
+			logger.info("entry {}", entry);
 			if (entry instanceof Map) {
 				((Map) entry).putAll((Map) value);
 			}
@@ -145,7 +147,11 @@ public class PatchUtils {
 				List list = (List) entry;
 				list.clear();
 				list.addAll((List) value);
-			} else {
+			}
+			else if ( entry instanceof String ) {
+				existingEntity.put(removeUrnFromString(path), value);
+			}
+			else {
 				logger.error("Cannot perform replace patch: path {} value {}", path, value);
 			}
 		}
@@ -223,7 +229,7 @@ public class PatchUtils {
 		if (StringUtils.isEmpty(path)) {
 			return entity;
 		}
-		List<String> segs = getPathSegments(path);
+		List<String> segs = getPathSegments(path, schema);
 		Object current = entity;
 		while (!segs.isEmpty()) {
 			String seg = segs.remove(0);
@@ -292,7 +298,12 @@ public class PatchUtils {
 	}
 	
 	
-	public List<String> getPathSegments(String path) {
+	public List<String> getPathSegments(String path, Schema schema ) {
+		
+		path = removeUrnFromString(path);
+		
+		logger.info("path {} schema {}", path, schema.getId());
+		
 		List<String> rest = new ArrayList<>();
 		if (!StringUtils.isEmpty(path) && !path.contains(StringUtils.DOT)) {
 			rest.add(path);
@@ -303,6 +314,15 @@ public class PatchUtils {
 			return rest;
 		}
 		return rest;
+	}
+
+
+
+	private String removeUrnFromString(String path) {
+		if ( path.startsWith("urn:")) {
+			path = path.substring(path.lastIndexOf(":") +1, path.length());
+		}
+		return path;
 	}
 	
 	
