@@ -18,9 +18,17 @@ import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.util.StringUtils;
 import be.personify.util.scim.PatchOperation;
 
+/**
+ * Class that bundles patch operations
+ * 
+ * @author wouter
+ *
+ */
 public class PatchUtils {
 	
 	
+	private static final String URN = "urn:";
+
 	@Autowired
 	private SchemaReader schemaReader;
 	
@@ -31,13 +39,16 @@ public class PatchUtils {
 		
 		Object entry = null;
 		
+		//ADD
 		if ( opType == PatchOperation.add) {
 			logger.info("adding {} to {}", value, path);
 			entry = getPath(path, existingEntity, true, schema);
-			logger.info(entry.getClass().getName() + " {} ", entry);
-			if (entry instanceof List) {
+			if ( entry == null ) {
+				existingEntity.put(removeUrnFromString(path), value);
+			}
+			else if (entry instanceof List) {
 				List eList = (List)entry;
-				logger.info("its a list {}", eList);
+				logger.debug("its a list {}", eList);
 				if ( value instanceof List ) {
 					List ll = (List)value;
 					for ( Object o : ll ) {
@@ -51,23 +62,23 @@ public class PatchUtils {
 				}
 			} 
 			else if (entry instanceof Map) {
-				logger.info("its a map");
+				logger.debug("its a map");
 				Map<String, Object> eMap = (Map) entry;
 				if ( value instanceof Map ) {
-					logger.info("value is a map");
+					logger.debug("value is a map");
 					Map<String, Object> aMap = (Map) value;
 					for (String key : aMap.keySet()) {
-						logger.info("key {}", key);
+						logger.debug("key {}", key);
 						if (eMap.containsKey(key)) {
 							Object e1 = eMap.get(key);
 							if (e1 instanceof List) {
 								Collection c = (Collection) aMap.get(key);
 								//((List) e1).addAll(c);
-								logger.info("c {}", c);
+								logger.debug("c {}", c);
 								List currentList = ((List) e1);
-								logger.info("currentList {}", currentList);
+								logger.debug("currentList {}", currentList);
 								for ( Object co : c ) {
-									logger.info("co {}", co);
+									logger.debug("co {}", co);
 									if ( !currentList.contains(co) ){
 										((List) e1).add(co);
 									}
@@ -82,7 +93,7 @@ public class PatchUtils {
 						}					}
 				}
 				else if ( value instanceof List ) {
-					logger.info("entry {} path {} list {}", entry , path, value );
+					logger.debug("entry {} path {} list {}", entry , path, value );
 					eMap.put(removeUrnFromString(path), value);
 				}
 			} 
@@ -91,28 +102,28 @@ public class PatchUtils {
 			}
 			
 		}
+		//REMOVE
 		else if ( opType == PatchOperation.remove) {
 			logger.info("removing {} from {}", value, path);
 			List<String> segs = getPathSegments(path, schema);
-			logger.info("segs {} {}", segs, segs.size());
+			logger.debug("segs {} {}", segs, segs.size());
 			if (segs.size() == 1) {
 				if ( value instanceof List ) {
 					List entriesToRemove = (List)value;
-					logger.info("entriesToRemove {}", entriesToRemove);
+					logger.debug("entriesToRemove {}", entriesToRemove);
 					Object existingAttribute = existingEntity.get(path);
 					if ( existingAttribute instanceof List ) {
-						logger.info("existing attribute is a list", existingAttribute);
+						logger.debug("existing attribute is a list", existingAttribute);
 						List existingAttributeList = (List)existingAttribute;
 						List newList = new ArrayList();
 						for (Object oo : existingAttributeList ) {
-							logger.info("oo {}", oo);
 							if ( oo instanceof Map ) {
-								logger.info("oo is a map");
+								logger.debug("oo is a map");
 								Map ooo = (Map)oo;
 								for ( Object ee : entriesToRemove ) {
 									if ( ee instanceof Map) {
 										if ( !areEqual(ooo, (Map)ee)) {
-											logger.info("ooo {} not equals ee {}", ooo, (Map)ee );
+											logger.debug("ooo {} not equals ee {}", ooo, (Map)ee );
 											newList.add(oo);
 										}
 									}
@@ -136,10 +147,11 @@ public class PatchUtils {
 				logger.error("Cannot perform remove patch: path {} value {} ", path, value);
 			}
 		}
+		//REPLACE
 		else if ( opType == PatchOperation.replace) {
-			logger.debug("replace {} with {}", path, value);
+			logger.info("replace {} with {}", path, value);
 			entry = getPath(path, existingEntity, false, schema);
-			logger.info("entry {}", entry);
+			logger.debug("entry {}", entry);
 			if (entry instanceof Map) {
 				((Map) entry).putAll((Map) value);
 			}
@@ -156,62 +168,6 @@ public class PatchUtils {
 			}
 		}
 		
-//		switch (opType) {
-//		case "add":
-//			logger.debug("adding {} to {} in {}", value, path, patchRequest);
-//			Object entry = getPath(path, existingEntity, true, schema);
-//			logger.info(entry.getClass().getName() + " {} ", entry);
-//			if (entry instanceof List) {
-//				((List) entry).addAll((List) value);
-//			} 
-//			else if (entry instanceof Map) {
-//				Map<String, Object> eMap = (Map) entry;
-//				Map<String, Object> aMap = (Map) value;
-//				for (String key : aMap.keySet()) {
-//					if (eMap.containsKey(key)) {
-//						Object e1 = eMap.get(key);
-//						if (e1 instanceof List) {
-//							((List) e1).addAll((Collection) aMap.get(key));
-//						} else {
-//							eMap.put(key, aMap.get(key));
-//						}
-//					} else {
-//						eMap.put(key, aMap.get(key));
-//					}
-//				}
-//			} 
-//			else {
-//				logger.error("Cannot perform add patch: path {} value {} on {}", path, value, patchRequest);
-//			}
-//			break;
-//		case "remove":
-//			logger.debug("removing {} from {} in {}", value, path, patchRequest);
-//			List<String> segs = getPathSegments(path);
-//			if (segs.size() == 1) {
-//				existingEntity.remove(path);
-//			}
-//			else {
-//				logger.error("Cannot perform remove patch: path {} value {} on {}", path, value, patchRequest);
-//			}
-//			break;
-//		case "replace":
-//			logger.debug("replace {} with {} in {}", path, value, patchRequest);
-//			entry = getPath(path, existingEntity, false, schema);
-//			if (entry instanceof Map) {
-//				((Map) entry).putAll((Map) value);
-//			}
-//			else if (entry instanceof List) {
-//				List list = (List) entry;
-//				list.clear();
-//				list.addAll((List) value);
-//			} else {
-//				logger.error("Cannot perform replace patch: path {} value {} on {}", path, value, patchRequest);
-//			}
-//			break;
-//
-//		default:
-//			return showError(404, "Invalid Operation");
-//		}
 		
 	}
 	
@@ -256,6 +212,16 @@ public class PatchUtils {
 				if ( (current == null || empty ) && createTree ) {
 					logger.info("seg {}", seg);
 					SchemaAttribute attribute = schema.getAttribute(seg);
+					if ( path.startsWith(URN)) {
+						String schemaString = path.substring(0, path.lastIndexOf(StringUtils.COLON));
+						logger.info("custom schema string {}", schemaString);
+						Schema customSchema = schemaReader.getSchema(schemaString);
+						logger.info("custom schema {}", customSchema);
+						attribute = customSchema.getAttribute(seg);
+					}
+					
+					
+					
 					if ( attribute.isMultiValued()) {
 						logger.info("multivalued {}", attribute.isMultiValued());
 						
@@ -319,8 +285,8 @@ public class PatchUtils {
 
 
 	private String removeUrnFromString(String path) {
-		if ( path.startsWith("urn:")) {
-			path = path.substring(path.lastIndexOf(":") +1, path.length());
+		if ( path.startsWith(URN)) {
+			path = path.substring(path.lastIndexOf(StringUtils.COLON) +1, path.length());
 		}
 		return path;
 	}

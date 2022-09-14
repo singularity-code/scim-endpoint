@@ -154,6 +154,17 @@ public class PatchTest {
 	
 	
 	
+	@Test
+	public void testPatchAddWithUrn() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+
+		patchUtils.patchEntity(entity, PatchOperation.add, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department", "dep two", schema );
+		
+		logger.info("entity {}", entity);
+		Assert.isTrue( ((String)entity.get("department")).equals("dep two") , "has to be dep two");
+	}
+	
 	
 	
 	
