@@ -154,9 +154,9 @@ public class Controller {
 				return showError(400, "id [" + entity.get(Constants.ID)	+ "] given in the data does not match the one in the url [" + id + "]");
 			}
 			;
-			Map<String, Object> existingUser = storageImplementationFactory.getStorageImplementation(schema).get(id);
-			if (existingUser != null) {
-				entity.put(Constants.KEY_META, existingUser.get(Constants.KEY_META));
+			Map<String, Object> existingEntity = storageImplementationFactory.getStorageImplementation(schema).get(id);
+			if (existingEntity != null) {
+				entity.put(Constants.KEY_META, existingEntity.get(Constants.KEY_META));
 			} 
 			else {
 				return showError(404, "resource of type " + schema.getName() + " with id " + id + " can not be updated");
@@ -262,6 +262,7 @@ public class Controller {
 	
 	
 	
+	
 	//GET
 	protected ResponseEntity<Map<String, Object>> get(String id, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes) {
 		long start = System.currentTimeMillis();
@@ -273,7 +274,7 @@ public class Controller {
 				List<String> includeList = getListFromString(attributes);
 				object = filterAttributes(schema, object, includeList, excludedAttributes);
 				//include groups
-				if ( haveToIncludeGroups(schema,includeList,excludedAttributes, "GET")) {
+				if ( haveToIncludeGroups(schema,includeList,excludedAttributes, Constants.HTTP_METHOD_GET)) {
 					logger.debug("have to include groups");
 					includeGroups(id, object);
 				}
@@ -303,7 +304,7 @@ public class Controller {
 		for( Map m : groupSearch ) {
 			filteredGroups.add(filterAttributes(groupsSchema, m, returnGroupsIncludedFieldsArray, null));
 		}
-		object.put("groups", filteredGroups);
+		object.put(Constants.KEY_GROUPS, filteredGroups);
 	}
 
 	
@@ -311,12 +312,12 @@ public class Controller {
 	
 	private boolean haveToIncludeGroups(Schema schema, List<String> includeList, String excludedAttributes, String operation ) {
 		if ( schema.getName().equalsIgnoreCase(Constants.RESOURCE_TYPE_USER)){
-			if ( excludedAttributes== null || !excludedAttributes.contains("groups")) {
-				if ( operation.equalsIgnoreCase("GET") && returnGroupsOnUserGet ) {
+			if ( excludedAttributes== null || !excludedAttributes.contains(Constants.KEY_GROUPS)) {
+				if ( operation.equalsIgnoreCase(Constants.HTTP_METHOD_GET) && returnGroupsOnUserGet ) {
 					logger.debug("have to return groups for get");
 					return true;
 				}
-				else if ( operation.equalsIgnoreCase("SEARCH") && returnGroupsOnUserSearch) {
+				else if ( operation.equalsIgnoreCase(Constants.SEARCH) && returnGroupsOnUserSearch) {
 					logger.debug("have to return groups for search");
 					return true;
 				}
@@ -366,7 +367,7 @@ public class Controller {
 			
 			if (dataFetched != null) {
 				for (Map<String, Object> entity : dataFetched) {
-					if ( haveToIncludeGroups(schema, includeList, excludedAttributes, "SEARCH")) {
+					if ( haveToIncludeGroups(schema, includeList, excludedAttributes, Constants.SEARCH)) {
 						includeGroups( (String)entity.get("id"), entity );
 					}
 					data.add(filterAttributes(schema, entity, includeList, excludedAttributes));
@@ -419,6 +420,10 @@ public class Controller {
 			boolean deleted = storageImplementationFactory.getStorageImplementation(schema).delete(id);
 			if (deleted) {
 				result = new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+				//if user is deleted, also remove from members
+				if ( schema.getName().equalsIgnoreCase(Constants.RESOURCE_TYPE_USER)){
+					deleteUserFromMembers(id);
+				}
 			}
 			else {
 				return showError(400, "could not delete resource of type " + schema.getName() + " with id " + id);
@@ -430,6 +435,38 @@ public class Controller {
 		logger.info("resource of type {} with id {} deleted in {} ms", schema.getName(), id, (System.currentTimeMillis() - start));
 
 		return result;
+	}
+
+
+	
+	
+	private void deleteUserFromMembers(String id) {
+		Storage groupStorage = storageImplementationFactory.getStorageImplementation(schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_GROUP));
+		//find all groups where the user is in
+		SearchCriteria groupSearchCriteria = new SearchCriteria(new SearchCriterium("members.value", id));
+		List<Map> groups = groupStorage.search(groupSearchCriteria, 1, Integer.MAX_VALUE, null, null);
+		if ( groups != null && groups.size() > 0 ) {
+			logger.info("found {} groups containing the deleted user", groups.size());
+			for ( Map group : groups ) {
+				String groupId = (String)group.get(Constants.ID);
+				List newMembers = new ArrayList<>();
+				List currentMembers = (List)group.get(Constants.KEY_MEMBERS);
+				for ( Object member : currentMembers ) {
+					Map memberMap = (Map)member;
+					if ( !memberMap.get(Constants.KEY_VALUE).equals(id)) {
+						newMembers.add(memberMap);
+					}
+				}
+				group.put(Constants.KEY_MEMBERS, newMembers);
+				try {
+					groupStorage.update(groupId, group);
+					logger.info("updated group {} containing the deleted user {}", groupId, id);
+				}
+				catch ( Exception e ) {
+					logger.error("can not remove user from group", e);
+				}
+			}
+		}
 	}
 
 	
@@ -565,6 +602,8 @@ public class Controller {
 	protected ResponseEntity<Map<String, Object>> invalidSchemaForResource(String resourceType, String requiredSchema) {
 		return showError(400, "for patching " + resourceType + ", given schemas is not containing " + requiredSchema, ScimErrorType.invalidSyntax);
 	}
+	
+	
 	
 	
 	

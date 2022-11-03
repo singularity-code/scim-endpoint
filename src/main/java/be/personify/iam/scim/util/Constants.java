@@ -53,6 +53,8 @@ public class Constants {
 	public static final String KEY_PATH = "path";
 	public static final String KEY_DATA = "data";
 	public static final String KEY_VALUE = "value";
+	public static final String KEY_MEMBERS = "members";
+	public static final String KEY_GROUPS = "groups";
 	public static final String KEY_STATUS = "status";
 	public static final String KEY_DETAIL = "detail";
 	public static final String KEY_CODE = "code";
@@ -74,7 +76,10 @@ public class Constants {
 	public static final String HEADER_LOCATION = "Location";
 
 	public static final String tempDir = System.getProperty("java.io.tmpdir");
+	
 	public static final String HTTP_METHOD_POST = "POST";
+	public static final String HTTP_METHOD_GET = "GET";
+	public static final String SEARCH = "SEARCH";
 
 	public static final String BASIC = "Basic";
 	public static final String BEARER = "Bearer";
