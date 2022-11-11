@@ -42,13 +42,16 @@ public class PatchUtils {
 		//ADD
 		if ( opType == PatchOperation.add) {
 			logger.info("adding {} to {}", value, path);
-			entry = getPath(path, existingEntity, true, schema);
+			Map pathResult = (Map)getPath(path, existingEntity, true, schema);
+			entry = pathResult.get("object");
+			logger.info("entry {} {}", entry);
 			if ( entry == null ) {
+				logger.info("entry is null");
 				existingEntity.put(removeUrnFromString(path), value);
 			}
 			else if (entry instanceof List) {
 				List eList = (List)entry;
-				logger.debug("its a list {}", eList);
+				logger.info("its a list {}", eList);
 				if ( value instanceof List ) {
 					List ll = (List)value;
 					for ( Object o : ll ) {
@@ -59,6 +62,21 @@ public class PatchUtils {
 				}
 				else if ( value instanceof Map ) {
 					eList.add(value);
+				}
+				else if ( value instanceof String) {
+					logger.info("pathResult {}", pathResult);
+					String type = (String)pathResult.get("type"); 
+					if ( type != null && type.equals(SchemaAttributeType.COMPLEX.name())) {
+						Map m = new HashMap<>();
+						m.put((String)pathResult.get("attributename"), value);
+						String conditions =  (String)pathResult.get("conditions");
+						if (!StringUtils.isEmpty(conditions)) {
+							putConditionsInMap( m, conditions);
+						}
+						eList.add(m);
+						logger.info("eList {}", eList);
+					}
+					logger.info("value {}", value);
 				}
 			} 
 			else if (entry instanceof Map) {
@@ -150,15 +168,30 @@ public class PatchUtils {
 		//REPLACE
 		else if ( opType == PatchOperation.replace) {
 			logger.info("replace {} with {}", path, value);
-			entry = getPath(path, existingEntity, false, schema);
-			logger.debug("entry {}", entry);
+			Map pathResult = (Map)getPath(path, existingEntity, false, schema);
+			logger.info("pathResult {}", pathResult);
+			entry = pathResult.get("object");
+			logger.info("entry {}", entry);
 			if (entry instanceof Map) {
 				((Map) entry).putAll((Map) value);
 			}
 			else if (entry instanceof List) {
 				List list = (List) entry;
-				list.clear();
-				list.addAll((List) value);
+				if ( pathResult.get("type").equals(SchemaAttributeType.COMPLEX.name())) {
+					for ( Object m : list ) {
+						Map map = (Map)m;
+						map.put(pathResult.get("attributename"), value);
+					}
+				}
+				else {
+					list.clear();
+					if (value instanceof List ) {
+						list.addAll((List) value);
+					}
+					else if (value instanceof String ) {
+						list.add(value);
+					}
+				}
 			}
 			else if ( entry instanceof String ) {
 				existingEntity.put(removeUrnFromString(path), value);
@@ -173,6 +206,26 @@ public class PatchUtils {
 	
 	
 	
+	private void putConditionsInMap(Map m, String conditions) {
+		conditions = conditions.substring(1,conditions.length() -1);
+		logger.info("conditions {}", conditions);
+		String sep = " eq ";
+		if ( conditions.contains(sep)) {
+			String[] keyValue = conditions.split(sep);
+			if ( keyValue.length == 2 ) {
+				String replaced = keyValue[1].replaceAll("\"", StringUtils.EMPTY_STRING);
+				if ( replaced.equalsIgnoreCase("true") || replaced.equalsIgnoreCase("false") ) {
+					m.put(keyValue[0], Boolean.valueOf(replaced));
+				}
+				else {
+					m.put(keyValue[0], replaced);
+				}
+			}
+		}
+	}
+
+
+
 	/**
 	 * This function needs to handle paths with selectors... doesn't yet. See
 	 * example user_patch4 .. (Microsoft AD example).
@@ -182,85 +235,109 @@ public class PatchUtils {
 	 * @return
 	 */
 	private Object getPath(String path, Map<String, Object> entity, boolean createTree, Schema schema ) {
-		if (StringUtils.isEmpty(path)) {
-			return entity;
-		}
-		List<String> segs = getPathSegments(path, schema);
+		Map m = new HashMap<>();
 		Object current = entity;
-		while (!segs.isEmpty()) {
-			String seg = segs.remove(0);
-			logger.info(current.getClass().getName() + " {} ", seg);
-			if (current instanceof Map) {
-				//parse conditions
-				String conditions = StringUtils.EMPTY_STRING;
-				logger.info("seg {}", seg);
-				if ( seg.endsWith("]")) {
-					int startCondition = seg.indexOf("[");
-					conditions = seg.substring(startCondition, seg.length());
-					seg = seg.substring(0, startCondition );
-					logger.info("conditions {} seg {}", conditions, seg);
-				}
-				current = ((Map) current).get(seg);
-				logger.info("current {}", current);
-				
-				boolean empty = false; 
-				if ( current instanceof List && ((List)current).size() == 0 ) {
-					logger.info("empty list");
-					empty = true;
-				}
-
-				if ( (current == null || empty ) && createTree ) {
+		if (StringUtils.isEmpty(path)) {
+			current = entity;
+	}
+		else {
+			List<String> segs = getPathSegments(path, schema);
+			while (!segs.isEmpty()) {
+				String seg = segs.remove(0);
+				logger.info(current.getClass().getName() + " {} ", seg);
+				if (current instanceof Map) {
+					//parse conditions
+					String conditions = StringUtils.EMPTY_STRING;
 					logger.info("seg {}", seg);
-					SchemaAttribute attribute = schema.getAttribute(seg);
-					if ( path.startsWith(URN)) {
-						String schemaString = path.substring(0, path.lastIndexOf(StringUtils.COLON));
-						logger.info("custom schema string {}", schemaString);
-						Schema customSchema = schemaReader.getSchema(schemaString);
-						logger.info("custom schema {}", customSchema);
-						attribute = customSchema.getAttribute(seg);
+					
+					if ( seg.endsWith("]")) {
+						int startCondition = seg.indexOf("[");
+						conditions = seg.substring(startCondition, seg.length());
+						seg = seg.substring(0, startCondition );
+						logger.info("conditions {} seg {}", conditions, seg);
+						m.put("conditions", conditions);
 					}
 					
+					SchemaAttribute attribute = getAttribute(path, schema, seg);
+					if ( SchemaAttributeType.fromString(attribute.getType()) == SchemaAttributeType.COMPLEX) {
+						logger.info("it's complex");
+						m.put("type", SchemaAttributeType.COMPLEX.name());
+					}
 					
+					current = ((Map) current).get(seg);
+					logger.info("current {}", current);
 					
-					if ( attribute.isMultiValued()) {
-						logger.info("multivalued {}", attribute.isMultiValued());
+					boolean empty = false; 
+					if ( current instanceof List && ((List)current).size() == 0 ) {
+						logger.info("empty list");
+						empty = true;
+					}
+	
+					if ( (current == null || empty ) && createTree ) {
+						logger.info("seg {}", seg);
 						
-						logger.info("attribute {} type {}", attribute , attribute.getType());
-						if ( SchemaAttributeType.fromString(attribute.getType()) == SchemaAttributeType.COMPLEX) {
-							logger.info("it's complex");
+						
+						
+						if ( attribute.isMultiValued()) {
+							logger.info("multivalued {}", attribute.isMultiValued());
 							
-							if ( current instanceof Map ) {
-								List<Object> list = new ArrayList<>();
-								Map<String,Object> newObject = new HashMap<>();
-								list.add(newObject);
-								((Map)current).put(seg, list);
-								current = newObject;
+							logger.info("attribute {} type {}", attribute , attribute.getType());
+							if ( SchemaAttributeType.fromString(attribute.getType()) == SchemaAttributeType.COMPLEX) {
+								logger.info("it's complex");
+								
+								if ( current instanceof Map ) {
+									List<Object> list = new ArrayList<>();
+									Map<String,Object> newObject = new HashMap<>();
+									list.add(newObject);
+									((Map)current).put(seg, list);
+									current = newObject;
+								}
+								else if ( current == null || current instanceof List ) {
+									List l = new ArrayList();
+									entity.put(seg, l);
+									current = l;
+									//((List)current).add(list);
+								}
+								
 							}
-							else if ( current == null || current instanceof List ) {
-								List l = new ArrayList();
-								entity.put(path, l);
-								current = l;
-								//((List)current).add(list);
-							}
+						}
+						logger.info("seg {} attribute {} current {}", seg, attribute, current);
+					}
+					else {
+						if ( current instanceof List && ((List)current).size() == 0 ) {
 							
 						}
 					}
-					logger.info("seg {} attribute {}", seg, attribute);
 				}
-				else {
-					if ( current instanceof List && ((List)current).size() == 0 ) {
-						
+				else if ( current instanceof List ) {
+					logger.info("list seg {}", seg);
+					if ( segs.isEmpty()) {
+						m.put("attributename", seg);
 					}
 				}
-			}
-			else if ( current instanceof List ) {
-				logger.info("list seg {}", seg);
-			}
-			else {
-				return null;
+				else {
+					return null;
+				}
 			}
 		}
-		return current;
+		
+		m.put("object", current);
+		
+		return m;
+	}
+
+
+
+	private SchemaAttribute getAttribute(String path, Schema schema, String seg) {
+		SchemaAttribute attribute = schema.getAttribute(seg);
+		if ( path.startsWith(URN)) {
+			String schemaString = path.substring(0, path.lastIndexOf(StringUtils.COLON));
+			logger.info("custom schema string {}", schemaString);
+			Schema customSchema = schemaReader.getSchema(schemaString);
+			logger.info("custom schema {}", customSchema);
+			attribute = customSchema.getAttribute(seg);
+		}
+		return attribute;
 	}
 	
 	

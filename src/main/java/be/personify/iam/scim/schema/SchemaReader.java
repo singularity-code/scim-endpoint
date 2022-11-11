@@ -66,8 +66,9 @@ public class SchemaReader {
 				schemaMap.put(schema.getId(), schema);
 				schemaMapper.put(schema.getName(), schema.getId());
 			}
-		} else {
-			logger.info("it's no array");
+		} 
+		else {
+			logger.error("it's no array");
 			throw new Exception("no array found in the schema");
 		}
 	}
@@ -118,16 +119,17 @@ public class SchemaReader {
 				}
 			} 
 			else {
-				if ( operation.equals("PUT") || operation.equals("POST")) {
+				if ( operation.equals(Constants.HTTP_METHOD_PUT) || operation.equals(Constants.HTTP_METHOD_POST)) {
 					if ( attribute.getMutability().equalsIgnoreCase("readOnly")) {
-						throw new SchemaException("attribute is readonly");
+						throw new SchemaException("attribute with name [" + attribute.getName() + "] is readonly");
 					}
 				}
 				SchemaAttributeType type = SchemaAttributeType.fromString(attribute.getType());
 				if (type.equals(SchemaAttributeType.STRING)) {
 					if (attribute.isMultiValued()) {
 						List<String> ll = (List<String>) o;
-					} else {
+					}
+					else {
 						String s = (String) o;
 						if (attribute.getCanonicalValues() != null && attribute.getCanonicalValues().length > 0) {
 							boolean found = false;
@@ -138,7 +140,7 @@ public class SchemaReader {
 								}
 							}
 							if (!found) {
-								throw new SchemaException("only one of " + Arrays.toString(attribute.getCanonicalValues()) + " is allowed");
+								throw new SchemaException("only one of " + Arrays.toString(attribute.getCanonicalValues()) + " is allowed for attribute [" + attribute.getName() + "]");
 							}
 						}
 					}
@@ -148,10 +150,12 @@ public class SchemaReader {
 						for (Map<String, Object> mm : (List<Map<String, Object>>) o) {
 							validateMap(attribute, mm, checkRequired, operation);
 						}
-					} else {
+					} 
+					else {
 						validateMap(attribute, (Map<String, Object>) o, checkRequired, operation);
 					}
-				} else if (type.equals(SchemaAttributeType.BOOLEAN)) {
+				} 
+				else if (type.equals(SchemaAttributeType.BOOLEAN)) {
 					Boolean.valueOf(o.toString());
 				}
 			}

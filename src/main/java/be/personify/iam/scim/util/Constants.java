@@ -33,6 +33,9 @@ public class Constants {
 
 	public static final String RESOURCE_TYPE_USER = "User";
 	public static final String RESOURCE_TYPE_GROUP = "Group";
+	public static final String RESOURCE_TYPE_ENTERPRISEUSER = "EnterpriseUser";
+	
+	
 	public static final String RESOURCE_TYPE_SERVICEPROVIDERCONFIG = "ServiceProviderConfig";
 
 	public static final String KEY_SCHEMAS = "schemas";
@@ -79,6 +82,8 @@ public class Constants {
 	
 	public static final String HTTP_METHOD_POST = "POST";
 	public static final String HTTP_METHOD_GET = "GET";
+	public static final String HTTP_METHOD_PUT = "PUT";
+	
 	public static final String SEARCH = "SEARCH";
 
 	public static final String BASIC = "Basic";

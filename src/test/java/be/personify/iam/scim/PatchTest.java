@@ -127,7 +127,7 @@ public class PatchTest {
 	
 	@Test
 	public void testPatchString() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_ENTERPRISEUSER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		entity.put("department", "dep one");
 		
@@ -170,16 +170,92 @@ public class PatchTest {
 	
 	
 	//for azure?
-//	@Test
-//	public void testGetPathTwo() {
-//		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
-//		Map<String,Object> entity = new HashMap<String,Object>();
-//		entity.put("roles", new ArrayList());
-//		
-//		patchUtils.patchEntity(entity, PatchOperation.add, "roles[primary eq \"True\"].value", "role1", schema );
-//		Assert.isTrue( ((List)entity.get("roles")).size() == 1 , "has to have one role");
-//		
-//	}
+	@Test
+	public void testGetPathTwo() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		entity.put("roles", new ArrayList());
+		
+		patchUtils.patchEntity(entity, PatchOperation.add, "roles[primary eq \"True\"].value", "role1", schema );
+		
+		logger.info("entity {}", entity);
+		
+		Assert.isTrue( ((List)entity.get("roles")).size() == 1 , "has to have one role");
+		
+	}
+	
+	
+	//for azure?
+	@Test
+	public void testGetPathThree() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		entity.put("roles", new ArrayList());
+		
+		patchUtils.patchEntity(entity, PatchOperation.add, "phoneNumbers[type eq \"mobile\"].value", "090-1234-5678", schema );
+		
+		logger.info("entity {}", entity);
+			
+		Assert.isTrue( ((List)entity.get("phoneNumbers")).size() == 1 , "has to have one phoneNumber");
+		
+	}
+	
+	
+	
+	
+	//for azure?
+	@Test
+	public void testGetPathFour() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		
+		
+		Map<String,String> existingPhone  = new HashMap<>();
+		existingPhone.put("type", "fixed");
+		existingPhone.put("value", "011141144");
+		List phoneNumbers = new ArrayList<>();
+		phoneNumbers.add(existingPhone);
+		entity.put("phoneNumbers", phoneNumbers);
+		
+		patchUtils.patchEntity(entity, PatchOperation.add, "phoneNumbers[type eq \"mobile\"].value", "090-1234-5678", schema );
+			
+		logger.info("entity {}", entity);
+				
+		Assert.isTrue( ((List)entity.get("phoneNumbers")).size() == 2 , "has to have two phoneNumbers");
+			
+	}
+	
+	
+	
+	//for azure?
+	@Test
+	public void testGetPathFive() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+			
+			
+		Map<String,String> existingPhone  = new HashMap<>();
+		existingPhone.put("type", "mobile");
+		existingPhone.put("value", "tobereplaced");
+		List phoneNumbers = new ArrayList<>();
+		phoneNumbers.add(existingPhone);
+		entity.put("phoneNumbers", phoneNumbers);
+			
+		patchUtils.patchEntity(entity, PatchOperation.replace, "phoneNumbers[type eq \"mobile\"].value", "090-1234-5678", schema );
+			
+		logger.info("entity {}", entity);
+		
+		List p = (List)entity.get("phoneNumbers");
+					
+		Assert.isTrue( p.size() == 1 , "has to have one phoneNumber");
+		
+		Map m = (Map)p.get(0);
+		Assert.isTrue( m.get("value").equals("090-1234-5678") , "phoneNumber has to be overwritten to 090-1234-5678");
+		
+				
+	}
+	
+	
 	
 	
 	
