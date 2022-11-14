@@ -148,7 +148,7 @@ public class Controller {
 		long start = System.currentTimeMillis();
 		try {
 			// validate
-			logger.info("schema {} ", schema);
+			logger.debug("schema {} ", schema);
 			schemaReader.validate(schema, entity, true, request.getMethod());
 			if (!entity.get(Constants.ID).equals(id)) {
 				return showError(400, "id [" + entity.get(Constants.ID)	+ "] given in the data does not match the one in the url [" + id + "]");
@@ -608,32 +608,90 @@ public class Controller {
 	
 	
 	private boolean canPerformAction(Schema schema, PatchOperation operation, String path) {
-		if ( path != null && path.indexOf(StringUtils.DOT) != -1){
-			SchemaAttribute attribute = schema.getAttribute(path);
-			if ( attribute != null && !StringUtils.isEmpty(attribute.getMutability())){
-				ScimMutability mutability = ScimMutability.valueOf(attribute.getMutability());
-				if ( operation == PatchOperation.add) {
-					if ( mutability == ScimMutability.immutable || mutability == ScimMutability.readOnly){
-						return false;
-					}
+		logger.debug("operation {} path {}", operation , path );
+		if ( path != null ){
+			SchemaAttribute attribute = null;
+			//custom schema
+			if ( path.startsWith(Constants.URN)) {
+				String schemaString = path.substring(0, path.lastIndexOf(StringUtils.COLON));
+				String attributeName = path.substring(path.lastIndexOf(StringUtils.COLON) +1, path.length());
+				logger.debug("custom schema string {}", schemaString);
+				Schema customSchema = schemaReader.getSchema(schemaString);
+				logger.debug("custom schema {}", customSchema);
+				attribute = customSchema.getAttribute(attributeName);
+				if ( !canPreformActionOnAttribute(operation, attribute)) {
+					return false;
 				}
-				else if ( operation == PatchOperation.remove) {
-					if ( mutability == ScimMutability.immutable || mutability == ScimMutability.readOnly){
-						return false;
-					}
-				}
-				else if ( operation == PatchOperation.replace) {
-					if ( mutability == ScimMutability.immutable || mutability == ScimMutability.readOnly){
-						return false;
-					}
-				}
-				
 			}
-			//required attributes can not be removed according to spec
-			if ( attribute.isRequired() && operation == PatchOperation.remove ){
-				return false;
+			//simple attribute
+			else if (path.indexOf(StringUtils.DOT) == -1 ) {
+				attribute = schema.getAttribute(path);
+				if ( !canPreformActionOnAttribute(operation, attribute)) {
+					return false;
+				}
+			}
+			else {
+				String[] splitted = path.split("\\.");
+				if ( splitted.length == 2){
+					attribute = schema.getAttribute(removeExpression(splitted[0]));
+					if ( attribute != null && !canPreformActionOnAttribute(operation, attribute) ) {
+						return false;
+					}
+					else {
+						attribute = attribute.getSubAttribute(removeExpression(splitted[1]));
+						if ( attribute != null && !canPreformActionOnAttribute(operation, attribute) ) {
+							return false;
+						}
+					}
+				}
+				else {
+					logger.info("authorization check skipped for operation {}, path {} containing more then two levels of depth", operation, path);
+				}
 			}
 		}
+		return true;
+	}
+	
+	
+	
+	private String removeExpression(String p ) {
+		int startExpression = p.indexOf("[");
+		int endExpression = p.indexOf("]");
+		logger.debug("start {} end {}", startExpression, endExpression );
+		if ( startExpression != -1 && endExpression != -1) {
+			p = p.substring(0, startExpression) + p.substring(endExpression+1, p.length());
+		}
+		logger.debug("removed expression {}", p);
+		return p;
+	}
+
+
+
+	private boolean canPreformActionOnAttribute(PatchOperation operation, SchemaAttribute attribute) {
+		if ( attribute != null && !StringUtils.isEmpty(attribute.getMutability())){
+			ScimMutability mutability = ScimMutability.valueOf(attribute.getMutability());
+			if ( operation == PatchOperation.add) {
+				if ( mutability == ScimMutability.immutable || mutability == ScimMutability.readOnly){
+					return false;
+				}
+			}
+			else if ( operation == PatchOperation.remove) {
+				if ( mutability == ScimMutability.immutable || mutability == ScimMutability.readOnly){
+					return false;
+				}
+			}
+			else if ( operation == PatchOperation.replace) {
+				if ( mutability == ScimMutability.immutable || mutability == ScimMutability.readOnly){
+					return false;
+				}
+			}
+			
+		}
+		//required attributes can not be removed according to spec
+		if ( attribute.isRequired() && operation == PatchOperation.remove ){
+			return false;
+		}
+		
 		return true;
 	}
 

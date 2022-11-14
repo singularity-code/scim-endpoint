@@ -126,6 +126,31 @@ public class PatchTest {
 	
 	
 	@Test
+	public void testPatchAddString() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		
+		patchUtils.patchEntity(entity, PatchOperation.add, "title", "mister", schema );
+		
+		logger.info("entity {}", entity);
+		Assert.isTrue( ((String)entity.get("title")).equals("mister") , "has to be mister");
+	}
+	
+	
+	@Test
+	public void testPatchAddStringExistingReplace() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		entity.put("title", "misses");
+		
+		patchUtils.patchEntity(entity, PatchOperation.replace, "title", "mister", schema );
+		
+		logger.info("entity {}", entity);
+		Assert.isTrue( ((String)entity.get("title")).equals("mister") , "has to be mister");
+	}
+	
+	
+	@Test
 	public void testPatchString() {
 		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_ENTERPRISEUSER);
 		Map<String,Object> entity = new HashMap<String,Object>();
@@ -135,6 +160,53 @@ public class PatchTest {
 		
 		logger.info("entity {}", entity);
 		Assert.isTrue( ((String)entity.get("department")).equals("dep two") , "has to be dep two");
+	}
+	
+	
+	
+	@Test
+	public void testPatchNameSubAttribute() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		Map<String,Object> name = new HashMap<String,Object>();
+		name.put("familyName", "Simpson");
+		entity.put("name", name);
+		
+		patchUtils.patchEntity(entity, PatchOperation.replace, "name.familyName", "Samson", schema );
+		
+		logger.info("entity {}", entity);
+		Assert.isTrue( ((String)entity.get("name.familyName")).equals("Samson") , "has to be Samson");
+	}
+	
+	
+	@Test
+	public void testPatchNameSubAttributeWithNull() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		
+		try {
+			patchUtils.patchEntity(entity, PatchOperation.replace, "name.familyName", "Samson", schema );
+		}
+		catch(Exception e ) {
+			logger.info("it's ok");
+		}
+		
+		
+	}
+	
+	
+	@Test
+	public void testPatchNameSubAttributeWithEmptyName() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		Map<String,Object> name = new HashMap<String,Object>();
+		entity.put("name", name);
+		
+		patchUtils.patchEntity(entity, PatchOperation.replace, "name.familyName", "Samson", schema );
+		Assert.isTrue( entity.get("name") != null , "has to be Samson");
+		
+		logger.info("entity {}", entity);
+		Assert.isTrue( ((Map)entity.get("name")).get("familyName").equals("Samson") , "has to be Samson");
 	}
 	
 	
