@@ -175,10 +175,10 @@ public class PatchTest {
 		patchUtils.patchEntity(entity, PatchOperation.replace, "name.familyName", "Samson", schema );
 		
 		logger.info("entity {}", entity);
-		Assert.isTrue( ((String)entity.get("name.familyName")).equals("Samson") , "has to be Samson");
+		Assert.isTrue( ((Map)entity.get("name")).get("familyName").equals("Samson") , "has to be Samson");
 	}
 	
-	
+	 
 	@Test
 	public void testPatchNameSubAttributeWithNull() {
 		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);

@@ -48,17 +48,17 @@ public class PatchUtils {
 		
 		//ADD
 		if ( opType == PatchOperation.add) {
-			logger.debug("adding {} to {}", value, path);
+			logger.info("adding {} to {}", value, path);
 			Map pathResult = (Map)getPath(path, existingEntity, true, schema);
 			entry = pathResult.get(OBJECT);
-			logger.debug("entry {} {}", entry);
+			logger.info("entry {} {}", entry);
 			if ( entry == null ) {
-				logger.debug("entry is null");
+				logger.info("entry is null");
 				existingEntity.put(removeUrnFromString(path), value);
 			}
 			else if (entry instanceof List) {
 				List eList = (List)entry;
-				logger.debug("its a list {}", eList);
+				logger.info("its a list {}", eList);
 				if ( value instanceof List ) {
 					List ll = (List)value;
 					for ( Object o : ll ) {
@@ -71,7 +71,7 @@ public class PatchUtils {
 					eList.add(value);
 				}
 				else if ( value instanceof String) {
-					logger.debug("pathResult {}", pathResult);
+					logger.info("pathResult {}", pathResult);
 					String type = (String)pathResult.get(TYPE); 
 					if ( type != null && type.equals(SchemaAttributeType.COMPLEX.name())) {
 						Map m = new HashMap<>();
@@ -81,29 +81,29 @@ public class PatchUtils {
 							putConditionsInMap( m, conditions);
 						}
 						eList.add(m);
-						logger.debug("eList {}", eList);
+						logger.info("eList {}", eList);
 					}
-					logger.debug("value {}", value);
+					logger.info("value {}", value);
 				}
 			} 
 			else if (entry instanceof Map) {
-				logger.debug("its a map");
+				logger.info("its a map");
 				Map<String, Object> eMap = (Map) entry;
 				if ( value instanceof Map ) {
-					logger.debug("value is a map");
+					logger.info("value is a map");
 					Map<String, Object> aMap = (Map) value;
 					for (String key : aMap.keySet()) {
-						logger.debug("key {}", key);
+						logger.info("key {}", key);
 						if (eMap.containsKey(key)) {
 							Object e1 = eMap.get(key);
 							if (e1 instanceof List) {
 								Collection c = (Collection) aMap.get(key);
 								//((List) e1).addAll(c);
-								logger.debug("c {}", c);
+								logger.info("c {}", c);
 								List currentList = ((List) e1);
-								logger.debug("currentList {}", currentList);
+								logger.info("currentList {}", currentList);
 								for ( Object co : c ) {
-									logger.debug("co {}", co);
+									logger.info("co {}", co);
 									if ( !currentList.contains(co) ){
 										((List) e1).add(co);
 									}
@@ -118,7 +118,7 @@ public class PatchUtils {
 						}					}
 				}
 				else if ( value instanceof List ) {
-					logger.debug("entry {} path {} list {}", entry , path, value );
+					logger.info("entry {} path {} list {}", entry , path, value );
 					eMap.put(removeUrnFromString(path), value);
 				}
 			} 
@@ -129,26 +129,26 @@ public class PatchUtils {
 		}
 		//REMOVE
 		else if ( opType == PatchOperation.remove) {
-			logger.debug("removing {} from {}", value, path);
+			logger.info("removing {} from {}", value, path);
 			List<String> segs = getPathSegments(path, schema);
-			logger.debug("segs {} {}", segs, segs.size());
+			logger.info("segs {} {}", segs, segs.size());
 			if (segs.size() == 1) {
 				if ( value instanceof List ) {
 					List entriesToRemove = (List)value;
-					logger.debug("entriesToRemove {}", entriesToRemove);
+					logger.info("entriesToRemove {}", entriesToRemove);
 					Object existingAttribute = existingEntity.get(path);
 					if ( existingAttribute instanceof List ) {
-						logger.debug("existing attribute is a list", existingAttribute);
+						logger.info("existing attribute is a list", existingAttribute);
 						List existingAttributeList = (List)existingAttribute;
 						List newList = new ArrayList();
 						for (Object oo : existingAttributeList ) {
 							if ( oo instanceof Map ) {
-								logger.debug("oo is a map");
+								logger.info("oo is a map");
 								Map ooo = (Map)oo;
 								for ( Object ee : entriesToRemove ) {
 									if ( ee instanceof Map) {
 										if ( !areEqual(ooo, (Map)ee)) {
-											logger.debug("ooo {} not equals ee {}", ooo, (Map)ee );
+											logger.info("ooo {} not equals ee {}", ooo, (Map)ee );
 											newList.add(oo);
 										}
 									}
@@ -173,22 +173,22 @@ public class PatchUtils {
 		}
 		//REPLACE
 		else if ( opType == PatchOperation.replace) {
-			logger.debug("replace {} with {}", path, value);
+			logger.info("replace {} with {}", path, value);
 			Map pathResult = (Map)getPath(path, existingEntity, false, schema);
-			logger.debug("pathResult {}", pathResult);
+			logger.info("pathResult {}", pathResult);
 			if ( pathResult == null) {
 				String error = "can not replace non existent attribute " +  path + " " + value;
 				logger.error(error);
 				throw new RuntimeException(error);
 			}
 			entry = pathResult.get(OBJECT);
-			logger.debug("entry {}", entry);
+			logger.info("entry {}", entry);
 			if ( entry == null ) {
-				logger.debug("path {}", path);
+				logger.info("path {}", path);
 				int dotFound = path.indexOf(StringUtils.DOT);
 				if ( pathResult.get(TYPE).equals(SchemaAttributeType.COMPLEX.name()) && dotFound != -1) {
 					String[] splitted = path.split("\\.");
-					logger.debug("splitted {} {}", splitted, splitted.length);
+					logger.info("splitted {} {}", splitted, splitted.length);
 					((Map)existingEntity.get(splitted[0])).put(splitted[1], value);
 				}
 			}
@@ -214,7 +214,20 @@ public class PatchUtils {
 				}
 			}
 			else if ( entry instanceof String ) {
-				existingEntity.put(removeUrnFromString(path), value);
+				//entry = value;
+				int dotFOund = path.indexOf(StringUtils.DOT);
+				if ( dotFOund == -1 ) {
+					existingEntity.put(removeUrnFromString(path), value);
+				}
+				else {
+					String[] splitted = path.split("\\.");
+					if ( splitted.length == 2 ) {
+						((Map)existingEntity.get(splitted[0])).put(splitted[1], value);
+					}
+					else {
+						throw new RuntimeException("path with depth more then two not supported");
+					}
+				}
 			}
 			else {
 				logger.error("Cannot perform replace patch: path {} value {}", path, value);
@@ -228,7 +241,7 @@ public class PatchUtils {
 	
 	private void putConditionsInMap(Map m, String conditions) {
 		conditions = conditions.substring(1,conditions.length() -1);
-		logger.debug("conditions {}", conditions);
+		logger.info("conditions {}", conditions);
 		if ( conditions.contains(EQ)) {
 			String[] keyValue = conditions.split(EQ);
 			if ( keyValue.length == 2 ) {
@@ -267,42 +280,42 @@ public class PatchUtils {
 				if (current instanceof Map) {
 					//parse conditions
 					String conditions = StringUtils.EMPTY_STRING;
-					logger.debug("seg {}", seg);
+					logger.info("seg {}", seg);
 					
 					if ( seg.endsWith("]")) {
 						int startCondition = seg.indexOf("[");
 						conditions = seg.substring(startCondition, seg.length());
 						seg = seg.substring(0, startCondition );
-						logger.debug("conditions {} seg {}", conditions, seg);
+						logger.info("conditions {} seg {}", conditions, seg);
 						m.put("conditions", conditions);
 					}
 					
 					SchemaAttribute attribute = getAttribute(path, schema, seg);
 					if ( SchemaAttributeType.fromString(attribute.getType()) == SchemaAttributeType.COMPLEX) {
-						logger.debug("it's complex");
+						logger.info("it's complex");
 						m.put(TYPE, SchemaAttributeType.COMPLEX.name());
 					}
 					
 					current = ((Map) current).get(seg);
-					logger.debug("current {}", current);
+					logger.info("current {}", current);
 					
 					boolean empty = false; 
 					if ( current instanceof List && ((List)current).size() == 0 ) {
-						logger.debug("empty list");
+						logger.info("empty list");
 						empty = true;
 					}
 	
 					if ( (current == null || empty ) && createTree ) {
-						logger.debug("seg {}", seg);
+						logger.info("seg {}", seg);
 						
 						
 						
 						if ( attribute.isMultiValued()) {
-							logger.debug("multivalued {}", attribute.isMultiValued());
+							logger.info("multivalued {}", attribute.isMultiValued());
 							
-							logger.debug("attribute {} type {}", attribute , attribute.getType());
+							logger.info("attribute {} type {}", attribute , attribute.getType());
 							if ( SchemaAttributeType.fromString(attribute.getType()) == SchemaAttributeType.COMPLEX) {
-								logger.debug("it's complex");
+								logger.info("it's complex");
 								
 								if ( current instanceof Map ) {
 									List<Object> list = new ArrayList<>();
@@ -320,7 +333,7 @@ public class PatchUtils {
 								
 							}
 						}
-						logger.debug("seg {} attribute {} current {}", seg, attribute, current);
+						logger.info("seg {} attribute {} current {}", seg, attribute, current);
 					}
 					else {
 						if ( current instanceof List && ((List)current).size() == 0 ) {
@@ -329,7 +342,7 @@ public class PatchUtils {
 					}
 				}
 				else if ( current instanceof List ) {
-					logger.debug("list seg {}", seg);
+					logger.info("list seg {}", seg);
 					if ( segs.isEmpty()) {
 						m.put(ATTRIBUTENAME, seg);
 					}
@@ -348,12 +361,12 @@ public class PatchUtils {
 
 
 	private SchemaAttribute getAttribute(String path, Schema schema, String seg) {
-		logger.debug("path {} seg {}", path, seg);
+		logger.info("path {} seg {}", path, seg);
 		SchemaAttribute attribute = schema.getAttribute(seg);
 		int dotFound = path.indexOf(StringUtils.DOT);
 		if ( dotFound != -1 && path.endsWith(seg)) {
 			String firstPath = path.substring(0,dotFound);
-			logger.debug("firstPath {}", firstPath);
+			logger.info("firstPath {}", firstPath);
 			attribute = schema.getAttribute(firstPath);
 			if ( attribute != null && attribute.getType().equals(SchemaAttributeType.COMPLEX.name())) {
 				attribute = attribute.getSubAttribute(path.substring(dotFound, seg.length()));
@@ -362,9 +375,9 @@ public class PatchUtils {
 		
 		if ( path.startsWith(Constants.URN)) {
 			String schemaString = path.substring(0, path.lastIndexOf(StringUtils.COLON));
-			logger.debug("custom schema string {}", schemaString);
+			logger.info("custom schema string {}", schemaString);
 			Schema customSchema = schemaReader.getSchema(schemaString);
-			logger.debug("custom schema {}", customSchema);
+			logger.info("custom schema {}", customSchema);
 			attribute = customSchema.getAttribute(seg);
 		}
 		return attribute;
@@ -375,7 +388,7 @@ public class PatchUtils {
 		
 		path = removeUrnFromString(path);
 		
-		logger.debug("path {} schema {}", path, schema.getId());
+		logger.info("path {} schema {}", path, schema.getId());
 		
 		List<String> rest = new ArrayList<>();
 		if (!StringUtils.isEmpty(path) && !path.contains(StringUtils.DOT)) {
