@@ -216,11 +216,12 @@ public class PatchUtils {
 			else if ( entry instanceof String ) {
 				//entry = value;
 				int dotFOund = path.indexOf(StringUtils.DOT);
-				if ( dotFOund == -1 ) {
+				if ( dotFOund == -1 || path.startsWith(Constants.URN)) {
 					existingEntity.put(removeUrnFromString(path), value);
 				}
 				else {
 					String[] splitted = path.split("\\.");
+					
 					if ( splitted.length == 2 ) {
 						((Map)existingEntity.get(splitted[0])).put(splitted[1], value);
 					}
