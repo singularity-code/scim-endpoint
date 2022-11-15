@@ -10,10 +10,10 @@
     "datecreated" : "meta.created"
   },
   "targetSystem" : {
-    "name" : "DB4SCIM",
+    "name" : "PSNFY4SCIM",
     "updateIfIdentical" : false,
     "pingEnabled" : false,
-    "supportsPagination" : false,
+    "supportsPagination" : true,
     "targetSystemAttributes" : [ 
     {
       "name" : "id",
@@ -83,23 +83,14 @@
     }
    ],
     "connectorConfiguration" : {
-      "connectorType" : "DATABASE",
+      "connectorType" : "PSNFYIDENTITY",
       "poolSize" : ${scim.storage.personify.poolSize},
       "configuration" : {
-        "jdbcUrl" : "${scim.storage.personify.jdbcUrl}",
-        "username" : "${scim.storage.personify.username}",
-        "password" : "${scim.storage.personify.password}",
-        "driver" : "${scim.storage.personify.driver}",
-        "table" : "${scim.storage.personify.table}",
-        "read-only" : "false",
-        "table-auto-create" : "true",
-        "schema" : "",
-        "test-query" : "${scim.storage.personify.test-query}",
-        "mail_table" : "create table scim_personify_email ( id INT PRIMARY KEY AUTO_INCREMENT, userid varchar(255), value varchar(255), type varchar(255), primary_ boolean, display varchar(255) )",
-        "mail_select" : "select value, type, display, primary_ as 'primary' from scim_personify_email where userid = '${id}'",
-		"mail_insert" : "insert into scim_personify_email ( userid, value, type, primary_,display ) values ('${id}', '${value}', '${type}', ${primary}, '${display}')",
-		"mail_delete" : "delete from scim_personify_email where userid = '${id}'",
-		"mail_index_1" : "create index idx_scim_personify_email_userid on scim_personify_email (userid)"
+           "url" : "http://localhost/valut/identity",
+           "authorizationUrl" : "http://localhost:9094/auth",
+           "clientId" : "module-vault",
+           "clientSecret" : "Azerty1234&",
+           "authenticationType" : "OAUTH"
       }
     }
   }

@@ -178,25 +178,16 @@ public abstract class ConnectorStorage implements Storage {
 		}
 		return scimObject;
 	}
-	
 
-	protected Map<String, Object> getConfigMap(String connectorType) throws JsonMappingException, JsonParseException, IOException {
-		
+	protected Map<String, Object> getConfigMap(String connectorType)
+			throws JsonMappingException, JsonParseException, IOException {
 		String configFile = propertyFactory.getProperty("scim.storage." + connectorType + ".configFile");
 		String fileContent = null;
-		if (!StringUtils.isEmpty(configFile) ) {
-			if ( configFile.startsWith("classpath:")) {
-				String fName = configFile.substring("classpath:".length(), configFile.length());
-				logger.info("fname : {}", fName);
-				fileContent = new String(IOUtils.readFileAsBytes(PersonifyConnectorStorage.class.getResourceAsStream(fName)));
-				logger.info("fileContent {}", fileContent);
-			}
-			else { 
-				fileContent = new String(IOUtils.readFileAsBytes(new FileInputStream(new File(configFile))));
-			}
-		}
-		else {
-			fileContent = new String(IOUtils.readFileAsBytes(PersonifyConnectorStorage.class.getResourceAsStream("/connector_" + connectorType + ".json")));
+		if (!StringUtils.isEmpty(configFile)) {
+			fileContent = new String(IOUtils.readFileAsBytes(new FileInputStream(new File(configFile))));
+		} else {
+			fileContent = new String(IOUtils.readFileAsBytes(
+					DatabaseConnectorStorage.class.getResourceAsStream("/connector_" + connectorType + ".json")));
 		}
 
 		fileContent = propertyFactory.resolvePlaceHolder(fileContent);

@@ -2,7 +2,9 @@
 
 Lean, mean and high performant open source Spring Boot Java SCIM server implementation with pluggable persistence layer and customizable authorization filter.
 
-Useful for exposing a company's identities using the SCIM protocol and target point for your provisioning engine or source for authentication or authorization providers. 
+Useful for exposing a company's identities using the SCIM protocol and target point for your provisioning engine or source for authentication or authorization providers.
+
+Also usable as a SCIM bridge between different systems or applications.
 
 You can reuse the integrated storage layers (couchbase,mongo,ldap,database,rest...) or write a custom java implementation and wire it via configuration.
 
@@ -24,6 +26,11 @@ basic server implementation.
 - bearer token endpoint created and verified with Forgerock IDM SCIM connector (compatible)
 - /ME endpoint
 - return groups in get user
+
+
+**todo :**
+
+- put/patch/delete in bulk processor
 
 
 ##  
@@ -147,6 +154,7 @@ Seven storage implementations are developed but if needed, you can implement and
 * mysql implementation : stable, creates table and indexes based on mapping
 * OrientDB implementation : should be oki
 * CouchBase : should be good, indexes added
+* personify vault : when something more then storage is needed ( workflow, provisioning and role management [personify.be](https://personify.be)
 
 For using a OAUTH bearer token on [forgerock openidm](https://bitbucket.org/wouter29/personify-scim-server/wiki/Forgerock%20SCIM%20connector) and other products, just point the endpoint to http://localhost:{8090}/scim/v2/token and use the credentials from the application.properties.
 
