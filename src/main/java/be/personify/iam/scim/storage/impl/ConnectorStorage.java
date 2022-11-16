@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -76,13 +77,13 @@ public abstract class ConnectorStorage implements Storage {
 		Map<String, String> mm = new HashMap<String, String>();
 		for (String key : m.keySet()) {
 			String value = m.get(key);
-			if (value.contains(StringUtils.DOT)) {
-				String[] parts = value.split(ESCAPED_DOT);
+			if (key.contains(StringUtils.DOT)) {
+				String[] parts = key.split(ESCAPED_DOT);
 				if (parts.length == 2) {
-					mm.put(key, value);
-				} else {
-					throw new ConfigurationException(
-							"expression is limited to depth of 2 for mapping [" + key + "->" + value + "]");
+					mm.put(value, key);
+				}
+				else {
+					throw new ConfigurationException("expression is limited to depth of 2 for mapping [" + key + "->" + value + "]");
 				}
 			}
 		}
@@ -92,11 +93,24 @@ public abstract class ConnectorStorage implements Storage {
 	protected Map<String, Object> convertNativeMap(Map<String, Object> nativeMap, Map<String, String> mapping, Map<String, String> depthMapping, List<String> excludes, Schema schema) {
 		
 		Map<String, Object> scimMap = new HashMap<String, Object>();
-		for (String key : mapping.keySet()) {
-			if (nativeMap.containsKey(key)) {
-				scimMap.put(mapping.get(key), nativeMap.get(key));
+		
+		
+		logger.info("nativemap {}", nativeMap);
+		
+		logger.info("mapping {}", mapping);
+		
+		for ( Entry<String,String> entry : mapping.entrySet()) {
+			String value = entry.getValue();
+			if (nativeMap.containsKey(value)) {
+				scimMap.put(entry.getKey(), nativeMap.get(value));
 			}
 		}
+		
+//		for (String key : mapping.keySet()) {
+//			if (nativeMap.containsKey(key)) {
+//				scimMap.put(mapping.get(key), nativeMap.get(key));
+//			}
+//		}
 		for (String exclude : excludes) {
 			scimMap.remove(exclude);
 		}
@@ -146,6 +160,8 @@ public abstract class ConnectorStorage implements Storage {
 			Map<String, Object> extraAttributes, Map<String, String> depthMapping, Schema schema) {
 
 		scimObject.putAll(extraAttributes);
+		
+		logger.info("depthMapping {}", depthMapping);
 
 		if (depthMapping.size() > 0) {
 
@@ -154,11 +170,14 @@ public abstract class ConnectorStorage implements Storage {
 			Object value = null;
 			for (String key : scimObject.keySet()) {
 				for (String mappingValue : depthMapping.values()) {
+					logger.info("mappingvalue {} {}", mappingValue, key);
 					if (mappingValue.startsWith(key + StringUtils.DOT)) {
 						sa = schema.getAttribute(key);
+						String parts[] = mappingValue.split(ESCAPED_DOT);
 						if (sa != null) {
-							String parts[] = mappingValue.split(ESCAPED_DOT);
+							logger.info("schema attribute found {}", sa);
 							if (sa.isMultiValued()) {
+								logger.info("multiv");
 								// TODO
 								List<Map> list = (List) scimObject.get(key);
 								List<Object> valueList = new ArrayList<Object>();
@@ -167,9 +186,14 @@ public abstract class ConnectorStorage implements Storage {
 								}
 								newMap.put(mappingValue, valueList);
 							} else {
+								logger.info("not multiv");
 								value = ((Map) scimObject.get(key)).get(parts[1]);
 								newMap.put(mappingValue, value);
 							}
+						}
+						else if ( mappingValue.startsWith("meta.")) {
+							value = ((Map) scimObject.get(key)).get(parts[1]);
+							newMap.put(mappingValue, value);
 						}
 					}
 				}

@@ -128,7 +128,7 @@ public class MemoryStorage implements Storage {
 		result = sort(result, sortBy, sortOrder);
 
 		count = count > result.size() ? result.size() : count;
-		logger.info("count {} start {}", count, start);
+		logger.debug("count {} start {}", count, start);
 		int newStart = (start - 1);
 		if ( newStart > result.size()) {
 			newStart = result.size();

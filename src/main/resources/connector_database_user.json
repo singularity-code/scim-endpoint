@@ -2,12 +2,12 @@
   "mapping" : {
     "id" : "id",
     "password" : "password",
-    "username" : "userName",
-    "familyname" : "name.familyName",
-    "firstname" : "name.givenName",
-    "externalid" : "externalId",
-    "mail" : "emails",
-    "datecreated" : "meta.created"
+    "userName" : "username",
+    "name.familyName" : "familyname",
+    "name.givenName" : "firstname",
+    "externalId" : "externalid",
+    "meta.created" : "datecreated",
+    "emails" : "mail"
   },
   "targetSystem" : {
     "name" : "DB4SCIM_USER",
@@ -66,19 +66,19 @@
       "indexed" : true
     }, 
     {
-      "name" : "mail",
-      "attributeType" : "MAP",
-      "readable" : true,
-      "writable" : true,
-      "multiValued" : true,
-      "primaryKey" : false
-    }, 
-    {
       "name" : "datecreated",
       "attributeType" : "STRING",
       "readable" : true,
       "writable" : true,
       "multiValued" : false,
+      "primaryKey" : false
+    },
+     {
+      "name" : "mail",
+      "attributeType" : "MAP",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : true,
       "primaryKey" : false
     }
    ],

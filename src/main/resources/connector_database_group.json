@@ -3,7 +3,7 @@
     "id" : "id",
     "displayName" : "displayName",
     "members" : "members",
-    "datecreated" : "meta.created"
+    "meta.created" : "datecreated"
   },
   "targetSystem" : {
     "name" : "DB4SCIM_GROUP",

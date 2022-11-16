@@ -186,10 +186,16 @@ public class PatchUtils {
 			if ( entry == null ) {
 				logger.info("path {}", path);
 				int dotFound = path.indexOf(StringUtils.DOT);
-				if ( pathResult.get(TYPE).equals(SchemaAttributeType.COMPLEX.name()) && dotFound != -1) {
-					String[] splitted = path.split("\\.");
-					logger.info("splitted {} {}", splitted, splitted.length);
-					((Map)existingEntity.get(splitted[0])).put(splitted[1], value);
+				String type = (String)pathResult.get(TYPE);
+				if ( type != null ) {
+					if ( type.equals(SchemaAttributeType.COMPLEX.name()) && dotFound != -1) {
+						String[] splitted = path.split("\\.");
+						logger.info("splitted {} {}", splitted, splitted.length);
+						((Map)existingEntity.get(splitted[0])).put(splitted[1], value);
+					}
+				}
+				else {
+					logger.error("existing object is null for path {}, can not replace, use add", path );
 				}
 			}
 			else if (entry instanceof Map) {
