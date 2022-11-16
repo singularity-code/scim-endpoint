@@ -58,16 +58,18 @@ public class PersonifyConnectorStorage extends ConnectorStorage {
 
 	private static final Logger logger = LogManager.getLogger(PersonifyConnectorStorage.class);
 
-	private static TargetSystem targetSystem = null;
+	private TargetSystem targetSystem = null;
 
-	private static Map<String, String> mapping;
-	private static Map<String, String> depthMapping;
+	private Map<String, String> mapping;
+	private Map<String, String> depthMapping;
 
 	private Schema schema = null;
 	private List<String> schemaList = null;
 
 	@Autowired
 	private SchemaReader schemaReader;
+	
+	private String type;
 
 	
 	@Override
@@ -78,6 +80,7 @@ public class PersonifyConnectorStorage extends ConnectorStorage {
 			extra.put(Constants.ID, id);
 			scimObject = processMapping(id, scimObject, extra, depthMapping, schema);
 			logger.info("mapping {}", mapping);
+			logger.info("scimobject {}", scimObject);
 			ProvisionResult result = new ProvisionTask().provision(State.PRESENT, scimObject, invertMap(mapping), targetSystem);
 			if (!result.getStatus().equals(ProvisionStatus.SUCCESS)) {
 				throw new DataException(result.getErrorCode() + StringUtils.SPACE + result.getErrorDetail());
@@ -235,7 +238,7 @@ public class PersonifyConnectorStorage extends ConnectorStorage {
 				nativeSearchCriteria.getCriteria().add(new SearchCriterium(nativeKey, criterium.getValue(), criterium.getSearchOperation()));
 			}
 			else {
-				logger.info("native key not found for {}", criterium.getKey());
+				logger.info("native key not found for type {} key {}", type, criterium.getKey());
 			}
 		}
 		for (int i = 0; i < searchCriteria.getGroupedCriteria().size(); i++) {
@@ -258,8 +261,9 @@ public class PersonifyConnectorStorage extends ConnectorStorage {
 
 	@Override
 	public void initialize(String type) {
+		this.type = type;
 		try {
-			Map<String, Object> config = getConfigMap("personify");
+			Map<String, Object> config = getConfigMap(type, "personify");
 
 			final String targetSystemJson = Constants.objectMapper.writeValueAsString(config.get("targetSystem"));
 			targetSystem = Constants.objectMapper.readValue(targetSystemJson, TargetSystem.class);

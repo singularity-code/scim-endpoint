@@ -1,0 +1,69 @@
+{
+  "mapping" : {
+    "id" : "id",
+    "displayName" : "displayName",
+    "members" : "members",
+    "datecreated" : "meta.created"
+  },
+  "targetSystem" : {
+    "name" : "DB4SCIM_GROUP",
+    "updateIfIdentical" : false,
+    "pingEnabled" : false,
+    "supportsPagination" : false,
+    "targetSystemAttributes" : [ 
+    {
+      "name" : "id",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : true
+    },
+    {
+      "name" : "displayName",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false,
+      "indexed" : true
+    }, 
+    {
+      "name" : "members",
+      "attributeType" : "MAP",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : true,
+      "primaryKey" : false
+    }, 
+    {
+      "name" : "datecreated",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false
+    }
+   ],
+    "connectorConfiguration" : {
+      "connectorType" : "DATABASE",
+      "poolSize" : ${scim.storage.personify.poolSize},
+      "configuration" : {
+        "jdbcUrl" : "${scim.storage.personify.jdbcUrl}",
+        "username" : "${scim.storage.personify.username}",
+        "password" : "${scim.storage.personify.password}",
+        "driver" : "${scim.storage.personify.driver}",
+        "table" : "${scim.storage.personify.table.group}",
+        "read-only" : "false",
+        "table-auto-create" : "true",
+        "schema" : "",
+        "test-query" : "${scim.storage.personify.test-query}",
+        "members_table" : "create table scim_personify_group_member ( id INT PRIMARY KEY AUTO_INCREMENT, groupid varchar(255), value varchar(255), type varchar(255) )",
+        "members_select" : "select value, type from scim_personify_group_member where groupid = '${id}'",
+		"members_insert" : "insert into scim_personify_group_member ( groupid, value, type ) values ('${id}', '${value}', '${type}')",
+		"members_delete" : "delete from scim_personify_group_member where groupid = '${id}'",
+		"members_index_1" : "create index idx_scim_personify_gm_groupid on scim_personify_group_member (groupid)"
+      }
+    }
+  }
+}

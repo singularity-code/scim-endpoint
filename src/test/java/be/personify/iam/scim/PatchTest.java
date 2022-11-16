@@ -56,6 +56,21 @@ public class PatchTest {
 	
 	
 	@Test
+	public void testPatchBoolean() {
+		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		
+		entity.put("active", "true");
+		
+		patchUtils.patchEntity(entity, PatchOperation.replace, "active", Boolean.FALSE, schema );
+		
+		logger.info("patched entity {}", entity );
+		
+		Assert.isTrue( entity.get("active").equals(Boolean.FALSE) , "has to have one role");
+	}
+	
+	
+	@Test
 	public void testPatchRolesSingleRoleRolesPresentButEmpty() {
 		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();

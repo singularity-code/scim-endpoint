@@ -251,7 +251,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 	@Override
 	public void initialize(String type) {
 		try {
-			Map<String, Object> config = getConfigMap("ldap");
+			Map<String, Object> config = getConfigMap(type, "ldap");
 
 			final String targetSystemJson = Constants.objectMapper.writeValueAsString(config.get("targetSystem"));
 			targetSystem = Constants.objectMapper.readValue(targetSystemJson, TargetSystem.class);

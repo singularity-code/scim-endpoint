@@ -213,7 +213,7 @@ public class PatchUtils {
 					}
 				}
 			}
-			else if ( entry instanceof String ) {
+			else if ( entry instanceof String || entry instanceof Boolean ) {
 				//entry = value;
 				int dotFOund = path.indexOf(StringUtils.DOT);
 				if ( dotFOund == -1 || path.startsWith(Constants.URN)) {

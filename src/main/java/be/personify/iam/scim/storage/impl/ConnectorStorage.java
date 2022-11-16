@@ -180,9 +180,10 @@ public abstract class ConnectorStorage implements Storage {
 	}
 	
 
-	protected Map<String, Object> getConfigMap(String connectorType) throws JsonMappingException, JsonParseException, IOException {
-		
-		String configFile = propertyFactory.getProperty("scim.storage." + connectorType + ".configFile");
+	protected Map<String, Object> getConfigMap(String type, String connectorType) throws JsonMappingException, JsonParseException, IOException {
+		logger.info("getting config for type {} connectorType {}", type, connectorType);
+		String configFile = propertyFactory.getProperty("scim.storage." + connectorType + "." + type.toLowerCase() + ".configFile");
+		logger.info("config file is {}", configFile);
 		String fileContent = null;
 		if (!StringUtils.isEmpty(configFile) ) {
 			if ( configFile.startsWith("classpath:")) {
