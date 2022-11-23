@@ -1,0 +1,129 @@
+{
+  "mapping" : {
+    "password" : "userPassword",
+    "userName" : "employeeNumber", 
+    "name.givenName" : "givenName", 
+    "externalId" : "carLicense",
+    "emails.value" : "mail",
+    "name.familyName" : "sn", 
+    "meta.created" : "createTimestamp", 
+    "objectClass" : "objectClass",
+     "id" : "cn"
+  },
+  "targetSystem" : {
+    "name" : "LDAP4SCIMUSER",
+    "updateIfIdentical" : false,
+    "pingEnabled" : false,
+    "supportsPagination" : false,
+    "targetSystemAttributes" : [ 
+    {
+      "name" : "cn",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : true
+    }, 
+    {
+      "name" : "givenName",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false
+    }, 
+    {
+      "name" : "initials",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false
+    },
+    {
+      "name" : "mail",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : true,
+      "primaryKey" : false
+    }, 
+    {
+      "name" : "displayName",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false
+    },
+    {
+      "name" : "sn",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false
+    }, 
+    {
+      "name" : "carLicense",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false
+    }, 
+    {
+      "name" : "employeeNumber",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false
+    }, 
+    {
+      "name" : "userPassword",
+      "attributeType" : "PASSWORD",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false
+    }, 
+    {
+      "name" : "createTimestamp",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : false,
+      "multiValued" : false,
+      "primaryKey" : false
+    },
+    {
+      "name" : "objectClass",
+      "attributeType" : "STRING",
+      "readable" : false,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false
+    } ],
+    "connectorConfiguration" : {
+      "connectorType" : "LDAP",
+      "poolSize" : ${scim.storage.personify.poolSize},
+      "configuration" : {
+        "password" : "${scim.storage.personify.password}",
+        "port" : "${scim.storage.personify.port}",
+        "host" : "${scim.storage.personify.host}",
+        "baseDn" : "${scim.storage.personify.baseDn}",
+        "subDn" : "ou=user",
+        "ssl" : "${scim.storage.personify.ssl}",
+        "username" : "${scim.storage.personify.username}",
+        "objectClasses" : "${scim.storage.personify.userObjectClasses}",
+        "ldapCerts" : "${scim.storage.personify.ldapCerts}"
+      }
+    }
+  }
+  
+  
+  
+  
+  
+  
+}

@@ -1,0 +1,76 @@
+{
+  "mapping" : {
+     "id" : "id",
+    "displayName" : "displayName",
+    "members" : "members"
+  },
+  "targetSystem" : {
+    "name" : "LDAP4SCIMGROUP",
+    "updateIfIdentical" : false,
+    "pingEnabled" : false,
+    "supportsPagination" : false,
+    "targetSystemAttributes" : [ 
+    {
+      "name" : "cn",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : true
+    },
+    {
+      "name" : "displayName",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false,
+      "indexed" : true
+    }, 
+    {
+      "name" : "members",
+      "attributeType" : "MAP",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : true,
+      "primaryKey" : false
+    }, 
+    {
+      "name" : "sn",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false
+    }, 
+    {
+      "name" : "objectClass",
+      "attributeType" : "STRING",
+      "readable" : false,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false
+    } ],
+    "connectorConfiguration" : {
+      "connectorType" : "LDAP",
+      "poolSize" : ${scim.storage.personify.poolSize},
+      "configuration" : {
+        "password" : "${scim.storage.personify.password}",
+        "port" : "${scim.storage.personify.port}",
+        "host" : "${scim.storage.personify.host}",
+        "baseDn" : "${scim.storage.personify.baseDn}",
+        "subDn" : "ou=group",
+        "ssl" : "${scim.storage.personify.ssl}",
+        "username" : "${scim.storage.personify.username}",
+        "objectClasses" : "${scim.storage.personify.groupObjectClasses}",
+        "ldapCerts" : "${scim.storage.personify.ldapCerts}"
+      }
+    }
+  }
+  
+  
+  
+  
+  
+  
+}

@@ -1,0 +1,9 @@
+download the certificate from the local ldap server
+
+> echo -n | openssl s_client -connect localhost:1636 -servername localhost | openssl x509 > /tmp/cert
+
+
+
+> keytool -exportcert -keystore /home/wouter/Applications/opendj/config/keystore -storepass $(cat /home/wouter/Applications/opendj/config/keystore.pin) -alias ssl-key-pair -rfc -file ds-cert.pem
+
+> keytool -importcert -file ds-cert.pem -keystore /home/wouter/Projects/personify-scim-server/src/main/resources/truststore
