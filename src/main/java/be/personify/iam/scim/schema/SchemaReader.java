@@ -178,7 +178,7 @@ public class SchemaReader {
 	/**
 	 * Validates
 	 *
-	 * @param schema        the schema to validate
+	 * @param resourceType  the recourcetype to validate
 	 * @param map           the map to be validated
 	 * @param checkRequired boolean indicating if the required attributes have to be
 	 *                      checked

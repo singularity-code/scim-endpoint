@@ -29,10 +29,10 @@ public class SchemaTest {
 
 	@Test
 	public void testEmptyMap() {	
-		Schema userSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema userSchema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> map = new HashMap<String, Object>();
 		try {
-			schemaReader.validate(userSchema, map,true, "GET");
+			schemaReader.validate(schemaReader.getResourceTypeByName(userSchema.getName()), map,true, "GET");
 		}
 		catch ( SchemaException se ) {
 			return ;
@@ -47,9 +47,9 @@ public class SchemaTest {
 		Map<String,Object> map = new HashMap<String, Object>();
 		map.put("userName", "username");
 		map.put("externalId", "externalId");
-		Schema userSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema userSchema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		try {
-			schemaReader.validate(userSchema, map, true,"GET");
+			schemaReader.validate(schemaReader.getResourceTypeByName(userSchema.getName()), map, true,"GET");
 		}
 		catch ( SchemaException se ) {
 			fail("No schema exception thrown " + se.getMessage());
@@ -63,9 +63,9 @@ public class SchemaTest {
 		map.put("userName", "username");
 		map.put("externalId", "externalId");
 		map.put("emails", "another email");
-		Schema userSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema userSchema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		try {
-			schemaReader.validate(userSchema, map, true, "GET");
+			schemaReader.validate(schemaReader.getResourceTypeByName(userSchema.getName()), map, true, "GET");
 		}
 		catch ( SchemaException se ) {
 			//se.printStackTrace();
@@ -82,9 +82,9 @@ public class SchemaTest {
 		map.put("externalId", "externalId");
 		String[] emails = new String[] {"another email"};
 		map.put("emails", emails);
-		Schema userSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema userSchema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		try {
-			schemaReader.validate(userSchema, map, true, "GET");
+			schemaReader.validate(schemaReader.getResourceTypeByName(userSchema.getName()), map, true, "GET");
 		}
 		catch ( SchemaException se ) {
 			//se.printStackTrace();
@@ -97,7 +97,7 @@ public class SchemaTest {
 	@Test
 	public void testMinimalWithInvalidOptionalComplexMultiThree() {	
 		
-		Schema userSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema userSchema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		
 		Map<String,Object> map = new HashMap<String, Object>();
 		map.put("userName", "username");
@@ -110,7 +110,7 @@ public class SchemaTest {
 		
 		map.put("emails", mailList);
 		try {
-			schemaReader.validate(userSchema, map, true, "GET");
+			schemaReader.validate(schemaReader.getResourceTypeByName(userSchema.getName()), map, true, "GET");
 		}
 		catch ( SchemaException se ) {
 			//se.printStackTrace();
@@ -123,7 +123,7 @@ public class SchemaTest {
 	@Test
 	public void testMinimalWithValidOptionalComplexMultiOne() {	
 		
-		Schema userSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema userSchema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		
 		Map<String,Object> map = new HashMap<String, Object>();
 		map.put("userName", "username");
@@ -136,7 +136,7 @@ public class SchemaTest {
 		
 		map.put("emails", mailList);
 		try {
-			schemaReader.validate(userSchema, map, true, "GET");
+			schemaReader.validate(schemaReader.getResourceTypeByName(userSchema.getName()), map, true, "GET");
 		}
 		catch ( SchemaException se ) {
 			fail("schema exception thrown " + se.getMessage());

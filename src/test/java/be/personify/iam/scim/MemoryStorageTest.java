@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.springframework.util.Assert;
 
+import be.personify.iam.scim.authentication.Consumer;
 import be.personify.iam.scim.storage.impl.MemoryStorage;
 import be.personify.iam.scim.storage.util.MemoryStorageUtil;
 import be.personify.util.SearchCriteria;
@@ -109,7 +110,7 @@ public class MemoryStorageTest {
 		
 		//create
 		try {
-			storage.create("atest", map);
+			storage.create("atest", map, new Consumer(null,null));
 		}
 		catch( Exception e) {
 			e.printStackTrace();
@@ -119,7 +120,7 @@ public class MemoryStorageTest {
 		
 		//test get
 		try {
-			Assert.notNull(storage.get("atest"), "can not be null");
+			Assert.notNull(storage.get("atest", new Consumer(null,null)), "can not be null");
 		}
 		catch( Exception e) {
 			fail("can not get " +  e.getMessage());
@@ -128,8 +129,8 @@ public class MemoryStorageTest {
 		
 		//test search
 		try {
-			List<Map> search = storage.search(new SearchCriteria(), 1, 10, null, null);
-			long count = storage.count(new SearchCriteria());
+			List<Map> search = storage.search(new SearchCriteria(), 1, 10, null, null, new Consumer(null,null));
+			long count = storage.count(new SearchCriteria(), new Consumer(null,null));
 			logger.info(" count {} search {}", count, search);
 		}
 		catch( Exception e) {
@@ -140,7 +141,7 @@ public class MemoryStorageTest {
 		
 		//delete
 		try {
-			Assert.isTrue(storage.delete("atest"), "delete is not truel");
+			Assert.isTrue(storage.delete("atest", new Consumer(null,null)), "delete is not truel");
 		}
 		catch( Exception e) {
 			fail("can not delete " +  e.getMessage());
@@ -149,7 +150,7 @@ public class MemoryStorageTest {
 		
 		//test delete
 		try {
-			Assert.isNull(storage.get("atest"), "must be null");
+			Assert.isNull(storage.get("atest", new Consumer(null,null)), "must be null");
 		}
 		catch( Exception e) {
 			fail("can not get " +  e.getMessage());

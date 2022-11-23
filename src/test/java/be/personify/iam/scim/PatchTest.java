@@ -41,7 +41,7 @@ public class PatchTest {
 	
 	@Test
 	public void testPatchRolesSingleRoleRolesNotPresent() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		
 		Map<String,Object> role = new HashMap<>();
@@ -57,7 +57,7 @@ public class PatchTest {
 	
 	@Test
 	public void testPatchBoolean() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		
 		entity.put("active", "true");
@@ -72,7 +72,7 @@ public class PatchTest {
 	
 	@Test
 	public void testPatchRolesSingleRoleRolesPresentButEmpty() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		entity.put("roles", new ArrayList());
 		
@@ -90,7 +90,7 @@ public class PatchTest {
 	
 	@Test
 	public void testPatchRoleList() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		entity.put("roles", new ArrayList());
 		
@@ -114,7 +114,7 @@ public class PatchTest {
 	
 	@Test
 	public void testPatchRoleListWithRolesPresent() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		List currentRoleList = new ArrayList<>();
 		Map<String,Object> role_zero = new HashMap<>();
@@ -142,7 +142,7 @@ public class PatchTest {
 	
 	@Test
 	public void testPatchAddString() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		
 		patchUtils.patchEntity(entity, PatchOperation.add, "title", "mister", schema );
@@ -154,7 +154,7 @@ public class PatchTest {
 	
 	@Test
 	public void testPatchAddStringExistingReplace() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		entity.put("title", "misses");
 		
@@ -167,7 +167,7 @@ public class PatchTest {
 	
 	@Test
 	public void testPatchString() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_ENTERPRISEUSER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_ENTERPRISEUSER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		entity.put("department", "dep one");
 		
@@ -181,7 +181,7 @@ public class PatchTest {
 	
 	@Test
 	public void testPatchNameSubAttribute() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		Map<String,Object> name = new HashMap<String,Object>();
 		name.put("familyName", "Simpson");
@@ -196,7 +196,7 @@ public class PatchTest {
 	 
 	@Test
 	public void testPatchNameSubAttributeWithNull() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		
 		try {
@@ -212,7 +212,7 @@ public class PatchTest {
 	
 	@Test
 	public void testPatchNameSubAttributeWithEmptyName() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		Map<String,Object> name = new HashMap<String,Object>();
 		entity.put("name", name);
@@ -228,7 +228,7 @@ public class PatchTest {
 	
 	@Test
 	public void testPatchRoleWithUrn() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		entity.put("department", "dep one");
 		
@@ -243,7 +243,7 @@ public class PatchTest {
 	
 	@Test
 	public void testPatchAddWithUrn() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 
 		patchUtils.patchEntity(entity, PatchOperation.add, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department", "dep two", schema );
@@ -259,7 +259,7 @@ public class PatchTest {
 	//for azure?
 	@Test
 	public void testGetPathTwo() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		entity.put("roles", new ArrayList());
 		
@@ -275,7 +275,7 @@ public class PatchTest {
 	//for azure?
 	@Test
 	public void testGetPathThree() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		entity.put("roles", new ArrayList());
 		
@@ -293,7 +293,7 @@ public class PatchTest {
 	//for azure?
 	@Test
 	public void testGetPathFour() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 		
 		
@@ -317,7 +317,7 @@ public class PatchTest {
 	//for azure?
 	@Test
 	public void testGetPathFive() {
-		Schema schema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
 			
 			

@@ -65,7 +65,7 @@ public class SchemaController extends Controller {
 	/**
 	 * POST of a entity
 	 *
-	 * @param resourceType       the resourcetype for which to POST
+	 * @param endpoint           the endpoint for which to POST
 	 * @param entity             the entity to post
 	 * @param attributes         the attributes to be included from the response
 	 * @param excludedAttributes the attributes to be excluded from the response
@@ -104,7 +104,7 @@ public class SchemaController extends Controller {
 	/**
 	 * PUT of a entity
 	 *
-	 * @param resourceType       the resourcetype of the entity to PUT
+	 * @param endpoint       	 the endpoint of the entity to PUT
 	 * @param id                 the id of the entity of the given resourcetype
 	 * @param entity             the entity itself as a map
 	 * @param attributes         the attributes to be included from the response
@@ -145,7 +145,7 @@ public class SchemaController extends Controller {
 	/**
 	 * PATCH a entity
 	 *
-	 * @param resourceType       the resourcetype of the entity to PATCH
+	 * @param endpoint           the endpoint of the entity to PATCH
 	 * @param id                 the id of the entity
 	 * @param entity             the entity
 	 * @param attributes         the attributes to be included from the response
@@ -180,7 +180,7 @@ public class SchemaController extends Controller {
 	/**
 	 * GETs the entity
 	 *
-	 * @param resourceType       the resourceType of the entity
+	 * @param endpoint           the endpoint of the entity
 	 * @param id                 the id of the entity
 	 * @param attributes         the attributes to be included from the response
 	 * @param excludedAttributes the attributes to be excluded from the response
@@ -209,7 +209,7 @@ public class SchemaController extends Controller {
 	/**
 	 * Searches the entity
 	 *
-	 * @param resourceType       the resource type
+	 * @param endpoint           the endpoint
 	 * @param startIndex         the index to start from
 	 * @param count              the number of records to return
 	 * @param filter             the filter to apply
@@ -247,7 +247,7 @@ public class SchemaController extends Controller {
 	/**
 	 * DELETEs the entity
 	 *
-	 * @param resourceType the resourcetype of the entity to be deleted
+	 * @param endpoint     the endpoint of the entity to be deleted
 	 * @param id           the id of the entity to be deleted
 	 * @return the entity deleted
 	 */
