@@ -31,7 +31,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import be.personify.iam.scim.authentication.Consumer;
 import be.personify.iam.scim.storage.ConstraintViolationException;
+import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.storage.util.MemoryStorageUtil;
 import be.personify.iam.scim.util.Constants;
@@ -61,39 +63,76 @@ public class MemoryStorage implements Storage {
 	private String type;
 
 	@Override
-	public Map<String, Object> get(String id) {
-		return storage.get(id);
+	public Map<String, Object> get(String id, Consumer consumer) {
+		Map<String, Object> object = storage.get(id);
+		if ( object != null ) {
+			if ( StringUtils.isEmpty(consumer.getTenant())) {
+				return object;
+			}
+			else {
+				String tenant = (String)object.get(Constants.TENANT_ATTRIBUTE);
+				if ( !StringUtils.isEmpty(tenant) && tenant.equals(consumer.getTenant()) ) {
+					return object;
+				}
+			}
+		}
+		return null;
 	}
+	
+	
 
 	@Override
-	public Map<String, Object> get(String id, String version) {
+	public Map<String, Object> get(String id, String version, Consumer consumer) {
 		throw new RuntimeException("versioning not implemented");
 	}
 
 	@Override
-	public List<String> getVersions(String id) {
+	public List<String> getVersions(String id, Consumer consumer) {
 		throw new RuntimeException("versioning not implemented");
 	}
+	
 
 	@Override
-	public void create(String id, final Map<String, Object> object) throws ConstraintViolationException {
+	public void create(String id, final Map<String, Object> object, Consumer consumer) throws ConstraintViolationException {
 		checkConstraints(id, object);
+		//add tenant attribute
+		if ( !StringUtils.isEmpty(consumer.getTenant())){
+			object.put(Constants.TENANT_ATTRIBUTE, consumer.getTenant());
+		}
 		synchronized (storage) {
 			storage.put(id, object);
 		}
 		updateConstraints(id, object);
 	}
 
+	
 	@Override
-	public void update(String id, final Map<String, Object> object) throws ConstraintViolationException {
+	public void update(String id, final Map<String, Object> object, Consumer consumer) throws ConstraintViolationException {
 		checkConstraints(id, object);
+		//check tenant attribute
+		if ( !StringUtils.isEmpty(consumer.getTenant())) {
+			Map<String,Object> storedObject = storage.get(id);
+			String tenant = (String)storedObject.get(Constants.TENANT_ATTRIBUTE);
+			if ( StringUtils.isEmpty(tenant) || !tenant.equals(consumer.getTenant()) ) {
+				throw new DataException("the consumer " + consumer.getClientid() + " can not update a user of tenant " + tenant);
+			}
+		}
 		storage.put(id, object);
 		updateConstraints(id, object);
 	}
+	
+	
 
 	@Override
-	public boolean delete(String id) {
+	public boolean delete(String id, Consumer consumer) {
 		boolean removed = false;
+		if ( !StringUtils.isEmpty(consumer.getTenant())) {
+			Map<String,Object> storedObject = storage.get(id);
+			String tenant = (String)storedObject.get(Constants.TENANT_ATTRIBUTE);
+			if ( StringUtils.isEmpty(tenant) || !tenant.equals(consumer.getTenant()) ) {
+				throw new DataException("the consumer " + consumer.getClientid() + " can not delete a user of tenant " + tenant);
+			}
+		}
 		synchronized (storage) {
 			removed = storage.remove(id) == null ? false : true;
 		}
@@ -101,17 +140,29 @@ public class MemoryStorage implements Storage {
 		return removed;
 	}
 
+	
 	@Override
-	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString) {
-		return search(searchCriteria, start, count, sortBy, sortOrderString, null);
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString, Consumer consumer) {
+		return search(searchCriteria, start, count, sortBy, sortOrderString, null, consumer);
 	}
 	
 
 	
 	@Override
-	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString, List<String> includeAttributes) {
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString, List<String> includeAttributes, Consumer consumer) {
 		List<Map> result = null;
-		if (searchCriteria == null || searchCriteria.getCriteria() == null || searchCriteria.size() == 0) {
+		
+		if ( searchCriteria == null ) {
+			searchCriteria = new SearchCriteria();
+		}
+		
+		//add tenant
+		if ( consumer != null && !StringUtils.isEmpty(consumer.getTenant())) {
+			searchCriteria.getCriteria().add(new SearchCriterium(Constants.TENANT_ATTRIBUTE, consumer.getTenant()));
+		}
+		
+		
+		if ( searchCriteria.getCriteria() == null || searchCriteria.size() == 0) {
 			result = new ArrayList<Map>(storage.values());
 		}
 		else {
@@ -148,10 +199,20 @@ public class MemoryStorage implements Storage {
 	
 	
 	@Override
-	public long count(SearchCriteria searchCriteria) {
+	public long count(SearchCriteria searchCriteria, Consumer consumer) {
 		long totalCount = 0;
 		
-		if ( searchCriteria == null || searchCriteria.getCriteria().size() == 0 ) {
+
+		if ( searchCriteria == null ) {
+			searchCriteria = new SearchCriteria();
+		}
+		
+		//add tenant
+		if ( consumer != null && !StringUtils.isEmpty(consumer.getTenant())) {
+			searchCriteria.getCriteria().add(new SearchCriterium(Constants.TENANT_ATTRIBUTE, consumer.getTenant()));
+		}
+		
+		if ( searchCriteria.getCriteria().size() == 0 ) {
 			return storage.values().size();
 		}
 
@@ -314,8 +375,7 @@ public class MemoryStorage implements Storage {
 				Object valueFromConstraintCache = uniqueConstraints.get(constraint).get(valueFromEntity);
 				if (valueFromConstraintCache != null) {
 					if (!valueFromConstraintCache.equals(id)) {
-						throw new ConstraintViolationException(
-								"the value " + valueFromEntity + " already exists for the attribute " + constraint);
+						throw new ConstraintViolationException("the value " + valueFromEntity + " already exists for the attribute " + constraint);
 					}
 				}
 			}
@@ -366,7 +426,12 @@ public class MemoryStorage implements Storage {
 	}
 
 	@Override
-	public boolean deleteAll() {
+	public boolean deleteAll(Consumer consumer) {
+
+		//check tenant
+		if ( !StringUtils.isEmpty(consumer.getTenant())) {
+			throw new DataException("consumer of tenant " + consumer.getTenant() + " can not delete all data");
+		}
 		storage.clear();
 		for (String constraint : uniqueConstraintsList) {
 			uniqueConstraints.get(constraint).clear();
@@ -374,6 +439,13 @@ public class MemoryStorage implements Storage {
 		flush();
 		return true;
 	}
+	
+	
+	@Override
+	public boolean tenantCompatible() {
+		return true;
+	}
+	
 
 	private File getStorageFile() {
 		if ( propertyFactory != null ) {
@@ -387,4 +459,6 @@ public class MemoryStorage implements Storage {
 		}
 		return new File(Constants.tempDir, "personify-scim-" + type.toLowerCase() + ".dump");
 	}
+
+	
 }

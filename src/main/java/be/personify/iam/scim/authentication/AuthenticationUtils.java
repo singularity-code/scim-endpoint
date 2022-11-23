@@ -50,35 +50,52 @@ public class AuthenticationUtils implements ApplicationContextAware {
 	@Autowired
 	private PropertyFactory propertyFactory;
 
-	private Map<String, List<String>> basicAuthUsers;
-	private Map<String, List<String>> bearerAuthUsers;
+	private Map<String, Consumer> basicAuthUsers;
+	private Map<String, Consumer> bearerAuthUsers;
 
+
+	
 	/**
-	 * Gets the userlist for a certain authentication type
-	 *
-	 * @param authenticationType authenticationtype ( basic or bearer )
-	 * @return a map containing the user+secret as a key and a list of roles as
-	 *         value
+	 * Gets the consumer list for a certain authentication type
+	 * 
+	 * @param authenticationType a
+	 * @return map containing the consumers
 	 */
-	private Map<String, List<String>> getUserList(String authenticationType) {
+	private Map<String, Consumer> getConsumerList(String authenticationType) {
 		logger.info("initializing users of type {}", authenticationType);
 		try {
-			Map<String, List<String>> users = new HashMap<String, List<String>>();
+			Map<String, Consumer> consumers = new HashMap<String, Consumer>();
 			int count = 1;
 			String user = null;
 			List<String> roles = null;
+			Consumer consumer = null;
 			while ((user = propertyFactory.getProperty("scim.authentication.propertyfile.method." + authenticationType + ".user." + count)) != null) {
+				String[] splitted = user.split(StringUtils.COLON);
+				if ( splitted.length == 2) {
+					consumer = new Consumer(splitted[0], splitted[1]);
+				}
+				else {
+					throw new RuntimeException("consumer identifier has to be following format clientid:secret");
+				}
+				
+				//roles
 				String rolesString = propertyFactory.getProperty("scim.authentication.propertyfile.method." + authenticationType + ".user." + count + ".roles");
 				logger.info("adding user {} with roles {}", user.split(StringUtils.COLON)[0], rolesString);
 				roles = new ArrayList<String>();
 				if (!StringUtils.isEmpty(rolesString)) {
 					roles = Arrays.asList(rolesString.split(StringUtils.COMMA));
 				}
-				users.put(user, roles);
+				consumer.setRoles(roles);
+				//tenant
+				String tenantString = propertyFactory.getProperty("scim.authentication.propertyfile.method." + authenticationType + ".user." + count + ".tenant");
+				consumer.setTenant(tenantString);
+				
+				consumers.put(splitted[0], consumer);
 				count++;
+				
 			}
-			logger.info("initializing auth users of type {} done : found {} users", authenticationType, users.size());
-			return users;
+			logger.info("initializing auth users of type {} done : found {} users", authenticationType, consumers.size());
+			return consumers;
 		}
 		catch (Exception e) {
 			logger.error("initializing auth users of type {} ", authenticationType, e);
@@ -88,6 +105,12 @@ public class AuthenticationUtils implements ApplicationContextAware {
 	
 	
 
+	/**
+	 * Gets the filter implementation
+	 * 
+	 * @return the filter
+	 * @throws Exception
+	 */
 	public Filter getFilterImplementation() throws Exception {
 		logger.info("trying to initialize authentication filter implementation of type {}", filterImplementation);
 		Class<?> c = Class.forName(filterImplementation);
@@ -105,16 +128,27 @@ public class AuthenticationUtils implements ApplicationContextAware {
 		this.applicationContext = applicationContext;
 	}
 
-	public Map<String, List<String>> getBasicAuthUsers() {
+	
+	/**
+	 * Gets a map with the basic auth consumers
+	 * 
+	 * @return a map containing the consumers of type basic auth
+	 */
+	public Map<String, Consumer> getBasicAuthConsumers() {
 		if (basicAuthUsers == null) {
-			basicAuthUsers = getUserList(Constants.BASIC.toLowerCase());
+			basicAuthUsers = getConsumerList(Constants.BASIC.toLowerCase());
 		}
 		return basicAuthUsers;
 	}
 
-	public Map<String, List<String>> getBearerAuthUsers() {
+	/**
+	 * Gets a map with the consumers of type bearer
+	 * 
+	 * @return a map containing the consumers of type bearer
+	 */
+	public Map<String, Consumer> getBearerAuthConsumers() {
 		if (bearerAuthUsers == null) {
-			bearerAuthUsers = getUserList(Constants.BEARER.toLowerCase());
+			bearerAuthUsers = getConsumerList(Constants.BEARER.toLowerCase());
 		}
 		return bearerAuthUsers;
 	}

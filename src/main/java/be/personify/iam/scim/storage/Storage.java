@@ -17,9 +17,11 @@
 */
 package be.personify.iam.scim.storage;
 
-import be.personify.util.SearchCriteria;
 import java.util.List;
 import java.util.Map;
+
+import be.personify.iam.scim.authentication.Consumer;
+import be.personify.util.SearchCriteria;
 
 public interface Storage {
 
@@ -36,7 +38,7 @@ public interface Storage {
    * @param id the id of the entity
    * @return the entity
    */
-  public Map<String, Object> get(String id);
+  public Map<String, Object> get(String id, Consumer consumer);
 
   /**
    * Gets a antity by id and version
@@ -45,7 +47,7 @@ public interface Storage {
    * @param version the version of the entity
    * @return the entity
    */
-  public Map<String, Object> get(String id, String version);
+  public Map<String, Object> get(String id, String version, Consumer consumer);
 
   /**
    * Gets the version of a specific entity
@@ -53,7 +55,7 @@ public interface Storage {
    * @param id the id of the entity
    * @return a list containing the versions
    */
-  public List<String> getVersions(String id);
+  public List<String> getVersions(String id, Consumer consumer);
 
   /**
    * Deletes a entity by id
@@ -61,14 +63,14 @@ public interface Storage {
    * @param id the id of the entity
    * @return boolean indicating success
    */
-  public boolean delete(String id);
+  public boolean delete(String id, Consumer consumer);
 
   /**
    * Deletes all entities
    *
    * @return boolean indicating success
    */
-  public boolean deleteAll();
+  public boolean deleteAll(Consumer consumer);
 
   /**
    * Creates a entity
@@ -77,7 +79,7 @@ public interface Storage {
    * @param object the entity itself
    * @throws ConstraintViolationException indicating if constraints are violated
    */
-  public void create(String id, final Map<String, Object> object) throws ConstraintViolationException;
+  public void create(String id, final Map<String, Object> object, Consumer consumer) throws ConstraintViolationException;
 
   /**
    * Updates a entity
@@ -86,7 +88,7 @@ public interface Storage {
    * @param object the entity itself
    * @throws ConstraintViolationException indicating if constraints are violated
    */
-  public void update(String id, final Map<String, Object> object) throws ConstraintViolationException;
+  public void update(String id, final Map<String, Object> object, Consumer consumer) throws ConstraintViolationException;
 
   /**
    * Searches entities
@@ -98,9 +100,9 @@ public interface Storage {
    * @param sortOrder the sortorder ( ascending or descending )
    * @return a list containing the entities
    */
-  public List<Map> search( SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes);
+  public List<Map> search( SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes, Consumer consumer);
 
-  public List<Map> search( SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder);
+  public List<Map> search( SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, Consumer consumer);
 
   /**
    * Counts the results giving a searchcrtieria
@@ -108,8 +110,11 @@ public interface Storage {
    * @param searchCriteria the searchcriteria
    * @return a long indicating the number of results
    */
-  public long count(SearchCriteria searchCriteria);
+  public long count(SearchCriteria searchCriteria, Consumer consumer);
 
   /** Optional to implement : persist */
   public void flush();
+  
+  public boolean tenantCompatible();
+  
 }

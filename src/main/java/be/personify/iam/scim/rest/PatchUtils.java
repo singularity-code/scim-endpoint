@@ -220,7 +220,9 @@ public class PatchUtils {
 				}
 			}
 			else if ( entry instanceof String || entry instanceof Boolean ) {
-				//entry = value;
+				if (( entry instanceof Boolean) && ( value instanceof String)) {
+				    value = Boolean.valueOf((String) value);
+				}
 				int dotFOund = path.indexOf(StringUtils.DOT);
 				if ( dotFOund == -1 || path.startsWith(Constants.URN)) {
 					existingEntity.put(removeUrnFromString(path), value);

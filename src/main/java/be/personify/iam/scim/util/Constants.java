@@ -62,6 +62,8 @@ public class Constants {
 	public static final String KEY_DETAIL = "detail";
 	public static final String KEY_CODE = "code";
 	public static final String KEY_SCIMTYPE = "scimType";
+	
+	public static final String TENANT_ATTRIBUTE = "tenant";
 
 	public static final ObjectMapper objectMapper = new ObjectMapper();
 

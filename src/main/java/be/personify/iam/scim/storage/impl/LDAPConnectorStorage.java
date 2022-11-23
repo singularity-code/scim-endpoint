@@ -32,6 +32,7 @@ import be.personify.iam.provisioning.ProvisionStatus;
 import be.personify.iam.provisioning.ProvisionTask;
 import be.personify.iam.provisioning.connectors.ConnectorConnection;
 import be.personify.iam.provisioning.connectors.ConnectorPool;
+import be.personify.iam.scim.authentication.Consumer;
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.storage.ConfigurationException;
@@ -74,7 +75,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 	private SchemaReader schemaReader;
 
 	@Override
-	public void create(String id, Map<String, Object> scimObject) throws ConstraintViolationException, DataException {
+	public void create(String id, Map<String, Object> scimObject, Consumer consumer) throws ConstraintViolationException, DataException {
 
 		try {
 			Map<String, Object> extra = new HashMap<String, Object>();
@@ -94,7 +95,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 	
 
 	@Override
-	public Map<String, Object> get(String id) {
+	public Map<String, Object> get(String id, Consumer consumer) {
 
 		ConnectorConnection connection = null;
 		try {
@@ -122,7 +123,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 
 	
 	@Override
-	public void update(String id, Map<String, Object> scimObject) throws ConstraintViolationException {
+	public void update(String id, Map<String, Object> scimObject, Consumer consumer) throws ConstraintViolationException {
 
 		try {
 			Map<String, Object> extra = new HashMap<String, Object>();
@@ -142,7 +143,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 	
 
 	@Override
-	public boolean delete(String id) {
+	public boolean delete(String id, Consumer consumer) {
 
 		ConnectorConnection connection = null;
 		try {
@@ -162,14 +163,14 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 	
 	
 	@Override
-	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy,	String sortOrderString) {
-		return search(searchCriteria, start, count, sortBy, sortOrderString, null);
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy,	String sortOrderString, Consumer consumer) {
+		return search(searchCriteria, start, count, sortBy, sortOrderString, null, consumer);
 	}
 	
 	
 
 	@Override
-	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString,	List<String> includeAttributes) {
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrderString,	List<String> includeAttributes, Consumer consumer) {
 		
 		ConnectorConnection connection = null;
 		try {
@@ -203,7 +204,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 	
 
 	@Override
-	public long count(SearchCriteria searchCriteria) {
+	public long count(SearchCriteria searchCriteria, Consumer consumer) {
 		ConnectorConnection connection = null;
 		try {
 
@@ -268,7 +269,7 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 			else {
 				objectClasses = Arrays.asList(targetSystem.getConnectorConfiguration().getConfiguration()
 						.get(type.toLowerCase() + "ObjectClasses").split(StringUtils.COMMA));
-				schema = schemaReader.getSchemaByResourceType(type);
+				schema = schemaReader.getSchemaByName(type);
 				schemaList = Arrays.asList(new String[] { schema.getId() });
 				depthMapping = createDepthMapping(mapping);
 				testConnection(targetSystem);
@@ -286,17 +287,25 @@ public class LDAPConnectorStorage extends ConnectorStorage {
 	}
 
 	@Override
-	public boolean deleteAll() {
+	public boolean deleteAll(Consumer consumer) {
 		throw new DataException("delete all not implemented");
 	}
 
 	@Override
-	public Map<String, Object> get(String id, String version) {
+	public Map<String, Object> get(String id, String version, Consumer consumer) {
 		throw new DataException("versioning not implemented");
 	}
 
 	@Override
-	public List<String> getVersions(String id) {
+	public List<String> getVersions(String id, Consumer consumer) {
 		throw new DataException("versioning not implemented");
+	}
+
+
+
+	@Override
+	public boolean tenantCompatible() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

@@ -61,8 +61,9 @@ public class PropertyFileAuthenticationFilter implements Filter {
 	@Autowired
 	private AuthenticationUtils authenticationUtils;
 
-	private final List<String> PUBLIC_ENDPOINTS = Arrays.asList(new String[] { "/scim/v2/token", "/scim/v2/Me" });
-	private final String serverDescription = PropertyFileAuthenticationFilter.class.getPackage().getImplementationTitle() + StringUtils.SPACE + PropertyFileAuthenticationFilter.class.getPackage().getImplementationVersion();
+	private static final List<String> UNAUTHENTICATED_ENDPOINTS = Arrays.asList(new String[] { "/scim/v2/token", "/scim/v2/Me"});
+	
+	private static final String serverDescription = PropertyFileAuthenticationFilter.class.getPackage().getImplementationTitle() + StringUtils.SPACE + PropertyFileAuthenticationFilter.class.getPackage().getImplementationVersion();
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -73,8 +74,14 @@ public class PropertyFileAuthenticationFilter implements Filter {
 
 		String header = req.getHeader(HttpHeaders.AUTHORIZATION);
 		boolean filtered = false;
+		
+		Consumer consumer = new Consumer(null, null);
+		
+		boolean hasAccess = false;
+		
 
-		if (PUBLIC_ENDPOINTS.contains(req.getRequestURI())) {
+		if (UNAUTHENTICATED_ENDPOINTS.contains(req.getRequestURI())) {
+			logger.debug("{} is a public endpoint", req.getRequestURI());
 			chain.doFilter(request, response);
 			filtered = true;
 		} 
@@ -83,12 +90,21 @@ public class PropertyFileAuthenticationFilter implements Filter {
 				String[] auth = header.split(StringUtils.SPACE);
 				if (auth.length == 2) {
 					String method = req.getMethod();
+					logger.debug("the auth method {}", auth[0]);
 					if (auth[0].equalsIgnoreCase(Constants.BASIC)) {
 						String credential = new String(Base64Utils.decode(auth[1].getBytes()));
-
-						if (authenticationUtils.getBasicAuthUsers() != null	&& authenticationUtils.getBasicAuthUsers().containsKey(credential)) {
-							// check roles
-							filtered = checkRole(request, response, chain, filtered, credential, method, authenticationUtils.getBasicAuthUsers());
+						String[] splitted = credential.split(StringUtils.COLON);
+						logger.debug("splitted {}", splitted);
+						Map<String,Consumer> bc = authenticationUtils.getBasicAuthConsumers(); 
+						if ( bc!= null	&& bc.containsKey(splitted[0])) {
+							consumer = bc.get(splitted[0]);
+							logger.debug("consumer {}", consumer);
+							//check password
+							if ( consumer.getSecret().equals(splitted[1])) {
+								// check roles
+								logger.debug("passwd match");
+								hasAccess = checkRole(request, response, chain, splitted[0], method, bc);
+							}
 						}
 					} 
 					else if (auth[0].equalsIgnoreCase(Constants.BEARER)) {
@@ -98,44 +114,56 @@ public class PropertyFileAuthenticationFilter implements Filter {
 							String decrypted = cryptUtils.decrypt(token, TokenUtils.SALT);
 							String[] parts = decrypted.split(StringUtils.COLON);
 							String clientId = parts[0];
-							token = getClientIdWithCredential(clientId, authenticationUtils.getBearerAuthUsers());
-							filtered = checkRole(request, response, chain, filtered, token, method, authenticationUtils.getBearerAuthUsers());
+							token = getClientIdWithCredential(clientId, authenticationUtils.getBearerAuthConsumers());
+							consumer = authenticationUtils.getBearerAuthConsumers().get(clientId);
+							hasAccess = checkRole(request, response, chain, token, method, authenticationUtils.getBearerAuthConsumers());
 						}
 					}
 				}
 			}
 		}
+		
 
 		if (filtered == false) {
-			HttpServletResponse resp = (HttpServletResponse) response;
-			resp.reset();
-			resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			resp.flushBuffer();
+			if (hasAccess ) {
+				CurrentConsumer.setCurrent(consumer);
+				chain.doFilter(request, response);
+			}
+			else {
+				HttpServletResponse resp = (HttpServletResponse) response;
+				resp.reset();
+				resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				resp.flushBuffer();
+			}
 		}
+		
 	}
 
-	private boolean checkRole(ServletRequest request, ServletResponse response, FilterChain chain, boolean filtered,
-			String credential, String method, Map<String, List<String>> users) throws IOException, ServletException {
-		List<String> roles = users.get(credential);
+	
+	
+	private boolean checkRole(ServletRequest request, ServletResponse response, FilterChain chain, String clientid, String method, Map<String, Consumer> users) throws IOException, ServletException {
+		logger.debug("clientid {}", clientid);
+		List<String> roles = users.get(clientid).getRoles();
 		if (roles != null) {
 			if (method.equals(HttpMethod.GET.name())) {
 				if (roles.contains(ROLE_READ)) {
-					chain.doFilter(request, response);
-					filtered = true;
+					return true;
 				}
 			} else {
 				if (roles.contains(ROLE_WRITE)) {
-					chain.doFilter(request, response);
-					filtered = true;
+					return true;
 				}
 			}
 		}
-		return filtered;
+		return false;
 	}
 
-	private String getClientIdWithCredential(String clientId, Map<String, List<String>> users) {
+	
+	
+	
+	private String getClientIdWithCredential(String clientId, Map<String, Consumer> users) {
 		for (String key : users.keySet()) {
-			if (key.startsWith((clientId + StringUtils.COLON))) {
+			if (key.equals(clientId)) {
 				return key;
 			}
 		}

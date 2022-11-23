@@ -39,10 +39,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import be.personify.iam.scim.authentication.CurrentConsumer;
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaAttribute;
 import be.personify.iam.scim.schema.SchemaException;
 import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.schema.SchemaResourceType;
 import be.personify.iam.scim.storage.ConfigurationException;
 import be.personify.iam.scim.storage.ConstraintViolationException;
 import be.personify.iam.scim.storage.DataException;
@@ -109,11 +111,13 @@ public class Controller {
 
 	
 	//POST
-	protected ResponseEntity<Map<String, Object>> post(Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes) {
+	protected ResponseEntity<Map<String, Object>> post(Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, SchemaResourceType resourceType, String attributes, String excludedAttributes) {
 		long start = System.currentTimeMillis();
 		try {
+			
+			Schema schema = resourceType.getSchemaObject();
 			// validate
-			schemaReader.validate(schema, entity, true, request.getMethod());
+			schemaReader.validate(resourceType, entity, true, request.getMethod());
 			
 			// prepare
 			String id = createId(entity);
@@ -123,7 +127,7 @@ public class Controller {
 			response.addHeader(Constants.HEADER_LOCATION, location);
 
 			// store and return
-			storageImplementationFactory.getStorageImplementation(schema).create(id, entity);
+			storageImplementationFactory.getStorageImplementation(schema).create(id, entity, CurrentConsumer.getCurrent());
 			logger.info("resource of type {} with id {} created in {} ms", schema.getName(), id, (System.currentTimeMillis() - start));
 			return new ResponseEntity<>(filterAttributes(schema, entity, getListFromString(attributes), excludedAttributes), HttpStatus.CREATED);
 
@@ -144,34 +148,35 @@ public class Controller {
 	
 	
 	//PUT
-	protected ResponseEntity<Map<String, Object>> put(String id, Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes) {
+	protected ResponseEntity<Map<String, Object>> put(String id, Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, SchemaResourceType resourceType, String attributes, String excludedAttributes) {
 		long start = System.currentTimeMillis();
 		try {
+			Schema mainSchema = resourceType.getSchemaObject();
 			// validate
-			logger.debug("schema {} ", schema);
-			schemaReader.validate(schema, entity, true, request.getMethod());
+			logger.debug("schema {} ", mainSchema);
+			schemaReader.validate(resourceType, entity, true, request.getMethod());
 			if (!entity.get(Constants.ID).equals(id)) {
 				return showError(400, "id [" + entity.get(Constants.ID)	+ "] given in the data does not match the one in the url [" + id + "]");
 			}
 			;
-			Map<String, Object> existingEntity = storageImplementationFactory.getStorageImplementation(schema).get(id);
+			Map<String, Object> existingEntity = storageImplementationFactory.getStorageImplementation(mainSchema).get(id,CurrentConsumer.getCurrent());
 			if (existingEntity != null) {
 				entity.put(Constants.KEY_META, existingEntity.get(Constants.KEY_META));
 			} 
 			else {
-				return showError(404, "resource of type " + schema.getName() + " with id " + id + " can not be updated");
+				return showError(404, "resource of type " + mainSchema.getName() + " with id " + id + " can not be updated");
 			}
 
 			// prepare
 			String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
-			createMeta(new Date(), id, entity, schema.getName(), location);
+			createMeta(new Date(), id, entity, mainSchema.getName(), location);
 			response.addHeader(Constants.HEADER_LOCATION, location);
 
 			// store
-			storageImplementationFactory.getStorageImplementation(schema).update(id, entity);
+			storageImplementationFactory.getStorageImplementation(mainSchema).update(id, entity,CurrentConsumer.getCurrent());
 
-			logger.info("resource of type {} with id {} updated in {} ms", schema.getName(), id, (System.currentTimeMillis() - start));
-			return new ResponseEntity<>(filterAttributes(schema, entity, getListFromString(attributes), excludedAttributes), HttpStatus.OK);
+			logger.info("resource of type {} with id {} updated in {} ms", mainSchema.getName(), id, (System.currentTimeMillis() - start));
+			return new ResponseEntity<>(filterAttributes(mainSchema, entity, getListFromString(attributes), excludedAttributes), HttpStatus.OK);
 
 		} 
 		catch (SchemaException e) {
@@ -191,24 +196,26 @@ public class Controller {
 	
 	//PATCH
 	@SuppressWarnings("unchecked")
-	protected ResponseEntity<Map<String, Object>> patch(String id, Map<String, Object> patchRequest, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes) {
+	protected ResponseEntity<Map<String, Object>> patch(String id, Map<String, Object> patchRequest, HttpServletRequest request, HttpServletResponse response, SchemaResourceType resourceType, String attributes, String excludedAttributes) {
 
 		long start = System.currentTimeMillis();
 		try {
+			Schema mainSchema = resourceType.getSchemaObject();
+			
 			// validate
-			schemaReader.validate(schema, patchRequest, false, request.getMethod());
+			schemaReader.validate(resourceType, patchRequest, false, request.getMethod());
 			if (!patchRequest.containsKey(Constants.KEY_OPERATIONS)) {
 				return showError(400, "no operations present");
 			}
 
 			String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
 
-			Map<String, Object> existingEntity = storageImplementationFactory.getStorageImplementation(schema).get(id);
+			Map<String, Object> existingEntity = storageImplementationFactory.getStorageImplementation(mainSchema).get(id, CurrentConsumer.getCurrent());
 			if (existingEntity != null) {
 				patchRequest.put(Constants.KEY_META, existingEntity.get(Constants.KEY_META));
 			} 
 			else {
-				return showError(404, "resource of type " + schema.getName() + " with id " + id + " can not be updated");
+				return showError(404, "resource of type " + mainSchema.getName() + " with id " + id + " can not be updated");
 			}
 
 			response.addHeader(Constants.HEADER_LOCATION, location);
@@ -231,19 +238,19 @@ public class Controller {
 				path = (String) operation.get(Constants.KEY_PATH);
 				value = operation.get(Constants.KEY_VALUE);
 				
-				if ( !canPerformAction(schema,opType,path)){
+				if ( !canPerformAction(mainSchema,opType,path)){
 					return showError(403, "operation " + opType + " is not allowed for path " + path);
 				}
 				
-				patchUtils.patchEntity( existingEntity, opType, path, value, schema);
+				patchUtils.patchEntity( existingEntity, opType, path, value, mainSchema);
 
 			}
 
-			createMeta(new Date(), id, existingEntity, schema.getName(), location);
-			storageImplementationFactory.getStorageImplementation(schema).update(id, existingEntity);
+			createMeta(new Date(), id, existingEntity, mainSchema.getName(), location);
+			storageImplementationFactory.getStorageImplementation(mainSchema).update(id, existingEntity, CurrentConsumer.getCurrent());
 
-			logger.info("resource of type {} with id {} patched in {} ms", schema.getName(), id,(System.currentTimeMillis() - start));
-			return new ResponseEntity<>( filterAttributes(schema, existingEntity, getListFromString(attributes), excludedAttributes), HttpStatus.OK);
+			logger.info("resource of type {} with id {} patched in {} ms", mainSchema.getName(), id,(System.currentTimeMillis() - start));
+			return new ResponseEntity<>( filterAttributes(mainSchema, existingEntity, getListFromString(attributes), excludedAttributes), HttpStatus.OK);
 
 		} 
 		catch (SchemaException e) {
@@ -267,7 +274,7 @@ public class Controller {
 	protected ResponseEntity<Map<String, Object>> get(String id, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes) {
 		long start = System.currentTimeMillis();
 		try {
-			Map<String, Object> object = storageImplementationFactory.getStorageImplementation(schema).get(id);
+			Map<String, Object> object = storageImplementationFactory.getStorageImplementation(schema).get(id, CurrentConsumer.getCurrent());
 
 			ResponseEntity<Map<String, Object>> result = null;
 			if (object != null) {
@@ -295,8 +302,8 @@ public class Controller {
 
 
 	private void includeGroups(String id, Map<String, Object> object ) {
-		Schema groupsSchema = schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_GROUP);
-		List<Map> groupSearch = storageImplementationFactory.getStorageImplementation(groupsSchema).search(new SearchCriteria(new SearchCriterium("members.value", id, SearchOperation.ENDS_WITH)), 1, returnGroupsMax, null, null);
+		Schema groupsSchema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_GROUP);
+		List<Map> groupSearch = storageImplementationFactory.getStorageImplementation(groupsSchema).search(new SearchCriteria(new SearchCriterium("members.value", id, SearchOperation.ENDS_WITH)), 1, returnGroupsMax, null, null, CurrentConsumer.getCurrent());
 		if ( returnGroupsIncludedFieldsArray == null ) {
 			returnGroupsIncludedFieldsArray = Arrays.asList(returnGroupsIncludedFields.split(StringUtils.COMMA));
 		}
@@ -362,7 +369,7 @@ public class Controller {
 				sortOrder = getSearchDefault(schema, SORT_ORDER);
 			}
 
-			List<Map> dataFetched = storage.search(searchCriteria, startIndex, count, sortBy, sortOrder, includeList);
+			List<Map> dataFetched = storage.search(searchCriteria, startIndex, count, sortBy, sortOrder, includeList, CurrentConsumer.getCurrent());
 			List<Map<String, Object>> data = new ArrayList<>();
 			
 			if (dataFetched != null) {
@@ -379,7 +386,7 @@ public class Controller {
 				responseObject.put(Constants.KEY_SCHEMAS, new String[] { Constants.SCHEMA_LISTRESPONSE });
 				responseObject.put(Constants.KEY_STARTINDEX, startIndex);
 				responseObject.put(Constants.KEY_ITEMSPERPAGE, count);
-				responseObject.put(Constants.KEY_TOTALRESULTS, storage.count(searchCriteria));
+				responseObject.put(Constants.KEY_TOTALRESULTS, storage.count(searchCriteria, CurrentConsumer.getCurrent()));
 				responseObject.put(Constants.KEY_RESOURCES, data);
 
 				result = new ResponseEntity<>(responseObject, HttpStatus.OK);
@@ -413,11 +420,11 @@ public class Controller {
 	protected ResponseEntity<?> delete(String id, Schema schema) {
 		long start = System.currentTimeMillis();
 
-		Map<String, Object> m = storageImplementationFactory.getStorageImplementation(schema).get(id);
+		Map<String, Object> m = storageImplementationFactory.getStorageImplementation(schema).get(id, CurrentConsumer.getCurrent());
 
 		ResponseEntity<?> result = null;
 		if (m != null) {
-			boolean deleted = storageImplementationFactory.getStorageImplementation(schema).delete(id);
+			boolean deleted = storageImplementationFactory.getStorageImplementation(schema).delete(id, CurrentConsumer.getCurrent());
 			if (deleted) {
 				result = new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 				//if user is deleted, also remove from members
@@ -441,10 +448,10 @@ public class Controller {
 	
 	
 	private void deleteUserFromMembers(String id) {
-		Storage groupStorage = storageImplementationFactory.getStorageImplementation(schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_GROUP));
+		Storage groupStorage = storageImplementationFactory.getStorageImplementation(schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_GROUP));
 		//find all groups where the user is in
 		SearchCriteria groupSearchCriteria = new SearchCriteria(new SearchCriterium("members.value", id));
-		List<Map> groups = groupStorage.search(groupSearchCriteria, 1, Integer.MAX_VALUE, null, null);
+		List<Map> groups = groupStorage.search(groupSearchCriteria, 1, Integer.MAX_VALUE, null, null, CurrentConsumer.getCurrent());
 		if ( groups != null && groups.size() > 0 ) {
 			logger.info("found {} groups containing the deleted user", groups.size());
 			for ( Map group : groups ) {
@@ -459,7 +466,7 @@ public class Controller {
 				}
 				group.put(Constants.KEY_MEMBERS, newMembers);
 				try {
-					groupStorage.update(groupId, group);
+					groupStorage.update(groupId, group, CurrentConsumer.getCurrent());
 					logger.info("updated group {} containing the deleted user {}", groupId, id);
 				}
 				catch ( Exception e ) {
@@ -595,12 +602,16 @@ public class Controller {
 		return (List<String>) user.get(Constants.KEY_SCHEMAS);
 	}
 
-	protected ResponseEntity<Map<String, Object>> invalidSchemaForResource(List<String> schemas, String resourceType) {
+	protected ResponseEntity<Map<String, Object>> invalidSchemaForEndpoint(List<String> schemas, String resourceType) {
 		return showError(400, "for type " + resourceType + " content is not compliant with schemas " + schemas.toString(), ScimErrorType.invalidSyntax);
 	}
 	
 	protected ResponseEntity<Map<String, Object>> invalidSchemaForResource(String resourceType, String requiredSchema) {
 		return showError(400, "for patching " + resourceType + ", given schemas is not containing " + requiredSchema, ScimErrorType.invalidSyntax);
+	}
+	
+	protected ResponseEntity<Map<String, Object>> missingRequiredSchemaForResource(SchemaResourceType resourceType, String requiredSchema) {
+		return showError(400, "the required schema " + requiredSchema + " for resourcetype " + resourceType.getName() + " is not present in the body ", ScimErrorType.invalidSyntax);
 	}
 	
 	

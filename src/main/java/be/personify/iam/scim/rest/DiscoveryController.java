@@ -17,20 +17,30 @@
 */
 package be.personify.iam.scim.rest;
 
-import be.personify.iam.scim.schema.SchemaReader;
-import be.personify.iam.scim.util.Constants;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.PropertiesUtil;
+import be.personify.util.io.IOUtils;
 
 /**
  * Discovery controller for the SCIM server
@@ -48,6 +58,24 @@ public class DiscoveryController extends Controller {
 
 	@Autowired
 	private SchemaReader schemaReader;
+	
+	@Autowired
+	private ResourceLoader resourceLoader;
+	
+	@Value("${scim.schemas.location}")
+	private String schemasLocation;
+	
+	@Value("${scim.resourceTypes.location}")
+	private String resourceTypesLocation;
+	
+	@Value("${scim.serviceProvider.location}")
+	private String serviceProviderLocation;
+	
+	@Autowired
+	private Environment env;
+	
+	
+
 
 	@GetMapping(path = "/scim/v2/ServiceProviderConfig", produces = { "application/scim+json", "application/json" })
 	public ResponseEntity<?> getServiceProviderConfig(HttpServletRequest request, HttpServletResponse response) {
@@ -56,7 +84,10 @@ public class DiscoveryController extends Controller {
 		ResponseEntity<?> result = null;
 		try {
 			if (serviceProviderConfig == null) {
-				serviceProviderConfig = Constants.objectMapper.readValue(DiscoveryController.class.getResourceAsStream("/disc_service_provider_config.json"), Map.class);
+				Resource resource = resourceLoader.getResource(serviceProviderLocation);
+				String content = new String(IOUtils.readFileAsBytes(resource.getInputStream()));
+				content = StringSubstitutor.replace(content, PropertiesUtil.getPropertiesFromEnv(env));
+				serviceProviderConfig = Constants.objectMapper.readValue(content, Map.class);
 			}
 			result = new ResponseEntity<Map<String, Object>>(serviceProviderConfig, HttpStatus.OK);
 		}
@@ -69,6 +100,7 @@ public class DiscoveryController extends Controller {
 		return result;
 	}
 
+	
 	@GetMapping(path = "/scim/v2/ResourceTypes", produces = { "application/scim+json", "application/json" })
 	public ResponseEntity<?> getResourceTypes(HttpServletRequest request, HttpServletResponse response) {
 
@@ -76,8 +108,10 @@ public class DiscoveryController extends Controller {
 		ResponseEntity<?> result = null;
 		try {
 			if (resourceTypes == null) {
-				resourceTypes = Constants.objectMapper.readValue(
-						DiscoveryController.class.getResourceAsStream("/disc_resource_types.json"), List.class);
+				Resource resource = resourceLoader.getResource(resourceTypesLocation);
+				String content = new String(IOUtils.readFileAsBytes(resource.getInputStream()));
+				content = StringSubstitutor.replace(content, PropertiesUtil.getPropertiesFromEnv(env));
+				resourceTypes = Constants.objectMapper.readValue(content, List.class);
 			}
 			result = new ResponseEntity<List<Object>>(resourceTypes, HttpStatus.OK);
 		}
@@ -89,6 +123,8 @@ public class DiscoveryController extends Controller {
 
 		return result;
 	}
+	
+	
 
 	@GetMapping(path = "/scim/v2/Schemas", produces = { "application/scim+json", "application/json" })
 	public ResponseEntity<?> getSchemas(HttpServletRequest request, HttpServletResponse response) {
@@ -109,4 +145,13 @@ public class DiscoveryController extends Controller {
 
 		return result;
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

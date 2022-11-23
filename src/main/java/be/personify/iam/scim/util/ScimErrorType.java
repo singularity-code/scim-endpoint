@@ -18,7 +18,16 @@
 package be.personify.iam.scim.util;
 
 public enum ScimErrorType {
+	
   invalidFilter,
+  tooMany,
   uniqueness,
-  invalidSyntax;
+  mutability,
+  invalidSyntax,
+  invalidPath,
+  noTarget,
+  invalidValue,
+  invalidVersion,
+  sensitive;
+	
 }

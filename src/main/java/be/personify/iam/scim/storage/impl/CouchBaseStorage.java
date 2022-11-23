@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -39,6 +40,7 @@ import com.couchbase.client.java.manager.query.CreatePrimaryQueryIndexOptions;
 import com.couchbase.client.java.query.QueryOptions;
 import com.couchbase.client.java.query.QueryResult;
 
+import be.personify.iam.scim.authentication.Consumer;
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaAttribute;
 import be.personify.iam.scim.schema.SchemaReader;
@@ -64,6 +66,7 @@ import be.personify.util.StringUtils;
  **/
 public class CouchBaseStorage implements Storage {
 
+	private static final String IX = "ix_";
 	private static final String OFFSET_WITH_SPACES = " offset ";
 	private static final String LIMIT_WITH_SPACES = " limit ";
 
@@ -98,8 +101,12 @@ public class CouchBaseStorage implements Storage {
 	 * Creates the entry
 	 */
 	@Override
-	public void create(String id, Map<String, Object> object) throws ConstraintViolationException {
+	public void create(String id, Map<String, Object> object, Consumer consumer) throws ConstraintViolationException {
 		try {
+			//add tenant attribute
+			if ( !StringUtils.isEmpty(consumer.getTenant())){
+				object.put(Constants.TENANT_ATTRIBUTE, consumer.getTenant());
+			}
 			//bucket.defaultCollection().insert(id, object);
 			bucket.defaultCollection().upsert(id, object);
 		} 
@@ -113,47 +120,97 @@ public class CouchBaseStorage implements Storage {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Object> get(String id) {
+	public Map<String, Object> get(String id, Consumer consumer) {
 		try {
-			return bucket.defaultCollection().get(id).contentAs(Map.class);
+			if ( StringUtils.isEmpty(consumer.getTenant())) {
+				return bucket.defaultCollection().get(id).contentAs(Map.class);
+			}
+			else {
+				Map<String,Object> found = bucket.defaultCollection().get(id).contentAs(Map.class);
+				String tenant = (String)found.get(Constants.TENANT_ATTRIBUTE);
+				if ( !StringUtils.isEmpty(tenant) && tenant.equals(consumer.getTenant()) ) {
+					return found;
+				}
+				else {
+					throw new DataException("consumer from tenant" + consumer.getTenant() + " can not read object from tenant " + tenant);
+				}
+			}
+			
 		}
 		catch( DocumentNotFoundException dnfe ) {
 			logger.debug("document with id " + id + "not found", dnfe);
 			return null;
 		}
 	}
+	
+	
 
 	/**
 	 * Delete the entry by id
 	 */
 	@Override
-	public boolean delete(String id) {
+	public boolean delete(String id, Consumer consumer) {
+		if ( !StringUtils.isEmpty(consumer.getTenant())) {
+			Map<String,Object> storedObject = bucket.defaultCollection().get(id).contentAs(Map.class);
+			if ( !StringUtils.isEmpty(storedObject)) {
+				String tenant = (String)storedObject.get(Constants.TENANT_ATTRIBUTE);
+				if ( StringUtils.isEmpty(tenant) || !tenant.equals(consumer.getTenant()) ) {
+					throw new DataException("the consumer " + consumer.getClientid() + " can not delete a user of tenant " + tenant);
+				}
+			}
+			else {
+				throw new DataException("resource with id " + id + " not found for consumer of tenant " + consumer.getTenant());
+			}
+		}
 		bucket.defaultCollection().remove(id);
 		return true;
 	}
+	
+	
+	
 
 	/**
 	 * Updates the thing
 	 */
 	@Override
-	public void update(String id, Map<String, Object> object) {
+	public void update(String id, Map<String, Object> object, Consumer consumer) {
 		try {
+			if ( !StringUtils.isEmpty(consumer.getTenant())) {
+				Map<String,Object> storedObject = bucket.defaultCollection().get(id).contentAs(Map.class);
+				String tenant = (String)storedObject.get(Constants.TENANT_ATTRIBUTE);
+				if ( StringUtils.isEmpty(tenant) || !tenant.equals(consumer.getTenant()) ) {
+					throw new DataException("the consumer " + consumer.getClientid() + " can not update a user of tenant " + tenant);
+				}
+			}
 			bucket.defaultCollection().upsert(id, object);
 		} 
 		catch (Exception dup) {
 			throw new DataException(dup.getMessage());
 		}
 	}
+	
+	
+	
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder) {
-		return search(searchCriteria, start, count, sortBy, sortOrder, null);
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, Consumer consumer) {
+		return search(searchCriteria, start, count, sortBy, sortOrder, null, consumer);
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes) {
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes, Consumer consumer) {
+		
+		if ( searchCriteria == null ) {
+			searchCriteria = new SearchCriteria();
+		}
+		
+		//add tenant
+		if ( !StringUtils.isEmpty(consumer.getTenant())) {
+			searchCriteria.getCriteria().add(new SearchCriterium(Constants.TENANT_ATTRIBUTE, consumer.getTenant()));
+		}
+		
 		String query = queryAll;
 		if (includeAttributes != null) {
 			logger.info("includeAttributes present");
@@ -206,7 +263,17 @@ public class CouchBaseStorage implements Storage {
 	
 
 	@Override
-	public long count(SearchCriteria searchCriteria) {
+	public long count(SearchCriteria searchCriteria, Consumer consumer) {
+		
+		if ( searchCriteria == null ) {
+			searchCriteria = new SearchCriteria();
+		}
+		
+		//add tenant
+		if ( !StringUtils.isEmpty(consumer.getTenant())) {
+			searchCriteria.getCriteria().add(new SearchCriterium(Constants.TENANT_ATTRIBUTE, consumer.getTenant()));
+		}
+		
 		StringBuilder builder = new StringBuilder(querySelectCount);
 		if (searchCriteria != null && searchCriteria.size() > 0) {
 			builder.append(Constants.WHERE);
@@ -255,18 +322,11 @@ public class CouchBaseStorage implements Storage {
 	
 	
 	
-
-	
-
-	
-
-	
-	
-
 	@Override
-	public void flush() {
-	}
+	public void flush() {}
 
+	
+	
 	/**
 	 * Initializes the thing
 	 */
@@ -282,14 +342,14 @@ public class CouchBaseStorage implements Storage {
 				
 				//create bucket
 				cluster.buckets().createBucket(BucketSettings.create(type).bucketType(BucketType.COUCHBASE).ramQuotaMB(120).numReplicas(1).replicaIndexes(true).flushEnabled(true));
-				cluster.queryIndexes().createPrimaryIndex(type, CreatePrimaryQueryIndexOptions.createPrimaryQueryIndexOptions().indexName("ix_" + type));
+				cluster.queryIndexes().createPrimaryIndex(type, CreatePrimaryQueryIndexOptions.createPrimaryQueryIndexOptions().indexName(IX + type));
 				
 				//create indexes
 				String[] splitted = indexes.split(StringUtils.COMMA);
 				for ( String s : splitted ) {
 					String[] pp = s.split(StringUtils.COLON);
 					if ( pp[0].toLowerCase().equals(type.toLowerCase())) {
-						cluster.queryIndexes().createIndex(type, "ix_" + pp[1], Arrays.asList(new String[] {pp[1]}));
+						cluster.queryIndexes().createIndex(type, IX + pp[1], Arrays.asList(new String[] {pp[1]}));
 					}
 				}
 				
@@ -309,7 +369,7 @@ public class CouchBaseStorage implements Storage {
 	}
 
 	private String constructUnnestString(SearchCriteria criteria ) {
-		Schema schema = schemaReader.getSchemaByResourceType(type);
+		Schema schema = schemaReader.getSchemaByName(type);
 		StringBuffer u = new StringBuffer(StringUtils.SPACE);
 		if ( criteria != null ) {
 			for ( SchemaAttribute a : schema.getAttributes()) {
@@ -325,17 +385,22 @@ public class CouchBaseStorage implements Storage {
 	}
 
 	@Override
-	public Map<String, Object> get(String id, String version) {
+	public Map<String, Object> get(String id, String version, Consumer consumer) {
 		throw new DataException("versioning not implemented");
 	}
 
 	@Override
-	public List<String> getVersions(String id) {
+	public List<String> getVersions(String id, Consumer consumer) {
 		throw new DataException("versioning not implemented");
 	}
 
 	@Override
-	public boolean deleteAll() {
+	public boolean deleteAll(Consumer consumer) {
 		throw new DataException("delete all not implemented");
+	}
+
+	@Override
+	public boolean tenantCompatible() {
+		return true;
 	}
 }

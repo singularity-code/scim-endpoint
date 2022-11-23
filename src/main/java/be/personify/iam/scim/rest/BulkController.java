@@ -17,12 +17,14 @@
 */
 package be.personify.iam.scim.rest;
 
+import be.personify.iam.scim.authentication.CurrentConsumer;
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaException;
 import be.personify.iam.scim.schema.SchemaReader;
 import be.personify.iam.scim.storage.ConstraintViolationException;
 import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.ScimErrorType;
 import be.personify.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Date;
@@ -82,7 +84,7 @@ public class BulkController extends Controller {
 		if (schemas.contains(SCHEMA)) {
 			return postBulk(objects, request, response);
 		}
-		return invalidSchemaForResource(schemas, null);
+		return showError(HttpStatus.NOT_FOUND.value(), "the schemas is not containing schema " + SCHEMA, null);
 	}
 	
 	
@@ -108,6 +110,7 @@ public class BulkController extends Controller {
 			entity = (Map<String, Object>) operation.get(Constants.KEY_DATA);
 			List<String> schemas = extractSchemas(entity);
 			Schema schema = schemaReader.getSchema(schemas.get(0));
+			
 			method = (String) operation.get(Constants.KEY_METHOD);
 			bulkId = (String) operation.get(Constants.KEY_BULKID);
 			path = (String) operation.get(Constants.KEY_PATH);
@@ -117,13 +120,13 @@ public class BulkController extends Controller {
 
 			if (method.equalsIgnoreCase(Constants.HTTP_METHOD_POST)) {
 				try {
-					schemaReader.validate(schema, entity, true, request.getMethod());
+					schemaReader.validate(schemaReader.getResourceTypeByName(schema.getName()), entity, true, request.getMethod());
 					String id = createId(entity);
 					entity.put(Constants.ID, id);
 					String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + StringUtils.SLASH + id;
 					Date now = new Date();
 					createMeta(now, id, entity, schema.getName(), location);
-					storageImplementationFactory.getStorageImplementation(schema).create(id, entity);
+					storageImplementationFactory.getStorageImplementation(schema).create(id, entity, CurrentConsumer.getCurrent());
 					operationResult = composeResultMap(method, bulkId, HttpStatus.CREATED);
 					operationResult.put(Constants.KEY_LOCATION, location);
 					operationResult.put(Constants.KEY_VERSION, createVersion(now));

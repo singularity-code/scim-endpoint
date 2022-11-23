@@ -35,6 +35,9 @@ import org.springframework.context.annotation.ComponentScan;
 public class Application {
 
   public static void main(String[] args) {
+	  //System.setProperty("javax.net.debug", "ssl:handshake");
+	  //System.setProperty("javax.net.debug", "all");
+	  
     SpringApplication.run(Application.class, args);
   }
 }

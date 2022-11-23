@@ -3,7 +3,8 @@
     "id" : "id",
     "displayName" : "displayName",
     "members" : "members",
-    "meta.created" : "datecreated"
+    "meta.created" : "datecreated",
+    "tenant" : "tenant"
   },
   "targetSystem" : {
     "name" : "DB4SCIM_GROUP",
@@ -43,6 +44,15 @@
       "writable" : true,
       "multiValued" : false,
       "primaryKey" : false
+    },
+      {
+      "name" : "tenant",
+      "attributeType" : "STRING",
+      "readable" : true,
+      "writable" : true,
+      "multiValued" : false,
+      "primaryKey" : false,
+      "indexed" : true
     }
    ],
     "connectorConfiguration" : {

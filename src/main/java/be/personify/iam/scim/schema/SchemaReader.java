@@ -17,6 +17,7 @@
 */
 package be.personify.iam.scim.schema;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,32 +32,77 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import be.personify.iam.scim.util.Constants;
+import be.personify.util.StringUtils;
 
 public class SchemaReader {
 
 	private static final Logger logger = LogManager.getLogger(SchemaReader.class);
 
 	private Map<String, Schema> schemaMap = new HashMap<String, Schema>();
+	
+	private Map<String, SchemaResourceType> schemaResourceTypeMap = new HashMap<String, SchemaResourceType>();
 
-	private Map<String, String> schemaMapper = new HashMap<String, String>();
 
-	@Value("${scim.schema.location}")
-	private String schemaLocation;
+	@Value("${scim.schemas.location}")
+	private String schemasLocation;
+	
+	@Value("${scim.resourceTypes.location}")
+	private String resourceTypesLocation;
 
 	@Autowired
 	private ResourceLoader resourceLoader;
 
 	@PostConstruct
 	public void read() throws Exception {
-		logger.info("using schema location {} ", schemaLocation);
+		logger.info("using schema location {} ", schemasLocation);
 		logger.info("resourceloader {}", resourceLoader);
-		if (!resourceLoader.getResource(schemaLocation).exists()) {
-			throw new Exception("schema " + schemaLocation + " does not exist");
+		if (!resourceLoader.getResource(schemasLocation).exists()) {
+			throw new Exception("schema file [" + schemasLocation + "] does not exist");
 		}
-		JsonNode root = Constants.objectMapper.readTree(resourceLoader.getResource(schemaLocation).getInputStream());
+		if (!resourceLoader.getResource(resourceTypesLocation).exists()) {
+			throw new Exception("resource type file [" + resourceTypesLocation + "] does not exist");
+		}
+		readSchemas();
+		readResourceTypes();
+		
+	}
+
+	
+	private void readResourceTypes() throws IOException, JsonProcessingException, Exception {
+		JsonNode root = Constants.objectMapper.readTree(resourceLoader.getResource(resourceTypesLocation).getInputStream());
+		if (root.isArray()) {
+			Iterator<JsonNode> iterator = root.elements();
+			SchemaResourceType schemaResourceType = null;
+			while (iterator.hasNext()) {
+				schemaResourceType = Constants.objectMapper.treeToValue(iterator.next(), SchemaResourceType.class);
+				enrichResourceTypesWithSchemas(schemaResourceType);
+				logger.info("loading resource type with id [" + schemaResourceType.getId() + "]");
+				schemaResourceTypeMap.put(schemaResourceType.getEndpoint(), schemaResourceType);
+			}
+		} 
+		else {
+			logger.error("it's no array");
+			throw new Exception("no array found in the schema resource type files");
+		}
+	}
+
+
+	private void enrichResourceTypesWithSchemas(SchemaResourceType schemaResourceType) {
+		schemaResourceType.setSchemaObject(schemaMap.get(schemaResourceType.getSchema()));
+		if ( schemaResourceType.getSchemaExtensions() != null ) {
+			for ( SchemaExtension ext : schemaResourceType.getSchemaExtensions()) {
+				ext.setSchemaObject(schemaMap.get(ext.getSchema()));
+			}
+		}
+	}
+
+
+	private void readSchemas() throws IOException, JsonProcessingException, Exception {
+		JsonNode root = Constants.objectMapper.readTree(resourceLoader.getResource(schemasLocation).getInputStream());
 		if (root.isArray()) {
 			Iterator<JsonNode> iterator = root.elements();
 			Schema schema = null;
@@ -64,18 +110,19 @@ public class SchemaReader {
 				schema = Constants.objectMapper.treeToValue(iterator.next(), Schema.class);
 				logger.info("loading schema with id [" + schema.getId() + "]");
 				schemaMap.put(schema.getId(), schema);
-				schemaMapper.put(schema.getName(), schema.getId());
+				//schemaMapper.put(schema.getName(), schema.getId());
 			}
 		} 
 		else {
 			logger.error("it's no array");
-			throw new Exception("no array found in the schema");
+			throw new Exception("no array found in the schema files");
 		}
 	}
+	
+	
 
 	public List getSchemas() throws Exception {
-		return Constants.objectMapper.readValue(resourceLoader.getResource(schemaLocation).getInputStream(),
-				List.class);
+		return Constants.objectMapper.readValue(resourceLoader.getResource(schemasLocation).getInputStream(), List.class);
 	}
 
 	/**
@@ -88,9 +135,45 @@ public class SchemaReader {
 		return schemaMap.get(id);
 	}
 
-	public Schema getSchemaByResourceType(String resourceType) {
-		return getSchema(schemaMapper.get(resourceType));
+	
+	
+	public SchemaResourceType getSchemaResourceTypeByEndpoint(String endpoint) throws Exception {
+		for ( SchemaResourceType srt : schemaResourceTypeMap.values()) {
+			if ( srt.getEndpoint().equalsIgnoreCase(StringUtils.SLASH + endpoint)) {
+				return srt;
+			}
+		}
+		return null;
 	}
+	
+	
+	public Schema getSchemaByName(String name) {
+		for ( Schema schema : schemaMap.values()) {
+			if ( schema.getName().equalsIgnoreCase(name)) {
+				return schema;
+			}
+		}
+		return null;
+	}
+	
+	public SchemaResourceType getResourceTypeByName(String name) {
+		for ( SchemaResourceType srt : schemaResourceTypeMap.values()) {
+			if ( srt.getName().equalsIgnoreCase(name)) {
+				return srt;
+			}
+		}
+		return null;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	/**
 	 * Validates
@@ -102,8 +185,9 @@ public class SchemaReader {
 	 * @return the same map
 	 * @throws SchemaException exception containing the errors
 	 */
-	public Map<String, Object> validate(Schema schema, Map<String, Object> map, boolean checkRequired, String operation) throws SchemaException {
-		for (SchemaAttribute attribute : schema.getAttributes()) {
+	public Map<String, Object> validate(SchemaResourceType resourceType, Map<String, Object> map, boolean checkRequired, String operation) throws SchemaException {
+		Schema mainSchema = resourceType.getSchemaObject();
+		for (SchemaAttribute attribute : mainSchema.getAttributes()) {
 			validateAttribute(map.get(attribute.getName()), attribute, checkRequired, operation);
 		}
 		return map;

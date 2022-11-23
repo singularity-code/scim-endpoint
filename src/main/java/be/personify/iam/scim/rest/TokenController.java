@@ -76,10 +76,10 @@ public class TokenController extends Controller {
 				String credentials = extractCredentials(entity, header);
 	
 				if (!StringUtils.isEmpty(credentials) && credentials.contains(StringUtils.COLON)) {
+					
+					String[] cc = credentials.split(StringUtils.COLON);
 	
-					if (authenticationUtils.getBearerAuthUsers().containsKey(credentials)) {
-	
-						String[] cc = credentials.split(StringUtils.COLON);
+					if (authenticationUtils.getBearerAuthConsumers().containsKey(cc[0])) {
 	
 						Map<String, Object> response = new HashMap<>();
 						response.put("access_token", tokenUtils.construct(cc[0], lifeTimeInSeconds));
@@ -96,8 +96,7 @@ public class TokenController extends Controller {
 					}
 	
 				} else {
-					String message = "client_id/client_secret [" + credentials
-							+ "] not found or incorrect, make sure it is part of the payload or present in the Authorization header";
+					String message = "client_id/client_secret [" + credentials + "] not found or incorrect, make sure it is part of the payload or present in the Authorization header";
 					logger.info(message);
 					return showError(HttpStatus.FORBIDDEN.value(), message);
 				}
@@ -120,9 +119,9 @@ public class TokenController extends Controller {
 		String credential = null;
 		if (entity.containsKey(Constants.CLIENT_ID) && entity.containsKey(Constants.CLIENT_SECRET)) {
 			// first fetch it from the payload
-			credential = entity.get(Constants.CLIENT_ID).get(0).toString() + StringUtils.COLON
-					+ entity.get(Constants.CLIENT_SECRET).get(0).toString();
-		} else {
+			credential = entity.get(Constants.CLIENT_ID).get(0).toString() + StringUtils.COLON	+ entity.get(Constants.CLIENT_SECRET).get(0).toString();
+		}
+		else {
 			// else fetch it from the authorization header
 			String[] auth = authorizationHeader.split(StringUtils.SPACE);
 			if (auth.length == 2) {

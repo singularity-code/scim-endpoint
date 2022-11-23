@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>be.personify.iam</groupId>
 	<artifactId>personify-scim-server</artifactId>
-	<version>1.5.8.RELEASE</version>
+	<version>2.0.0.RELEASE</version>
 	<packaging>jar</packaging>
 	<licenses>
 		<license>
@@ -59,8 +59,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		
-		<spring-boot-starter-version>2.6.6</spring-boot-starter-version>
-		<personify.provisioning.version>1.4.3.RELEASE</personify.provisioning.version>
+		<spring-boot-starter-version>2.7.5</spring-boot-starter-version>
+		<personify.provisioning.version>1.4.4.RELEASE</personify.provisioning.version>
 		<junit.version>4.13.2</junit.version>
 		<postgress.version>42.3.4</postgress.version>
 		<mysql-connector.version>8.0.28</mysql-connector.version>

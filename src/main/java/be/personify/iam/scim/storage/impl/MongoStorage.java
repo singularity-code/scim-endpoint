@@ -42,6 +42,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 
+import be.personify.iam.scim.authentication.Consumer;
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaAttribute;
 import be.personify.iam.scim.schema.SchemaReader;
@@ -112,30 +113,38 @@ public class MongoStorage implements Storage {
 
 	
 	@Override
-	public Map<String, Object> get(String id) {
+	public Map<String, Object> get(String id, Consumer consumer) {
 		Document doc = col.find(new Document(oid, id)).first();
 		logger.info("doc {}", doc);
 		if (doc != null) {
 			doc.remove(oid);
 			doc.put(Constants.ID, id);
+			if ( consumerCanRead(consumer, doc)) {
+				return unsafetyfyAttributes(doc);
+			}
 		}
-		return unsafetyfyAttributes(doc);
+		return null;
 	}
-	
 
+	
+	
 	@Override
-	public Map<String, Object> get(String id, String version) {
+	public Map<String, Object> get(String id, String version, Consumer consumer) {
 		Document query = new Document(oid, id).append(Constants.KEY_META, new Document(Constants.KEY_VERSION, version));
 		Document doc = col.find(query).first();
 		if (doc != null) {
 			doc.remove(oid);
 			doc.put(Constants.ID, id);
+			if ( consumerCanRead(consumer, doc)) {
+				return unsafetyfyAttributes(doc);
+			}
 		}
-		return unsafetyfyAttributes(doc);
+		return null;
 	}
+	
 
 	@Override
-	public List<String> getVersions(String id) {
+	public List<String> getVersions(String id, Consumer consumer) {
 		List<String> vs = new ArrayList<>();
 		Document query = new Document(oid, id);
 		Document doc = col.find(query).first();
@@ -144,14 +153,28 @@ public class MongoStorage implements Storage {
 		}
 		return vs;
 	}
+	
+	
 
 	@Override
-	public boolean delete(String id) {
+	public boolean delete(String id, Consumer consumer) {
+		if ( !StringUtils.isEmpty(consumer.getTenant())) {
+			Document doc = col.find(new Document(oid, id)).first();
+			String tenant = (String)doc.get(Constants.TENANT_ATTRIBUTE);
+			if ( StringUtils.isEmpty(tenant) || !tenant.equals(consumer.getTenant()) ) {
+				throw new DataException("the consumer " + consumer.getClientid() + " can not delete a user of tenant " + tenant);
+			}
+		}
 		return col.findOneAndDelete(new Document(oid, id)) != null;
 	}
 
+	
 	@Override
-	public boolean deleteAll() {
+	public boolean deleteAll(Consumer consumer) {
+		//check tenant
+		if ( !StringUtils.isEmpty(consumer.getTenant())) {
+			throw new DataException("consumer of tenant " + consumer.getTenant() + " can not delete all data");
+		}
 		col.drop();
 		return true;
 	}
@@ -161,7 +184,7 @@ public class MongoStorage implements Storage {
 	 * Creates a new entry
 	 */
 	@Override
-	public void create(String id, Map<String, Object> object) throws ConstraintViolationException {
+	public void create(String id, Map<String, Object> object, Consumer consumer) throws ConstraintViolationException {
 		
 		object = safetyfyAttributes(object);
 		Document doc = new Document(object);
@@ -171,6 +194,11 @@ public class MongoStorage implements Storage {
 		
 		doc.remove(Constants.ID);
 		doc.put(oid, id);
+		
+		//add tenant attribute
+		if ( !StringUtils.isEmpty(consumer.getTenant())){
+			doc.put(Constants.TENANT_ATTRIBUTE, consumer.getTenant());
+		}
 		
 		
 		try {
@@ -202,7 +230,14 @@ public class MongoStorage implements Storage {
 	
 	
 	@Override
-	public void update(String id, Map<String, Object> object) {
+	public void update(String id, Map<String, Object> object, Consumer consumer) {
+		if ( !StringUtils.isEmpty(consumer.getTenant())) {
+			Document doc = col.find(new Document(oid, id)).first();
+			String tenant = (String)doc.get(Constants.TENANT_ATTRIBUTE);
+			if ( StringUtils.isEmpty(tenant) || !tenant.equals(consumer.getTenant()) ) {
+				throw new DataException("the consumer " + consumer.getClientid() + " can not update a user of tenant " + tenant);
+			}
+		}
 		object = safetyfyAttributes(object);
 		Document doc = new Document(object);
 		Document query = new Document(oid, id);
@@ -213,12 +248,21 @@ public class MongoStorage implements Storage {
 	
 
 	@Override
-	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder) {
-		return search(searchCriteria, start, count, sortBy, sortOrder, null);
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, Consumer consumer) {
+		return search(searchCriteria, start, count, sortBy, sortOrder, null, consumer);
 	}
 
 	@Override
-	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes) {
+	public List<Map> search(SearchCriteria searchCriteria, int start, int count, String sortBy, String sortOrder, List<String> includeAttributes, Consumer consumer) {
+		
+		if ( searchCriteria == null ) {
+			searchCriteria = new SearchCriteria();
+		}
+		
+		//add tenant
+		if ( !StringUtils.isEmpty(consumer.getTenant())) {
+			searchCriteria.getCriteria().add(new SearchCriterium(Constants.TENANT_ATTRIBUTE, consumer.getTenant()));
+		}
 
 		logger.info("searchcriteria {}", searchCriteria);
 		FindIterable<Document> finds = find(start, count, includeAttributes, getCriteria(searchCriteria));
@@ -234,7 +278,26 @@ public class MongoStorage implements Storage {
 		}
 		return all;
 	}
+	
+	
+	
+	@Override
+	public long count(SearchCriteria searchCriteria, Consumer consumer) {
+		
+		if ( searchCriteria == null ) {
+			searchCriteria = new SearchCriteria();
+		}
+		
+		//add tenant
+		if ( !StringUtils.isEmpty(consumer.getTenant())) {
+			searchCriteria.getCriteria().add(new SearchCriterium(Constants.TENANT_ATTRIBUTE, consumer.getTenant()));
+		}
+		
+		
+		return col.countDocuments(getCriteria(searchCriteria));
+	}
 
+	
 	
 	private FindIterable<Document> find(int start, int count, List<String> includeAttributes, Bson query) {
 		FindIterable<Document> finds;
@@ -266,11 +329,7 @@ public class MongoStorage implements Storage {
 	}
 
 	
-	@Override
-	public long count(SearchCriteria searchCriteria) {
-		return col.countDocuments(getCriteria(searchCriteria));
-	}
-
+	
 	
 	
 	private Bson getCriteria(SearchCriteria searchCriteria) {
@@ -402,7 +461,7 @@ public class MongoStorage implements Storage {
 	
 	private void createUniqueIndexes(String type) {
 		try {
-			Schema schema = schemaReader.getSchemaByResourceType(type);
+			Schema schema = schemaReader.getSchemaByName(type);
 			for ( SchemaAttribute a : schema.getAttributes()) {
 				if ( a.getUniqueness() != null && (a.getUniqueness().equalsIgnoreCase("server") || a.getUniqueness().equalsIgnoreCase("global"))) {
 					logger.info("creating index for type {} and attribute [{}]", type, a.getName());
@@ -483,6 +542,26 @@ public class MongoStorage implements Storage {
 			return newMap;
 		}
 		return map;
+	}
+
+
+	@Override
+	public boolean tenantCompatible() {
+		return true;
+	}
+	
+	
+	private boolean consumerCanRead(Consumer consumer, Document doc) {
+		if ( StringUtils.isEmpty(consumer.getTenant())) {
+			return true;
+		}
+		else {
+			String tenant = (String)doc.get(Constants.TENANT_ATTRIBUTE);
+			if ( !StringUtils.isEmpty(tenant) && tenant.equals(consumer.getTenant()) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	

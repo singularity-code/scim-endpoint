@@ -15,7 +15,7 @@
 			}
 		],
 		"meta": {
-			"location": "https://example.com/v2/ResourceTypes/User",
+			"location": "${exposed.protocol}://${exposed.host}/scim/v2/ResourceTypes/User",
 			"resourceType": "ResourceType"
 		}
 	},
@@ -29,7 +29,21 @@
 		"description": "Group",
 		"schema": "urn:ietf:params:scim:schemas:core:2.0:Group",
 		"meta": {
-			"location": "https://example.com/v2/ResourceTypes/Group",
+			"location": "${exposed.protocol}://${exposed.host}/scim/v2/ResourceTypes/Group",
+			"resourceType": "ResourceType"
+		}
+	},
+		{
+		"schemas": [
+			"urn:ietf:params:scim:schemas:core:2.0:ResourceType"
+		],
+		"id": "Application",
+		"name": "Application",
+		"endpoint": "/Applications",
+		"description": "Application",
+		"schema": "urn:ietf:params:scim:schemas:core:2.0:Application",
+		"meta": {
+			"location": "${exposed.protocol}://${exposed.host}/scim/v2/ResourceTypes/Application",
 			"resourceType": "ResourceType"
 		}
 	}

@@ -53,6 +53,8 @@ public abstract class ConnectorStorage implements Storage {
 
 	@Autowired
 	private PropertyFactory propertyFactory;
+	
+	
 
 	protected void testConnection(TargetSystem targetSystem) {
 		ConnectorConnection connection = null;
@@ -238,5 +240,10 @@ public abstract class ConnectorStorage implements Storage {
 		}
 		return invertedMap;
 	}
+	
+	
+	
+	
+	
 	
 }

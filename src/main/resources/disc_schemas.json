@@ -862,8 +862,7 @@
     ],
     "meta" : {
       "resourceType" : "Schema",
-      "location" :
-        "/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:Group"
+      "location" : "/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:Group"
     }
   },
   {
@@ -976,8 +975,35 @@
     ],
     "meta" : {
       "resourceType" : "Schema",
-      "location" :
-"/v2/Schemas/urn:ietf:params:scim:schemas:extension:enterprise:2.0:User"
+      "location" : "/v2/Schemas/urn:ietf:params:scim:schemas:extension:enterprise:2.0:User"
     }
-  }
+  },
+   {
+    "id" : "urn:ietf:params:scim:schemas:core:2.0:Application",
+    "name" : "Application",
+    "description" : "Application",
+    "attributes" : [
+      {
+        "name" : "name",
+        "type" : "string",
+        "multiValued" : false,
+        "description" : "A human-readable name for the Group. REQUIRED.",
+        "required" : true,
+        "caseExact" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+       {
+        "name" : "code",
+        "type" : "string",
+        "multiValued" : false,
+        "description" : "A human-readable name for the Group. REQUIRED.",
+        "required" : false,
+        "caseExact" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "server"
+      }]
+    }
 ]

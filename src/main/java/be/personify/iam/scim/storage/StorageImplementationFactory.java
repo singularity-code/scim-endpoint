@@ -64,6 +64,7 @@ public class StorageImplementationFactory implements ApplicationContextAware {
 				storage.initialize(resourceType);
 				storageMap.put(resourceType, storage);
 				logger.info("storage for type {} initialized", resourceType);
+				logger.info("is this storage tenant enabled : {}", storage.tenantCompatible());
 			}
 			catch (ClassNotFoundException cnfe) {
 				logger.error("error initializing storage implementation " + storageImplementation, cnfe);

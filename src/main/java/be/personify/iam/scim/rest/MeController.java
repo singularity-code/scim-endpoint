@@ -17,14 +17,12 @@
 */
 package be.personify.iam.scim.rest;
 
-import be.personify.iam.scim.schema.Schema;
-import be.personify.iam.scim.schema.SchemaReader;
-import be.personify.iam.scim.util.Constants;
-import be.personify.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -42,6 +40,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import be.personify.iam.scim.schema.Schema;
+import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.schema.SchemaResourceType;
+import be.personify.iam.scim.util.Constants;
+import be.personify.util.StringUtils;
+
 /**
  * Me controller for the SCIM server
  *
@@ -53,8 +57,8 @@ public class MeController extends Controller {
 	@Autowired
 	private SchemaReader schemaReader;
 
-	private Schema getSchema() {
-		return schemaReader.getSchemaByResourceType(Constants.RESOURCE_TYPE_USER);
+	private SchemaResourceType getResourceType() {
+		return schemaReader.getResourceTypeByName(Constants.RESOURCE_TYPE_USER);
 	}
 
 	@PutMapping(path = "/scim/v2/Me", produces = { "application/scim+json", "application/json" })
@@ -63,11 +67,11 @@ public class MeController extends Controller {
 			@RequestParam(required = false, name = "excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response) {
 		
-		Map<String, Object> result = getAndValidateUserName(request, getSchema());
+		Map<String, Object> result = getAndValidateUserName(request);
 		if (!StringUtils.isEmpty(result)) {
 			// perform update
 			if (result.get(Constants.ID).equals(entity.get(Constants.ID))) {
-				return put(result.get(Constants.ID).toString(), entity, request, response, getSchema(), attributes,
+				return put(result.get(Constants.ID).toString(), entity, request, response, getResourceType(), attributes,
 						excludedAttributes);
 			} 
 			else {
@@ -85,27 +89,24 @@ public class MeController extends Controller {
 			@RequestParam(required = false, name = "excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response) {
 		
-		Map<String, Object> result = getAndValidateUserName(request, getSchema());
+		Map<String, Object> result = getAndValidateUserName(request);
 		if (!StringUtils.isEmpty(result)) {
-			ResponseEntity<Map<String, Object>> responseEntity = new ResponseEntity<Map<String, Object>>(
-					filterAttributes(getSchema(), result, getListFromString(attributes), excludedAttributes),
-					HttpStatus.OK);
-			String requestUrl = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build()
-					.toUriString();
-			requestUrl = requestUrl.substring(0, requestUrl.lastIndexOf("/Me") + 1) + "Users/"
-					+ result.get(Constants.ID);
+			ResponseEntity<Map<String, Object>> responseEntity = new ResponseEntity<Map<String, Object>>(filterAttributes(getResourceType().getSchemaObject(), result, getListFromString(attributes), excludedAttributes),	HttpStatus.OK);
+			String requestUrl = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString();
+			requestUrl = requestUrl.substring(0, requestUrl.lastIndexOf("/Me") + 1) + "Users/"	+ result.get(Constants.ID);
 			response.addHeader(Constants.HEADER_LOCATION, requestUrl);
 			return responseEntity;
-		} else {
+		}
+		else {
 			return showError(HttpStatus.UNAUTHORIZED.value(), "no valid authorization subject found", null);
 		}
 	}
+	
 
 	@DeleteMapping(path = "/scim/v2/Me")
 	public ResponseEntity<?> delete(@PathVariable String resourceType, @PathVariable String id) {
 		// think this through before you implements this
-		return showError(HttpStatus.NOT_IMPLEMENTED.value(),
-				"the delete against the /Me endpoint is not yet implemented", null);
+		return showError(HttpStatus.NOT_IMPLEMENTED.value(),"the delete against the /Me endpoint is not yet implemented", null);
 	}
 
 	@PostMapping(path = "/scim/v2/Me", produces = { "application/scim+json", "application/json" })
@@ -114,8 +115,7 @@ public class MeController extends Controller {
 			@RequestParam(required = false, name = "excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response) {
 		// think this through before you implement this
-		return showError(HttpStatus.NOT_IMPLEMENTED.value(), "the post to the /Me endpoint is not yet implemented",
-				null);
+		return showError(HttpStatus.NOT_IMPLEMENTED.value(), "the post to the /Me endpoint is not yet implemented",	null);
 	}
 
 	@PatchMapping(path = "/scim/v2/Me", produces = { "application/scim+json", "application/json" })
@@ -123,11 +123,11 @@ public class MeController extends Controller {
 			@RequestParam(required = false, name = "attributes") String attributes,
 			@RequestParam(required = false, name = "excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response) {
-		return showError(HttpStatus.NOT_IMPLEMENTED.value(),
-				"the patch against the /Me endpoint is not yet implemented", null);
+		return showError(HttpStatus.NOT_IMPLEMENTED.value(), "the patch against the /Me endpoint is not yet implemented", null);
 	}
+	
 
-	private Map<String, Object> getAndValidateUserName(HttpServletRequest request, Schema schema) {
+	private Map<String, Object> getAndValidateUserName(HttpServletRequest request) {
 		String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (header != null) {
 			String[] auth = header.split(be.personify.util.StringUtils.SPACE);
@@ -138,7 +138,7 @@ public class MeController extends Controller {
 					if (parts.length == 2) {
 						String userName = parts[0];
 						String password = parts[1];
-						ResponseEntity<Map<String, Object>> result = search(1, 1, schema,
+						ResponseEntity<Map<String, Object>> result = search(1, 1, getResourceType().getSchemaObject(),
 								"userName eq " + userName + " and password eq " + password);
 						if ((Long) result.getBody().get(Constants.KEY_TOTALRESULTS) == 1) {
 							Map<String, Object> searchResult = result.getBody();

@@ -19,12 +19,19 @@ package be.personify.iam.scim.rest;
 
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.schema.SchemaResourceType;
 import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.ScimErrorType;
+
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,7 +55,11 @@ public class SchemaController extends Controller {
 	@Autowired
 	private SchemaReader schemaReader;
 	
+	private static final Logger logger = LogManager.getLogger(SchemaController.class);
 	
+	
+	@Value("${scim.validationEnabled:true}")
+	private boolean validationEnabled;
 
 
 	/**
@@ -62,25 +73,32 @@ public class SchemaController extends Controller {
 	 * @param response           the HttpServletResponse
 	 * @return the map as a ResponseEntity
 	 */
-	@PostMapping(path = "/scim/v2/{resourceType}s", produces = { "application/scim+json", "application/json" })
-	public ResponseEntity<Map<String, Object>> post(@PathVariable String resourceType,
-			@RequestBody Map<String, Object> entity,
+	@PostMapping(path = "/scim/v2/{endpoint}", produces = { "application/scim+json", "application/json" })
+	public ResponseEntity<Map<String, Object>> post(@PathVariable String endpoint, @RequestBody Map<String, Object> entity,
 			@RequestParam(required = false, name = "attributes") String attributes,
 			@RequestParam(required = false, name = "excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response) {
-		Schema schema = schemaReader.getSchemaByResourceType(resourceType);
-		if (schema != null) {
-			List<String> schemas = extractSchemas(entity);
-			if (schemas != null && schemas.size() > 0) {
-				if (schemas.contains(schema.getId())) {
-					return post(entity, request, response, schema, attributes, excludedAttributes);
+		try {
+			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint);
+			Schema schema = resourceType.getSchemaObject();
+			if (schema != null) { 
+				List<String> schemas = extractSchemas(entity); 
+				if (schemas != null && schemas.size() > 0) {
+					if (schemas.contains(schema.getId())) {
+						return post(entity, request, response, resourceType, attributes, excludedAttributes);
+					}
+					return missingRequiredSchemaForResource(resourceType, schema.getId());
 				}
-				return invalidSchemaForResource(schemas, resourceType);
-			} else {
-				return post(entity, request, response, schema, attributes, excludedAttributes);
+				else {
+					return post(entity, request, response, resourceType, attributes, excludedAttributes);
+				}
 			}
+			return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", ScimErrorType.noTarget);
 		}
-		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
+		catch (Exception e) {
+			e.printStackTrace();
+			return showError(HttpStatus.NOT_FOUND.value(), "for the endpoint " + endpoint + " : " + e.getMessage() , ScimErrorType.invalidPath);
+		}
 	}
 
 	/**
@@ -95,26 +113,33 @@ public class SchemaController extends Controller {
 	 * @param response           the HttpServletResponse
 	 * @return the map as a ResponseEntity
 	 */
-	@PutMapping(path = "/scim/v2/{resourceType}s/{id}", produces = { "application/scim+json", "application/json" })
-	public ResponseEntity<Map<String, Object>> put(@PathVariable String resourceType, @PathVariable String id,
+	@PutMapping(path = "/scim/v2/{endpoint}/{id}", produces = { "application/scim+json", "application/json" })
+	public ResponseEntity<Map<String, Object>> put(@PathVariable String endpoint, @PathVariable String id,
 			@RequestBody Map<String, Object> entity,
 			@RequestParam(required = false, name = "attributes") String attributes,
 			@RequestParam(required = false, name = "excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response) {
-		Schema schema = schemaReader.getSchemaByResourceType(resourceType);
-		if (schema != null) {
-			List<String> schemas = extractSchemas(entity);
-			if (schemas != null && schemas.size() > 0) {
-				if (schemas.contains(schema.getId())) {
-					return put(id, entity, request, response, schema, attributes, excludedAttributes);
+		try {
+			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint); 
+			Schema schema = resourceType.getSchemaObject();
+			if (schema != null) {
+				List<String> schemas = extractSchemas(entity);
+				if (schemas != null && schemas.size() > 0) {
+					if (schemas.contains(schema.getId())) {
+						return put(id, entity, request, response, resourceType, attributes, excludedAttributes);
+					}
+					return missingRequiredSchemaForResource(resourceType, schema.getId());
+				} 
+				else {
+					return put(id, entity, request, response, resourceType, attributes, excludedAttributes);
 				}
-				return invalidSchemaForResource(schemas, resourceType);
-			} 
-			else {
-				return put(id, entity, request, response, schema, attributes, excludedAttributes);
 			}
+			return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", ScimErrorType.noTarget);
 		}
-		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
+		catch (Exception e) {
+			return showError(HttpStatus.NOT_FOUND.value(), e.getMessage() , ScimErrorType.invalidPath);
+		}
+		
 	}
 
 	/**
@@ -129,21 +154,27 @@ public class SchemaController extends Controller {
 	 * @param response           the HttpServletResponse
 	 * @return the map as a ResponseEntity
 	 */
-	@PatchMapping(path = "/scim/v2/{resourceType}s/{id}", produces = { "application/scim+json", "application/json" })
-	public ResponseEntity<Map<String, Object>> patch(@PathVariable String resourceType, @PathVariable String id,
+	@PatchMapping(path = "/scim/v2/{endpoint}/{id}", produces = { "application/scim+json", "application/json" })
+	public ResponseEntity<Map<String, Object>> patch(@PathVariable String endpoint, @PathVariable String id,
 			@RequestBody Map<String, Object> entity,
 			@RequestParam(required = false, name = "attributes") String attributes,
 			@RequestParam(required = false, name = "excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response) {
-		Schema schema = schemaReader.getSchemaByResourceType(resourceType);
-		if (schema != null) {
-			List<String> schemas = extractSchemas(entity);
-			if (schemas.contains(Constants.SCHEMA_PATCHOP)) {
-				return patch(id, entity, request, response, schema, attributes, excludedAttributes);
+		try {
+			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint); 
+			Schema schema = resourceType.getSchemaObject();
+			if (schema != null) {
+				List<String> schemas = extractSchemas(entity);
+				if (schemas.contains(Constants.SCHEMA_PATCHOP)) {
+					return patch(id, entity, request, response, resourceType, attributes, excludedAttributes);
+				}
+				return missingRequiredSchemaForResource(resourceType, Constants.SCHEMA_PATCHOP);
 			}
-			return invalidSchemaForResource(resourceType, Constants.SCHEMA_PATCHOP);
+			return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + endpoint + " is not found", null);
 		}
-		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
+		catch (Exception e) {
+			return showError(HttpStatus.NOT_FOUND.value(), e.getMessage() , ScimErrorType.invalidPath);
+		}
 	}
 
 	/**
@@ -157,16 +188,22 @@ public class SchemaController extends Controller {
 	 * @param response           the HttpServletResponse
 	 * @return the map containing the entity
 	 */
-	@GetMapping(path = "/scim/v2/{resourceType}s/{id}", produces = { "application/scim+json", "application/json" })
-	public ResponseEntity<Map<String, Object>> get(@PathVariable String resourceType, @PathVariable String id,
+	@GetMapping(path = "/scim/v2/{endpoint}/{id}", produces = { "application/scim+json", "application/json" })
+	public ResponseEntity<Map<String, Object>> get(@PathVariable String endpoint, @PathVariable String id,
 			@RequestParam(required = false, name = "attributes") String attributes,
 			@RequestParam(required = false, name = "excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response) {
-		Schema schema = schemaReader.getSchemaByResourceType(resourceType);
-		if (schema != null) {
-			return get(id, request, response, schema, attributes, excludedAttributes);
+		try {
+			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint); 
+			Schema schema = resourceType.getSchemaObject();
+			if (schema != null) {
+				return get(id, request, response, schema, attributes, excludedAttributes);
+			}
+			return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
 		}
-		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
+		catch( Exception e ) {
+			return showError(HttpStatus.NOT_FOUND.value(), e.getMessage() , ScimErrorType.invalidPath);
+		}
 	}
 
 	/**
@@ -184,8 +221,8 @@ public class SchemaController extends Controller {
 	 * @param response           the HttpServletResponse
 	 * @return the response entity
 	 */
-	@GetMapping(path = "/scim/v2/{resourceType}s", produces = { "application/scim+json", "application/json" })
-	public ResponseEntity<Map<String, Object>> search(@PathVariable String resourceType,
+	@GetMapping(path = "/scim/v2/{endpoint}", produces = { "application/scim+json", "application/json" })
+	public ResponseEntity<Map<String, Object>> search(@PathVariable String endpoint,
 			@RequestParam(required = false, name = "startIndex", defaultValue = "1") Integer startIndex,
 			@RequestParam(required = false, name = "count", defaultValue = "200") Integer count,
 			@RequestParam(required = false, name = "filter") String filter,
@@ -194,11 +231,17 @@ public class SchemaController extends Controller {
 			@RequestParam(required = false, name = "attributes") String attributes,
 			@RequestParam(required = false, name = "excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response) {
-		Schema schema = schemaReader.getSchemaByResourceType(resourceType);
-		if (schema != null) {
-			return search(startIndex, count, schema, filter, sortBy, sortOrder, attributes, excludedAttributes);
+		try {
+			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint); 
+			Schema schema = resourceType.getSchemaObject();
+			if (schema != null) {
+				return search(startIndex, count, schema, filter, sortBy, sortOrder, attributes, excludedAttributes);
+			}
+			return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
 		}
-		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
+		catch( Exception e ) {
+			return showError(HttpStatus.NOT_FOUND.value(), e.getMessage() , ScimErrorType.invalidPath);
+		}
 	}
 
 	/**
@@ -208,12 +251,20 @@ public class SchemaController extends Controller {
 	 * @param id           the id of the entity to be deleted
 	 * @return the entity deleted
 	 */
-	@DeleteMapping(path = "/scim/v2/{resourceType}s/{id}")
-	public ResponseEntity<?> delete(@PathVariable String resourceType, @PathVariable String id) {
-		Schema schema = schemaReader.getSchemaByResourceType(resourceType);
-		if (schema != null) {
-			return delete(id, schema);
+	@DeleteMapping(path = "/scim/v2/{endpoint}/{id}")
+	public ResponseEntity<?> delete(@PathVariable String endpoint, @PathVariable String id) {
+		try {
+			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint); 
+			Schema schema = resourceType.getSchemaObject();
+			if (schema != null) { 
+				return delete(id, schema);
+			}
+			return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
 		}
-		return showError(HttpStatus.NOT_FOUND.value(), "the resource of type " + resourceType + " is not found", null);
+		catch( Exception e ) {
+			return showError(HttpStatus.NOT_FOUND.value(), e.getMessage() , ScimErrorType.invalidPath);
+		}
+
+			
 	}
 }
