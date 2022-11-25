@@ -20,6 +20,5 @@ public class CurrentConsumer {
         CONSUMER.set(c);
     }
     
-    
-
+     
 }

@@ -82,7 +82,7 @@ public class SchemaController extends Controller {
 			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint);
 			Schema schema = resourceType.getSchemaObject();
 			if (schema != null) { 
-				List<String> schemas = extractSchemas(entity); 
+				List<String> schemas = schemaReader.extractSchemas(entity); 
 				if (schemas != null && schemas.size() > 0) {
 					if (schemas.contains(schema.getId())) {
 						return post(entity, request, response, resourceType, attributes, excludedAttributes);
@@ -123,7 +123,7 @@ public class SchemaController extends Controller {
 			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint); 
 			Schema schema = resourceType.getSchemaObject();
 			if (schema != null) {
-				List<String> schemas = extractSchemas(entity);
+				List<String> schemas = schemaReader.extractSchemas(entity);
 				if (schemas != null && schemas.size() > 0) {
 					if (schemas.contains(schema.getId())) {
 						return put(id, entity, request, response, resourceType, attributes, excludedAttributes);
@@ -164,7 +164,7 @@ public class SchemaController extends Controller {
 			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint); 
 			Schema schema = resourceType.getSchemaObject();
 			if (schema != null) {
-				List<String> schemas = extractSchemas(entity);
+				List<String> schemas = schemaReader.extractSchemas(entity);
 				if (schemas.contains(Constants.SCHEMA_PATCHOP)) {
 					return patch(id, entity, request, response, resourceType, attributes, excludedAttributes);
 				}

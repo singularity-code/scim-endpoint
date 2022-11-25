@@ -17,6 +17,7 @@
 */
 package be.personify.iam.scim.schema;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -80,4 +81,16 @@ public class Schema {
     }
     return null;
   }
+  
+  
+  public List<String> getAttributeNames() {
+	  List<String> attributeNames = new ArrayList<>();
+	  for (SchemaAttribute attr : getAttributes()) {
+		  attributeNames.add(attr.getName());
+	  }
+	  return attributeNames;
+  }
+  
+  
+  
 }

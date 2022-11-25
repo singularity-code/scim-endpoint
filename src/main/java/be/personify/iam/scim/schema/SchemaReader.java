@@ -18,6 +18,7 @@
 package be.personify.iam.scim.schema;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -187,9 +188,44 @@ public class SchemaReader {
 	 */
 	public Map<String, Object> validate(SchemaResourceType resourceType, Map<String, Object> map, boolean checkRequired, String operation) throws SchemaException {
 		Schema mainSchema = resourceType.getSchemaObject();
+		List<String> schemas = extractSchemas(map);
+		boolean mainSchemaFound = false;
+		List<String> allPossibleAttributes = new ArrayList<String>();
+		allPossibleAttributes.add("schemas");
+		for ( String schema : schemas ) {
+			logger.info("checking schema {}",schema );
+			if ( schema.equals(mainSchema.getId())) {
+				logger.info("main schema found {} " , mainSchema);
+				mainSchemaFound = true;
+				allPossibleAttributes.addAll(mainSchema.getAttributeNames());
+			}
+			else {
+				boolean extensionFound = false;
+				for ( SchemaExtension extension : resourceType.getSchemaExtensions() ) {
+					if ( schema.equalsIgnoreCase(extension.getSchema())) {
+						extensionFound = true;
+						allPossibleAttributes.addAll(extension.getSchemaObject().getAttributeNames());
+					}
+				}
+				if (!extensionFound) {
+					throw new SchemaException("invalid extension " + schema + " for main schema " + mainSchema.getId());
+				}
+			}
+			
+		}
+		if ( !mainSchemaFound ) {
+			throw new SchemaException("schemas does not contain main schema " + mainSchema.getId());
+		}
+		for ( String key :  map.keySet()) {
+			if ( !allPossibleAttributes.contains(key)) {
+				throw new SchemaException("attribute " + key  + " is not defined in schemas  " + schemas );
+			}
+		}
+		
 		for (SchemaAttribute attribute : mainSchema.getAttributes()) {
 			validateAttribute(map.get(attribute.getName()), attribute, checkRequired, operation);
 		}
+		
 		return map;
 	}
 	
@@ -247,6 +283,15 @@ public class SchemaReader {
 		catch (Exception e) {
 			throw new SchemaException("schema validation for attribute [" + attribute.getName() + "] with value [" + o + "] " + e.getMessage());
 		}
+	}
+	
+	
+	
+	public List<String> extractSchemas(Map<String, Object> user) {
+		if ( user.containsKey(Constants.KEY_SCHEMAS)) {
+			return (List<String>) user.get(Constants.KEY_SCHEMAS);
+		}
+		return new ArrayList<String>();
 	}
 	
 	

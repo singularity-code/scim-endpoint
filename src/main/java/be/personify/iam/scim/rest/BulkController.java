@@ -17,22 +17,15 @@
 */
 package be.personify.iam.scim.rest;
 
-import be.personify.iam.scim.authentication.CurrentConsumer;
-import be.personify.iam.scim.schema.Schema;
-import be.personify.iam.scim.schema.SchemaException;
-import be.personify.iam.scim.schema.SchemaReader;
-import be.personify.iam.scim.storage.ConstraintViolationException;
-import be.personify.iam.scim.storage.StorageImplementationFactory;
-import be.personify.iam.scim.util.Constants;
-import be.personify.iam.scim.util.ScimErrorType;
-import be.personify.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +37,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import be.personify.iam.scim.authentication.CurrentConsumer;
+import be.personify.iam.scim.schema.Schema;
+import be.personify.iam.scim.schema.SchemaException;
+import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.storage.ConstraintViolationException;
+import be.personify.iam.scim.storage.StorageImplementationFactory;
+import be.personify.iam.scim.util.Constants;
+import be.personify.util.StringUtils;
 
 /**
  * Controller managing bulk operations with circular reference processing,
@@ -80,7 +82,7 @@ public class BulkController extends Controller {
 			return showError(HttpStatus.PAYLOAD_TOO_LARGE.value(), "The size of the bulk operation (" + contentLenth + ") exceeds the maxPayloadSize (" + maxPayloadSize + ")", null);
 		}
 
-		List<String> schemas = extractSchemas(objects);
+		List<String> schemas = schemaReader.extractSchemas(objects);
 		if (schemas.contains(SCHEMA)) {
 			return postBulk(objects, request, response);
 		}
@@ -108,7 +110,7 @@ public class BulkController extends Controller {
 
 		for (Map<String, Object> operation : operations) {
 			entity = (Map<String, Object>) operation.get(Constants.KEY_DATA);
-			List<String> schemas = extractSchemas(entity);
+			List<String> schemas = schemaReader.extractSchemas(entity);
 			Schema schema = schemaReader.getSchema(schemas.get(0));
 			
 			method = (String) operation.get(Constants.KEY_METHOD);

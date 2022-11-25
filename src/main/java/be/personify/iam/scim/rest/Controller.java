@@ -598,9 +598,7 @@ public class Controller {
 		}
 	}
 
-	protected List<String> extractSchemas(Map<String, Object> user) {
-		return (List<String>) user.get(Constants.KEY_SCHEMAS);
-	}
+	
 
 	protected ResponseEntity<Map<String, Object>> invalidSchemaForEndpoint(List<String> schemas, String resourceType) {
 		return showError(400, "for type " + resourceType + " content is not compliant with schemas " + schemas.toString(), ScimErrorType.invalidSyntax);
