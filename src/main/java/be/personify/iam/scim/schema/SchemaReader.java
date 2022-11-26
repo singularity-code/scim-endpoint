@@ -192,6 +192,7 @@ public class SchemaReader {
 		boolean mainSchemaFound = false;
 		List<String> allPossibleAttributes = new ArrayList<String>();
 		allPossibleAttributes.add("schemas");
+		allPossibleAttributes.add("id");
 		for ( String schema : schemas ) {
 			logger.info("checking schema {}",schema );
 			if ( schema.equals(mainSchema.getId())) {
