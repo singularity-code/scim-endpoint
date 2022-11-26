@@ -13,7 +13,7 @@
     },
     "filter": {
       "supported":true,
-      "maxResults": 50
+      "maxResults": ${scim.searchresult.defaultCount}
     },
     "changePassword": {
       "supported":true

@@ -53,6 +53,10 @@ public class SchemaReader {
 	
 	@Value("${scim.resourceTypes.location}")
 	private String resourceTypesLocation;
+	
+
+	@Value("${scim.validationEnabled:true}")
+	private boolean validationEnabled;
 
 	@Autowired
 	private ResourceLoader resourceLoader;
@@ -187,44 +191,46 @@ public class SchemaReader {
 	 * @throws SchemaException exception containing the errors
 	 */
 	public Map<String, Object> validate(SchemaResourceType resourceType, Map<String, Object> map, boolean checkRequired, String operation) throws SchemaException {
-		Schema mainSchema = resourceType.getSchemaObject();
-		List<String> schemas = extractSchemas(map);
-		boolean mainSchemaFound = false;
-		List<String> allPossibleAttributes = new ArrayList<String>();
-		allPossibleAttributes.add("schemas");
-		allPossibleAttributes.add("id");
-		for ( String schema : schemas ) {
-			logger.info("checking schema {}",schema );
-			if ( schema.equals(mainSchema.getId())) {
-				logger.info("main schema found {} " , mainSchema);
-				mainSchemaFound = true;
-				allPossibleAttributes.addAll(mainSchema.getAttributeNames());
-			}
-			else {
-				boolean extensionFound = false;
-				for ( SchemaExtension extension : resourceType.getSchemaExtensions() ) {
-					if ( schema.equalsIgnoreCase(extension.getSchema())) {
-						extensionFound = true;
-						allPossibleAttributes.addAll(extension.getSchemaObject().getAttributeNames());
+		if ( validationEnabled ) {
+			Schema mainSchema = resourceType.getSchemaObject();
+			List<String> schemas = extractSchemas(map);
+			boolean mainSchemaFound = false;
+			List<String> allPossibleAttributes = new ArrayList<String>();
+			allPossibleAttributes.add("schemas");
+			allPossibleAttributes.add("id");
+			for ( String schema : schemas ) {
+				logger.info("checking schema {}",schema );
+				if ( schema.equals(mainSchema.getId())) {
+					logger.info("main schema found {} " , mainSchema);
+					mainSchemaFound = true;
+					allPossibleAttributes.addAll(mainSchema.getAttributeNames());
+				}
+				else {
+					boolean extensionFound = false;
+					for ( SchemaExtension extension : resourceType.getSchemaExtensions() ) {
+						if ( schema.equalsIgnoreCase(extension.getSchema())) {
+							extensionFound = true;
+							allPossibleAttributes.addAll(extension.getSchemaObject().getAttributeNames());
+						}
+					}
+					if (!extensionFound) {
+						throw new SchemaException("invalid extension " + schema + " for main schema " + mainSchema.getId());
 					}
 				}
-				if (!extensionFound) {
-					throw new SchemaException("invalid extension " + schema + " for main schema " + mainSchema.getId());
+				
+			}
+			if ( !mainSchemaFound ) {
+				throw new SchemaException("schemas does not contain main schema " + mainSchema.getId());
+			}
+			for ( String key :  map.keySet()) {
+				if ( !allPossibleAttributes.contains(key)) {
+					throw new SchemaException("attribute " + key  + " is not defined in schemas  " + schemas );
 				}
 			}
 			
-		}
-		if ( !mainSchemaFound ) {
-			throw new SchemaException("schemas does not contain main schema " + mainSchema.getId());
-		}
-		for ( String key :  map.keySet()) {
-			if ( !allPossibleAttributes.contains(key)) {
-				throw new SchemaException("attribute " + key  + " is not defined in schemas  " + schemas );
+			for (SchemaAttribute attribute : mainSchema.getAttributes()) {
+				validateAttribute(map.get(attribute.getName()), attribute, checkRequired, operation);
 			}
-		}
-		
-		for (SchemaAttribute attribute : mainSchema.getAttributes()) {
-			validateAttribute(map.get(attribute.getName()), attribute, checkRequired, operation);
 		}
 		
 		return map;

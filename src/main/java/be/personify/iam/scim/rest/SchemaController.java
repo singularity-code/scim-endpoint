@@ -17,21 +17,13 @@
 */
 package be.personify.iam.scim.rest;
 
-import be.personify.iam.scim.schema.Schema;
-import be.personify.iam.scim.schema.SchemaReader;
-import be.personify.iam.scim.schema.SchemaResourceType;
-import be.personify.iam.scim.util.Constants;
-import be.personify.iam.scim.util.ScimErrorType;
-
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -44,6 +36,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import be.personify.iam.scim.schema.Schema;
+import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.schema.SchemaResourceType;
+import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.ScimErrorType;
+
 /**
  * Schema controller for the SCIM server implementation
  *
@@ -55,11 +53,6 @@ public class SchemaController extends Controller {
 	@Autowired
 	private SchemaReader schemaReader;
 	
-	private static final Logger logger = LogManager.getLogger(SchemaController.class);
-	
-	
-	@Value("${scim.validationEnabled:true}")
-	private boolean validationEnabled;
 
 
 	/**
@@ -224,7 +217,7 @@ public class SchemaController extends Controller {
 	@GetMapping(path = "/scim/v2/{endpoint}", produces = { "application/scim+json", "application/json" })
 	public ResponseEntity<Map<String, Object>> search(@PathVariable String endpoint,
 			@RequestParam(required = false, name = "startIndex", defaultValue = "1") Integer startIndex,
-			@RequestParam(required = false, name = "count", defaultValue = "200") Integer count,
+			@RequestParam(required = false, name = "count", defaultValue = "${scim.searchresult.defaultCount}") Integer count,
 			@RequestParam(required = false, name = "filter") String filter,
 			@RequestParam(required = false, name = "sortBy") String sortBy,
 			@RequestParam(required = false, name = "sortOrder") String sortOrder,

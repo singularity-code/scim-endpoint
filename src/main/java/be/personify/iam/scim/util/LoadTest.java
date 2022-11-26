@@ -46,6 +46,8 @@ public class LoadTest {
 	private static final String EXCLUDED_ATTRIBUTES_GROUPS = "excludedAttributes=groups";
 
 	private static final ObjectMapper objectMapper = new ObjectMapper();
+	
+	private int maxIdsSearch = 1000;
 
 	private static int createFinished = 0;
 	private static int createGroupsFinished = 0;
@@ -425,11 +427,13 @@ public class LoadTest {
 		long start = System.currentTimeMillis();
 		RestTemplate restTemplate = new RestTemplate();
 		try {
-			ResponseEntity<Map> response = restTemplate.exchange(endpoint + "/Users?attributes=id", HttpMethod.GET,
-					entity, Map.class);
+			ResponseEntity<Map> response = restTemplate.exchange(endpoint + "/Users?attributes=id", HttpMethod.GET,	entity, Map.class);
 			// System.out.println(response.getBody());
 			int findIdsFinished = (int) response.getBody().get("totalResults");
-			long count = 100;
+			if ( findIdsFinished > maxIdsSearch) {
+				findIdsFinished = maxIdsSearch;
+			}
+			long count = 5;
 			long time = 0;
 			for (int i = 0; i < count; i++) {
 				long cstart = System.currentTimeMillis();
