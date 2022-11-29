@@ -198,6 +198,7 @@ public class SchemaReader {
 			List<String> allPossibleAttributes = new ArrayList<String>();
 			allPossibleAttributes.add("schemas");
 			allPossibleAttributes.add("id");
+			allPossibleAttributes.add("meta");
 			for ( String schema : schemas ) {
 				logger.info("checking schema {}",schema );
 				if ( schema.equals(mainSchema.getId())) {
@@ -207,14 +208,20 @@ public class SchemaReader {
 				}
 				else {
 					boolean extensionFound = false;
-					for ( SchemaExtension extension : resourceType.getSchemaExtensions() ) {
-						if ( schema.equalsIgnoreCase(extension.getSchema())) {
-							extensionFound = true;
-							allPossibleAttributes.addAll(extension.getSchemaObject().getAttributeNames());
-						}
+					if ( schema.equalsIgnoreCase(Constants.SCHEMA_PATCHOP)) {
+						extensionFound = true;
 					}
-					if (!extensionFound) {
-						throw new SchemaException("invalid extension " + schema + " for main schema " + mainSchema.getId());
+					else {
+						for ( SchemaExtension extension : resourceType.getSchemaExtensions() ) {
+							if ( schema.equalsIgnoreCase(extension.getSchema())) {
+								extensionFound = true;
+								allPossibleAttributes.add(schema);
+								//allPossibleAttributes.addAll(extension.getSchemaObject().getAttributeNames());
+							}
+						}
+						if (!extensionFound) {
+							throw new SchemaException("invalid extension " + schema + " for main schema " + mainSchema.getId());
+						}
 					}
 				}
 				
