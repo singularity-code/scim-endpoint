@@ -251,7 +251,11 @@ public class SchemaTest {
 		
 		map.put("userName", "username");
 		map.put("externalId", "externalId");
-		map.put("employeeNumber", "1025001");
+		
+		Map<String,Object> entMap = new HashMap<String, Object>();
+		entMap.put("employeeNumber", "1025001");
+		map.put("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", entMap);
+		
 		
 		List<Map<String,Object>> mailList = new ArrayList<Map<String,Object>>();
 		Map<String,Object> mailMap = new HashMap<String, Object>();
