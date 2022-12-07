@@ -30,6 +30,7 @@ import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoWriteException;
@@ -51,10 +52,12 @@ import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.Storage;
 import be.personify.iam.scim.util.Constants;
 import be.personify.util.LogicalOperator;
+import be.personify.util.MapUtils;
 import be.personify.util.SearchCriteria;
 import be.personify.util.SearchCriterium;
 import be.personify.util.SearchOperation;
 import be.personify.util.StringUtils;
+import be.personify.util.io.IOUtils;
 
 /**
  * @author jingzhou wang
@@ -91,6 +94,11 @@ public class MongoStorage implements Storage {
 	
 	@Value("${scim.storage.mongo.collection.groups}")
 	private String groupCollection = "groups";
+	
+	@Value("${scim.storage.mongo.attributeNameReplacements}")
+	private String attributeReplacementsString;
+	
+	private Map attributeReplacements;
 	
 	private String type = null;
 	
@@ -430,6 +438,16 @@ public class MongoStorage implements Storage {
 			throw new DataException("the type " + type + " is not a valid resource type");
 		}
 		
+		try {
+			if ( !StringUtils.isEmpty(attributeReplacementsString)) {
+				ObjectMapper o = new ObjectMapper();
+				attributeReplacements = o.readValue(attributeReplacementsString, Map.class);
+				logger.info("replacements {}", attributeReplacements);
+			}
+		}
+		catch ( Exception e ) {
+			logger.error("can not parse attribute replacements", e);
+		}
 		createUniqueIndexes(type);
 		
 	}
@@ -500,6 +518,21 @@ public class MongoStorage implements Storage {
 			}
 			return newMap;
 		}
+		else {
+			if ( attributeReplacements.size() > 0 ) {
+				Map<String,Object> newMap = new HashMap<String,Object>();
+				for (String key :  map.keySet() ) {
+					Object o = map.get(key);
+					if ( attributeReplacements.containsKey(key)){
+						newMap.put((String)attributeReplacements.get(key), o);
+					}
+					else {
+						newMap.put(key, o);
+					}
+				}
+				return newMap;
+			}
+		}
 		return map;
 	}
 	
@@ -508,6 +541,11 @@ public class MongoStorage implements Storage {
 	private String safeName( String name ) {
 		if ( name.startsWith("$")) {
 			name = StringUtils.UNDERSCORE + name;
+		}
+		if ( attributeReplacements.size() > 0 ) {
+			if ( attributeReplacements.containsKey(name)){
+				name = (String)attributeReplacements.get(name);
+			}
 		}
 		return name;
 	}
@@ -540,6 +578,23 @@ public class MongoStorage implements Storage {
 				newMap.put(key, o);
 			}
 			return newMap;
+		}
+		else {
+			if ( attributeReplacements.size() > 0 ) {
+				Document newMap = new Document();
+				for (String key :  map.keySet() ) {
+					Object o = map.get(key);
+					if ( attributeReplacements.containsValue(key)) {
+						for ( Object k : attributeReplacements.keySet() ) {
+							if ( attributeReplacements.get(k).equals(key)) {
+								key = (String)k;
+							}
+						}
+					}
+					newMap.put(key, o);
+				}
+				return newMap;
+			}
 		}
 		return map;
 	}

@@ -199,6 +199,7 @@ public class SchemaReader {
 			allPossibleAttributes.add("schemas");
 			allPossibleAttributes.add("id");
 			allPossibleAttributes.add("meta");
+			boolean patchFound = false;
 			for ( String schema : schemas ) {
 				logger.info("checking schema {}",schema );
 				if ( schema.equals(mainSchema.getId())) {
@@ -207,36 +208,39 @@ public class SchemaReader {
 					allPossibleAttributes.addAll(mainSchema.getAttributeNames());
 				}
 				else {
-					boolean extensionFound = false;
+					
 					if ( schema.equalsIgnoreCase(Constants.SCHEMA_PATCHOP)) {
-						extensionFound = true;
+						patchFound = true;
 					}
 					else {
 						for ( SchemaExtension extension : resourceType.getSchemaExtensions() ) {
 							if ( schema.equalsIgnoreCase(extension.getSchema())) {
-								extensionFound = true;
+								patchFound = true;
 								allPossibleAttributes.add(schema);
 								//allPossibleAttributes.addAll(extension.getSchemaObject().getAttributeNames());
 							}
 						}
-						if (!extensionFound) {
+						if (!patchFound) {
 							throw new SchemaException("invalid extension " + schema + " for main schema " + mainSchema.getId());
 						}
 					}
 				}
 				
 			}
-			if ( !mainSchemaFound ) {
+			if ( !mainSchemaFound && ! patchFound) {
 				throw new SchemaException("schemas does not contain main schema " + mainSchema.getId());
 			}
-			for ( String key :  map.keySet()) {
-				if ( !allPossibleAttributes.contains(key)) {
-					throw new SchemaException("attribute " + key  + " is not defined in schemas  " + schemas );
-				}
-			}
 			
-			for (SchemaAttribute attribute : mainSchema.getAttributes()) {
-				validateAttribute(map.get(attribute.getName()), attribute, checkRequired, operation);
+			if ( !patchFound ) {
+				for ( String key :  map.keySet()) {
+					if ( !allPossibleAttributes.contains(key)) {
+						throw new SchemaException("attribute " + key  + " is not defined in schemas  " + schemas );
+					}
+				}
+				
+				for (SchemaAttribute attribute : mainSchema.getAttributes()) {
+					validateAttribute(map.get(attribute.getName()), attribute, checkRequired, operation);
+				}
 			}
 		}
 		

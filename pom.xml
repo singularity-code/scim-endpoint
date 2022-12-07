@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>be.personify.iam</groupId>
 	<artifactId>personify-scim-server</artifactId>
-	<version>2.0.2.RELEASE</version>
+	<version>2.0.3.RELEASE</version>
 	<packaging>jar</packaging>
 	<licenses>
 		<license>
@@ -200,6 +200,9 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot-starter-version}</version>
+				<configuration>
+	        		<classifier>exec</classifier>
+            	</configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -208,6 +211,8 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+		
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -314,7 +319,7 @@
 <!-- 					<repository>personify/${project.artifactId}</repository> -->
 <!-- 					<tag>${project.version}</tag> -->
 <!-- 					<buildArgs> -->
-<!-- 						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE> -->
+<!-- 						<JAR_FILE>${project.build.finalName}-exec.jar</JAR_FILE> -->
 <!-- 					</buildArgs> -->
 <!-- 				</configuration> -->
 <!-- 			</plugin> -->
