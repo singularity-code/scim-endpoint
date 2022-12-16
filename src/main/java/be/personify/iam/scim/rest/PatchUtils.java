@@ -29,6 +29,7 @@ public class PatchUtils {
 	
 	
 	
+	private static final String VALUE = "value";
 	private static final String EQ = " eq ";
 	private static final String FALSE = "false";
 	private static final String TRUE = "true";
@@ -75,12 +76,19 @@ public class PatchUtils {
 					String type = (String)pathResult.get(TYPE); 
 					if ( type != null && type.equals(SchemaAttributeType.COMPLEX.name())) {
 						Map m = new HashMap<>();
-						m.put((String)pathResult.get(ATTRIBUTENAME), value);
-						String conditions =  (String)pathResult.get("conditions");
-						if (!StringUtils.isEmpty(conditions)) {
-							putConditionsInMap( m, conditions);
+						String attrname = (String)pathResult.get(ATTRIBUTENAME);
+						if ( StringUtils.isEmpty(attrname)) {
+							attrname = VALUE;
 						}
-						eList.add(m);
+						m.put(attrname, value);
+						boolean alreadyContains = alreadyContainsValue(eList,m);
+						if (!alreadyContains ) {
+							String conditions =  (String)pathResult.get("conditions");
+							if (!StringUtils.isEmpty(conditions)) {
+								putConditionsInMap( m, conditions);
+							}
+							eList.add(m);
+						}
 						logger.info("eList {}", eList);
 					}
 					logger.info("value {}", value);
@@ -265,6 +273,21 @@ public class PatchUtils {
 	
 	
 	
+	private boolean alreadyContainsValue(List<Map> eList, Map m) {
+		Object value = m.get(VALUE);
+		for ( Map mm : eList ) {
+			Object vvalue = mm.get(VALUE);
+			if ( vvalue != null && value != null ) {
+				if ( value.equals(vvalue)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+
+
 	private String getSchemaFormPath(String path) {
 		for ( String schemaId : schemaReader.getSchemaIds()) {
 			logger.info("schema id {} path {}", schemaId, path);
@@ -363,6 +386,7 @@ public class PatchUtils {
 								logger.info("it's complex");
 								
 								if ( current instanceof Map ) {
+									logger.info("current is a map {}", current);
 									List<Object> list = new ArrayList<>();
 									Map<String,Object> newObject = new HashMap<>();
 									list.add(newObject);
@@ -370,6 +394,7 @@ public class PatchUtils {
 									current = newObject;
 								}
 								else if ( current == null || current instanceof List ) {
+									logger.info("current is a list or null {}", current);
 									List l = new ArrayList();
 									entity.put(seg, l);
 									current = l;

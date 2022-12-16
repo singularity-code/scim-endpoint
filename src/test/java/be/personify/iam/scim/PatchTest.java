@@ -114,6 +114,45 @@ public class PatchTest {
 	
 	
 	
+	
+	@Test
+	public void testPatchRoleListUnique() {
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		entity.put("roles", new ArrayList());
+		
+		Map<String,Object> role_one = new HashMap<>();
+		role_one.put("value", "role1");
+		
+		Map<String,Object> role_two = new HashMap<>();
+		role_two.put("value", "role2");
+		
+		Map<String,Object> role_twocopy = new HashMap<>();
+		role_twocopy.put("value", "role2");
+		
+		List roleList = new ArrayList<>();
+		roleList.add(role_one);
+		roleList.add(role_two);
+		
+		
+		patchUtils.patchEntity(entity, PatchOperation.add, "roles", roleList, schema );
+		
+		logger.info("entity {}", entity);
+		Assert.isTrue( ((List)entity.get("roles")).size() == 2 , "has to have two roles");
+		
+		roleList = new ArrayList<>();
+		roleList.add(role_twocopy);
+		
+		patchUtils.patchEntity(entity, PatchOperation.add, "roles", roleList, schema );
+		
+		Assert.isTrue( ((List)entity.get("roles")).size() == 2 , "has to have two roles");
+		
+	}
+	
+	
+	
+	
+	
 	@Test
 	public void testPatchRoleListWithRolesPresent() {
 		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
@@ -355,6 +394,66 @@ public class PatchTest {
 		
 				
 	}
+	
+	
+	
+	
+	@Test
+	public void testPatchGroupOne() {
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_GROUP);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		
+		String value = "222222222";
+		
+		patchUtils.patchEntity(entity, PatchOperation.add, "members", value, schema );
+		
+		logger.info("entity {}", entity);
+		
+		List members = (List)entity.get("members");
+		if ( members != null ) {
+			Assert.isTrue( members.size() == 1 , "has to be one length");
+			Map firstEntry = (Map)members.get(0);
+			Assert.isTrue( firstEntry.get("value").equals(value) , "has to be value " + value);
+		}
+		else {
+			fail("no members found");
+		}
+		
+		
+	}
+	
+	
+	
+	
+	@Test
+	public void testPatchGroupTwo() {
+		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_GROUP);
+		Map<String,Object> entity = new HashMap<String,Object>();
+		
+		String value = "222222222";
+		Map m = new HashMap<>();
+		m.put("value", value);
+		
+		List members = new ArrayList<>();
+		members.add(m);
+		entity.put("members", members);
+		
+		patchUtils.patchEntity(entity, PatchOperation.add, "members", value, schema );
+		
+		logger.info("entity {}", entity);
+		
+		members = (List)entity.get("members");
+		if ( members != null ) {
+			Assert.isTrue( members.size() == 1 , "has to be one length and is " + members.size());
+			Map firstEntry = (Map)members.get(0);
+			Assert.isTrue( firstEntry.get("value").equals(value) , "has to be value " + value);
+		}
+		else {
+			fail("no members found");
+		}
+		
+	}
+	
 	
 	
 	
