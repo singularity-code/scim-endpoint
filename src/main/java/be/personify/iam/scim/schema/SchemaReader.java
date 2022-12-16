@@ -125,6 +125,10 @@ public class SchemaReader {
 	}
 	
 	
+	public List<String> getSchemaIds(){
+		return List.copyOf(schemaMap.keySet());
+	}
+	
 
 	public List getSchemas() throws Exception {
 		return Constants.objectMapper.readValue(resourceLoader.getResource(schemasLocation).getInputStream(), List.class);

@@ -1,6 +1,8 @@
 package be.personify.iam.scim;
 
 
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -226,17 +228,29 @@ public class PatchTest {
 	
 	
 	
+	
+	
 	@Test
-	public void testPatchRoleWithUrn() {
+	public void testPatchEnterpriseWithUrn() {
 		Schema schema = schemaReader.getSchemaByName(Constants.RESOURCE_TYPE_USER);
 		Map<String,Object> entity = new HashMap<String,Object>();
-		entity.put("department", "dep one");
+		Map<String,Object> enterprise = new HashMap<String,Object>();
+		enterprise.put("department", "dep one");
+		entity.put("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User", enterprise);
 		
 		
 		patchUtils.patchEntity(entity, PatchOperation.replace, "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department", "dep two", schema );
 		
 		logger.info("entity {}", entity);
-		Assert.isTrue( ((String)entity.get("department")).equals("dep two") , "has to be dep two");
+		
+		Map<String,Object> ent = (Map)entity.get("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User");
+		
+		if ( ent != null ) {
+			Assert.isTrue( ((String)ent.get("department")).equals("dep two") , "has to be dep two");
+		}
+		else {
+			fail("custom enterprise objectmap not found");
+		}
 	}
 	
 	

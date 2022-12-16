@@ -174,7 +174,19 @@ public class PatchUtils {
 		//REPLACE
 		else if ( opType == PatchOperation.replace) {
 			logger.info("replace {} with {}", path, value);
-			Map pathResult = (Map)getPath(path, existingEntity, false, schema);
+			Map pathResult = null;
+			String customSchemaId = null;
+			String customAttribute = null;
+			if ( ( customSchemaId = getSchemaFormPath(path)) != null ) {
+				pathResult = new HashMap<>();
+				pathResult.put(OBJECT, (Map)existingEntity.get(customSchemaId));
+				customAttribute = path.substring(path.indexOf(customSchemaId) + customSchemaId.length() + 1, path.length());
+				logger.info("attribute {}", customAttribute);
+				pathResult.put(ATTRIBUTENAME, customAttribute );
+			}
+			else {
+				pathResult = (Map)getPath(path, existingEntity, false, schema);
+			}
 			logger.info("pathResult {}", pathResult);
 			if ( pathResult == null) {
 				String error = "can not replace non existent attribute " +  path + " " + value;
@@ -199,7 +211,12 @@ public class PatchUtils {
 				}
 			}
 			else if (entry instanceof Map) {
-				((Map) entry).putAll((Map) value);
+				if ( customSchemaId != null ) {
+					((Map) entry).put(customAttribute, value);
+				}
+				else {
+					((Map) entry).putAll((Map) value);
+				}
 			}
 			else if (entry instanceof List) {
 				List list = (List) entry;
@@ -248,6 +265,18 @@ public class PatchUtils {
 	
 	
 	
+	private String getSchemaFormPath(String path) {
+		for ( String schemaId : schemaReader.getSchemaIds()) {
+			logger.info("schema id {} path {}", schemaId, path);
+			if ( path.startsWith(schemaId)) {
+				return schemaId;
+			}
+		}
+		return null;
+	}
+
+
+
 	private void putConditionsInMap(Map m, String conditions) {
 		conditions = conditions.substring(1,conditions.length() -1);
 		logger.info("conditions {}", conditions);
@@ -265,6 +294,13 @@ public class PatchUtils {
 		}
 	}
 
+	
+	
+	public static void main(String[] args) {
+		String s = "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User";
+		String path = "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department";
+		System.out.println(path.startsWith(s));
+	}
 
 
 	/**
@@ -280,7 +316,7 @@ public class PatchUtils {
 		Object current = entity;
 		if (StringUtils.isEmpty(path)) {
 			current = entity;
-	}
+		}
 		else {
 			List<String> segs = getPathSegments(path, schema);
 			while (!segs.isEmpty()) {

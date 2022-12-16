@@ -66,7 +66,7 @@ Connection details :
 
 For spinning up a scim server from the **[downloaded binary](https://bitbucket.org/wouter29/personify-scim-server/downloads/)**: 
 
-> java -jar -Dserver.port=8080 personify-scim-server-2.0.3.RELEASE.jar
+> java -jar -Dserver.port=8080 personify-scim-server-2.0.4.RELEASE.jar
 
 When port 8080 is already taken or other problems occur, adapt the server.port via the commandline.
 
@@ -126,7 +126,7 @@ Different environment variables can be used to choose the storage implementation
 
 In your docker container specify/override environment entries you find in [application.properties](https://bitbucket.org/wouter29/personify-scim-server/src/master/src/main/resources/application.properties)
 
->docker run -p 8080:8080 -e scim.storage.implementation=... -e scim.storage.mongo.database=users personify/personify-scim-server:2.0.3.RELEASE
+>docker run -p 8080:8080 -e scim.storage.implementation=... -e scim.storage.mongo.database=users personify/personify-scim-server:2.0.4.RELEASE
 
  
 ##   
@@ -162,6 +162,10 @@ For using a OAUTH bearer token on [forgerock openidm](https://bitbucket.org/wout
 
 ##
 
+##
+
+## customization
+
 Custom schemas can also be configured simply by defining it in a file.
 
 
@@ -169,10 +173,19 @@ First step is to download the [standard file](https://bitbucket.org/wouter29/per
 
 Second step depends on your deployment but assuming you downloaded the jar.
 
->java -jar -Dserver.port=8080 personify-scim-server-2.0.3.RELEASE.jar -Dscim.schema.location=/tmp/disc_schema_custom.json
+>java -jar -Dserver.port=8080 personify-scim-server-2.0.4.RELEASE.jar -Dscim.schema.location=/tmp/disc_schema_custom.json
 
 ##
 
+For writing custom storage layers or authentication methods, [following project](https://bitbucket.org/personifybe/personify-scim-server-custom/src/master/) can be used.
+
+
+
+
+
+
+
+##
 
 A **load test** is also runnable, below the response of the loadtest running against a single personify-scim-server instance :
 
