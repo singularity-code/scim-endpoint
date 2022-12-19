@@ -17,7 +17,7 @@ items:
           app: personify-scim-server
       spec:
         containers:
-        - image: personify/personify-scim-server:2.0.4.RELEASE
+        - image: personify/personify-scim-server:2.0.5.RELEASE
           name: personify-scim-server
           imagePullPolicy: "Always"
           ports:

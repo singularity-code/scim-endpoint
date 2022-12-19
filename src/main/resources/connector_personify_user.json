@@ -1,13 +1,12 @@
 {
   "mapping" : {
-    "id" : "id",
+    "id" : "code",
     "password" : "password",
-    "username" : "userName",
-    "familyname" : "name.familyName",
-    "firstname" : "name.givenName",
-    "externalid" : "externalId",
-    "mail" : "emails",
-    "datecreated" : "meta.created"
+    "name.familyName" : "familyName",
+    "name.givenName" : "firstName" ,
+    "externalid" : "code",
+    "emails.value" : "mail",
+    "meta.created" : "datecreated"
   },
   "targetSystem" : {
     "name" : "PSNFY4SCIM",
@@ -16,7 +15,7 @@
     "supportsPagination" : true,
     "targetSystemAttributes" : [ 
     {
-      "name" : "id",
+      "name" : "code",
       "attributeType" : "STRING",
       "readable" : true,
       "writable" : true,
@@ -31,17 +30,8 @@
       "multiValued" : false,
       "primaryKey" : false
     }, 
-    {
-      "name" : "username",
-      "attributeType" : "STRING",
-      "readable" : true,
-      "writable" : true,
-      "multiValued" : false,
-      "primaryKey" : false,
-      "indexed" : true
-    }, 
      {
-      "name" : "familyname",
+      "name" : "familyName",
       "attributeType" : "STRING",
       "readable" : true,
       "writable" : true,
@@ -49,25 +39,16 @@
       "primaryKey" : false
     }, 
      {
-      "name" : "firstname",
+      "name" : "firstName",
       "attributeType" : "STRING",
       "readable" : true,
       "writable" : true,
       "multiValued" : false,
       "primaryKey" : false
-    }, 
-     {
-      "name" : "externalid",
-      "attributeType" : "STRING",
-      "readable" : true,
-      "writable" : true,
-      "multiValued" : false,
-      "primaryKey" : false,
-      "indexed" : true
     }, 
     {
       "name" : "mail",
-      "attributeType" : "MAP",
+      "attributeType" : "STRING",
       "readable" : true,
       "writable" : true,
       "multiValued" : true,
@@ -81,16 +62,16 @@
       "multiValued" : false,
       "primaryKey" : false
     }
-   ],
+   ], 
     "connectorConfiguration" : {
       "connectorType" : "PSNFYIDENTITY",
       "poolSize" : ${scim.storage.personify.poolSize},
       "configuration" : {
-           "url" : "http://localhost/valut/identity",
-           "authorizationUrl" : "http://localhost:9094/auth",
-           "clientId" : "module-vault",
-           "clientSecret" : "Azerty1234&",
-           "authenticationType" : "OAUTH"
+           "url" : "http://localhost:9091/vault/api/identity",
+           "authorizationUrl" : "http://localhost:9091/authentication/auth",
+           "identity" : "module-vault",
+           "credential" : "Azerty1234&",
+           "authentication-type" : "${scim.storage.personify.authentication-type}"
       }
     }
   }

@@ -140,7 +140,10 @@ public class Controller {
 			logger.error("constraint violation in {} ms : {}", (System.currentTimeMillis() - start), e.getMessage());
 			return showError(409, SCHEMA_VALIDATION + e.getMessage(), ScimErrorType.uniqueness);
 		}
-		catch (DataException | ConfigurationException e) {
+		catch (DataException d ){
+			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), d.getMessage());
+		}
+		catch (ConfigurationException e) {
 			return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 		}
 	}

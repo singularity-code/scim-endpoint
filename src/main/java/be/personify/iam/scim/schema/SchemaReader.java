@@ -44,6 +44,7 @@ public class SchemaReader {
 	private static final Logger logger = LogManager.getLogger(SchemaReader.class);
 
 	private Map<String, Schema> schemaMap = new HashMap<String, Schema>();
+	private List<String> schemaIds = new ArrayList<String>();
 	
 	private Map<String, SchemaResourceType> schemaResourceTypeMap = new HashMap<String, SchemaResourceType>();
 
@@ -115,7 +116,7 @@ public class SchemaReader {
 				schema = Constants.objectMapper.treeToValue(iterator.next(), Schema.class);
 				logger.info("loading schema with id [" + schema.getId() + "]");
 				schemaMap.put(schema.getId(), schema);
-				//schemaMapper.put(schema.getName(), schema.getId());
+				schemaIds.add(schema.getId());
 			}
 		} 
 		else {
@@ -126,7 +127,7 @@ public class SchemaReader {
 	
 	
 	public List<String> getSchemaIds(){
-		return List.copyOf(schemaMap.keySet());
+		return schemaIds;
 	}
 	
 
@@ -311,7 +312,7 @@ public class SchemaReader {
 	
 	public List<String> extractSchemas(Map<String, Object> user) {
 		if ( user.containsKey(Constants.KEY_SCHEMAS)) {
-			return (List<String>) user.get(Constants.KEY_SCHEMAS);
+			return (List<String>)user.get(Constants.KEY_SCHEMAS);
 		}
 		return new ArrayList<String>();
 	}
