@@ -15,7 +15,7 @@
 			}
 		],
 		"meta": {
-			"location": "${exposed.protocol}://${exposed.host}/scim/v2/ResourceTypes/User",
+			"location": "${exposed.protocol}://${exposed.host}/ResourceTypes/User",
 			"resourceType": "ResourceType"
 		}
 	},
@@ -29,7 +29,7 @@
 		"description": "Group",
 		"schema": "urn:ietf:params:scim:schemas:core:2.0:Group",
 		"meta": {
-			"location": "${exposed.protocol}://${exposed.host}/scim/v2/ResourceTypes/Group",
+			"location": "${exposed.protocol}://${exposed.host}/ResourceTypes/Group",
 			"resourceType": "ResourceType"
 		}
 	},

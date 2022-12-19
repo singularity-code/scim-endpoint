@@ -56,8 +56,8 @@ public class DiscoveryController extends Controller {
 	private List<Object> resourceTypes = null;
 	private List<Object> schemas = null;
 
-	@Autowired
-	private SchemaReader schemaReader;
+	//@Autowired
+	//private SchemaReader schemaReader;
 	
 	@Autowired
 	private ResourceLoader resourceLoader;
@@ -71,8 +71,8 @@ public class DiscoveryController extends Controller {
 	@Value("${scim.serviceProvider.location}")
 	private String serviceProviderLocation;
 	
-	@Autowired
-	private Environment env;
+	//@Autowired
+	//private Environment env;
 	
 	
 

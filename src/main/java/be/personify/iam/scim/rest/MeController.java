@@ -54,8 +54,8 @@ import be.personify.util.StringUtils;
 @RestController
 public class MeController extends Controller {
 
-	@Autowired
-	private SchemaReader schemaReader;
+	//@Autowired
+	//private SchemaReader schemaReader;
 
 	private SchemaResourceType getResourceType() {
 		return schemaReader.getResourceTypeByName(Constants.RESOURCE_TYPE_USER);

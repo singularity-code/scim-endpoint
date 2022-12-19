@@ -26,6 +26,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,11 +43,13 @@ import be.personify.iam.scim.authentication.CurrentConsumer;
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaException;
 import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.schema.SchemaResourceType;
 import be.personify.iam.scim.storage.ConfigurationException;
 import be.personify.iam.scim.storage.ConstraintViolationException;
 import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.PropertiesUtil;
 import be.personify.iam.scim.util.ScimErrorType;
 import be.personify.util.StringUtils;
 
@@ -76,8 +79,6 @@ public class BulkController extends Controller {
 	@Value("${scim.bulk.failOnErrors.default:10}")
 	private int failOnErrorsDefault;
 
-	@Autowired
-	private SchemaReader schemaReader;
 
 	@PostMapping(path = "/scim/v2/Bulk", produces = { "application/scim+json", "application/json" })
 	public ResponseEntity<Map<String, Object>> post(@RequestBody Map<String, Object> objects, HttpServletRequest request, HttpServletResponse response) {
@@ -141,10 +142,13 @@ public class BulkController extends Controller {
 
 			if (method.equalsIgnoreCase(Constants.HTTP_METHOD_POST)) {
 				try {
-					schemaReader.validate(schemaReader.getResourceTypeByName(schema.getName()), entity, true, request.getMethod());
+					SchemaResourceType resourceType = schemaReader.getResourceTypeByName(schema.getName());
+					schemaReader.validate(resourceType, entity, true, request.getMethod());
 					String id = createId(entity);
 					entity.put(Constants.ID, id);
-					String location = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request)).build().toUriString() + StringUtils.SLASH + id;
+					String fullResourceTypeEndpoint = getFullResourceTypeEndpoint(resourceType); 
+					String location = fullResourceTypeEndpoint + StringUtils.SLASH + id;
+					location = StringSubstitutor.replace(location, PropertiesUtil.getPropertiesFromEnv(env));
 					Date now = new Date();
 					createMeta(now, id, entity, schema.getName(), location);
 					storageImplementationFactory.getStorageImplementation(schema).create(id, entity, CurrentConsumer.getCurrent());
@@ -196,6 +200,12 @@ public class BulkController extends Controller {
 
 	
 	
+
+	private String getFullResourceTypeEndpoint(SchemaResourceType resourceType) {
+		return env.getProperty("exposed.protocol") + "://" + env.getProperty("exposed.host") + resourceType.getEndpoint();
+	}
+
+
 
 	private Map<String, Object> composeResultMap(String method, String bulkId, int status, Map<String,Object> errorResponse) {
 		Map<String, Object> result = new HashMap<String, Object>();

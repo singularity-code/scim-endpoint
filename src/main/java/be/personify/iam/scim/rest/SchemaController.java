@@ -50,8 +50,8 @@ import be.personify.iam.scim.util.ScimErrorType;
 @RestController
 public class SchemaController extends Controller {
 
-	@Autowired
-	private SchemaReader schemaReader;
+	//@Autowired
+	//private SchemaReader schemaReader;
 	
 
 
