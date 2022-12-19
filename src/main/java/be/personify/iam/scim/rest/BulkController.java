@@ -42,9 +42,12 @@ import be.personify.iam.scim.authentication.CurrentConsumer;
 import be.personify.iam.scim.schema.Schema;
 import be.personify.iam.scim.schema.SchemaException;
 import be.personify.iam.scim.schema.SchemaReader;
+import be.personify.iam.scim.storage.ConfigurationException;
 import be.personify.iam.scim.storage.ConstraintViolationException;
+import be.personify.iam.scim.storage.DataException;
 import be.personify.iam.scim.storage.StorageImplementationFactory;
 import be.personify.iam.scim.util.Constants;
+import be.personify.iam.scim.util.ScimErrorType;
 import be.personify.util.StringUtils;
 
 /**
@@ -69,6 +72,9 @@ public class BulkController extends Controller {
 
 	@Value("${scim.bulk.maxOperations:1000}")
 	private int maxOperations;
+	
+	@Value("${scim.bulk.failOnErrors.default:10}")
+	private int failOnErrorsDefault;
 
 	@Autowired
 	private SchemaReader schemaReader;
@@ -94,6 +100,14 @@ public class BulkController extends Controller {
 	protected ResponseEntity<Map<String, Object>> postBulk(Map<String, Object> bulk, HttpServletRequest request, HttpServletResponse response) {
 
 		long start = System.currentTimeMillis();
+		
+		Integer failOnErrors = failOnErrorsDefault;
+		if ( bulk.get(Constants.FAIL_ON_ERRORS) != null ) {
+			failOnErrors = (Integer) bulk.get(Constants.FAIL_ON_ERRORS);
+		}
+		Integer currentErrors = 0;
+		
+		
 		List<Map<String, Object>> operations = (List<Map<String, Object>>) bulk.get(Constants.KEY_OPERATIONS);
 
 		if (operations.size() > maxOperations) {
@@ -109,6 +123,11 @@ public class BulkController extends Controller {
 		Map<String, Object> entity = null;
 
 		for (Map<String, Object> operation : operations) {
+			
+			if ( currentErrors >= failOnErrors ) {
+				break;
+			}
+			
 			entity = (Map<String, Object>) operation.get(Constants.KEY_DATA);
 			List<String> schemas = schemaReader.extractSchemas(entity);
 			Schema schema = schemaReader.getSchema(schemas.get(0));
@@ -129,17 +148,34 @@ public class BulkController extends Controller {
 					Date now = new Date();
 					createMeta(now, id, entity, schema.getName(), location);
 					storageImplementationFactory.getStorageImplementation(schema).create(id, entity, CurrentConsumer.getCurrent());
-					operationResult = composeResultMap(method, bulkId, HttpStatus.CREATED);
+					operationResult = composeResultMap(method, bulkId, HttpStatus.CREATED.value(), null);
 					operationResult.put(Constants.KEY_LOCATION, location);
 					operationResult.put(Constants.KEY_VERSION, createVersion(now));
 				}
+				catch (DataException de) {
+					//logger.error("error ", de);
+					currentErrors++;
+					int errorStatus = HttpStatus.INTERNAL_SERVER_ERROR.value();
+					Map<String,Object> error = composeError(errorStatus, de.getMessage(), ScimErrorType.invalidValue);
+					operationResult = composeResultMap(method, bulkId,errorStatus, error );
+				} 
 				catch (SchemaException se) {
-					logger.error("error validating", se);
-					operationResult = composeResultMap(method, bulkId, HttpStatus.BAD_REQUEST);
+					//logger.error("error validating", se);
+					currentErrors++;
+					int errorStatus = HttpStatus.BAD_REQUEST.value();
+					Map<String,Object> error = composeError(errorStatus, se.getMessage(), ScimErrorType.invalidValue);
+					operationResult = composeResultMap(method, bulkId, errorStatus, error);
 				} 
 				catch (ConstraintViolationException e) {
-					logger.error("constraint error", e);
-					operationResult = composeResultMap(method, bulkId, HttpStatus.BAD_REQUEST);
+					//logger.error("constraint error", e);
+					currentErrors++;
+					int errorStatus = HttpStatus.BAD_REQUEST.value();
+					Map<String,Object> error = composeError(errorStatus, e.getMessage(), ScimErrorType.invalidValue);
+					operationResult = composeResultMap(method, bulkId, errorStatus, error );
+				}
+				catch (ConfigurationException e) {
+					logger.error("configuration error", e);
+					return showError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null);
 				}
 			}
 
@@ -161,13 +197,21 @@ public class BulkController extends Controller {
 	
 	
 
-	private Map<String, Object> composeResultMap(String method, String bulkId, HttpStatus status) {
+	private Map<String, Object> composeResultMap(String method, String bulkId, int status, Map<String,Object> errorResponse) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		result.put(Constants.KEY_METHOD, method);
 		result.put(Constants.KEY_BULKID, bulkId);
-		Map<String, String> statusMap = new HashMap<String, String>();
-		statusMap.put(Constants.KEY_CODE, StringUtils.EMPTY_STRING + status.value());
-		result.put(Constants.KEY_STATUS, statusMap);
+		result.put(Constants.KEY_STATUS, status);
+		if ( errorResponse != null) {
+			result.put(Constants.KEY_RESPONSE, errorResponse);
+		}
 		return result;
 	}
+	
+	
+	
+	
+	
 }
+
+

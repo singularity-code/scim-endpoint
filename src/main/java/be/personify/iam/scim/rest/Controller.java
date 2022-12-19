@@ -533,6 +533,13 @@ public class Controller {
 	}
 
 	protected ResponseEntity<Map<String, Object>> showError(int status, String detail, ScimErrorType scimType) {
+		Map<String, Object> error = composeError(status, detail, scimType);
+		return new ResponseEntity<Map<String, Object>>(error, HttpStatus.valueOf(status));
+	}
+
+
+
+	protected Map<String, Object> composeError(int status, String detail, ScimErrorType scimType) {
 		Map<String, Object> error = new HashMap<>();
 		error.put(Constants.KEY_SCHEMAS, Constants.SCHEMA_ERROR);
 		if (scimType != null) {
@@ -540,7 +547,7 @@ public class Controller {
 		}
 		error.put(Constants.KEY_DETAIL, detail);
 		error.put(Constants.KEY_STATUS, StringUtils.EMPTY_STRING + status);
-		return new ResponseEntity<Map<String, Object>>(error, HttpStatus.valueOf(status));
+		return error;
 	}
 
 	

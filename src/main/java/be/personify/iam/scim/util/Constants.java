@@ -52,6 +52,7 @@ public class Constants {
 	public static final String KEY_METHOD = "method";
 	public static final String KEY_BULKID = "bulkId";
 	public static final String KEY_OPERATIONS = "Operations";
+	public static final String FAIL_ON_ERRORS = "failOnErrors";
 	public static final String KEY_OP = "op";
 	public static final String KEY_PATH = "path";
 	public static final String KEY_DATA = "data";
@@ -60,6 +61,7 @@ public class Constants {
 	public static final String KEY_GROUPS = "groups";
 	public static final String KEY_STATUS = "status";
 	public static final String KEY_DETAIL = "detail";
+	public static final String KEY_RESPONSE = "response";
 	public static final String KEY_CODE = "code";
 	public static final String KEY_SCIMTYPE = "scimType";
 	

@@ -20,6 +20,7 @@ package be.personify.iam.scim.storage.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -223,7 +224,15 @@ public abstract class ConnectorStorage implements Storage {
 			}
 		}
 		else {
-			fileContent = new String(IOUtils.readFileAsBytes(PersonifyConnectorStorage.class.getResourceAsStream("/connector_" + connectorType + ".json")));
+			String file = "/connector_" + connectorType + ".json";
+			InputStream is = null;
+			try {
+				is = PersonifyConnectorStorage.class.getResourceAsStream(file);
+				fileContent = new String(IOUtils.readFileAsBytes(is));
+			}
+			catch( IOException e) {
+				throw new IOException("the file " + file + " can not be found for type " + type);
+			}
 		}
 
 		fileContent = propertyFactory.resolvePlaceHolder(fileContent);
