@@ -259,7 +259,7 @@ public class MemoryStorage implements Storage {
 		for (SearchCriterium criterium : searchCriteria.getCriteria()) {
 			Map m = uniqueConstraints.get(criterium.getKey());
 			if (m != null) {
-				String id = (String) m.get(criterium.getValue());
+				String id = (String) m.get(criterium.getValue().toString().toLowerCase());
 				// logger.info("found id in unique {} for value {}", id, criterium.getValue());
 				if (id != null && !criteriaFoundInConstraints.contains(id)) {
 					// logger.info("putting it in map {}", id);

@@ -364,6 +364,11 @@ public class Controller {
 
 		try {
 			SearchCriteria searchCriteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
+			for (SearchCriterium criterium : searchCriteria.getCriteria()) {
+				criterium.setValue(criterium.getValue().toString().toLowerCase());
+			}
+
+
 			Storage storage = storageImplementationFactory.getStorageImplementation(schema);
 
 			List<String> includeList = getListFromString(attributes);
