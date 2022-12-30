@@ -253,7 +253,7 @@ public class Controller {
 
 			}
 			Map <String, Object> extensions = (Map <String, Object>) existingEntity.get("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User");
-			if (!extensions.containsKey("manager")) {
+			if (extensions != null && !extensions.containsKey("manager")) {
 				Map<String, Object> manager = new HashMap<>();
 				manager.put("value", "");
 				extensions.put("manager", manager);
