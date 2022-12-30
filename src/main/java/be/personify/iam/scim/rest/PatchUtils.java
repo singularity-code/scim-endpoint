@@ -307,11 +307,18 @@ public class PatchUtils {
 			String[] keyValue = conditions.split(EQ);
 			if ( keyValue.length == 2 ) {
 				String replaced = keyValue[1].replaceAll("\"", StringUtils.EMPTY_STRING);
-				if ( replaced.equalsIgnoreCase(TRUE) || replaced.equalsIgnoreCase(FALSE) ) {
+				if (replaced.equalsIgnoreCase(TRUE) || replaced.equalsIgnoreCase(FALSE) ) {
 					m.put(keyValue[0], Boolean.valueOf(replaced));
 				}
 				else {
 					m.put(keyValue[0], replaced);
+				}
+				// Add primary for email and address if missing
+				if (replaced.equalsIgnoreCase("work")) {
+					String primaryValue = (String) m.get("primary");
+					if (StringUtils.isEmpty(primaryValue)) {
+						m.put("primary", false);
+					}
 				}
 			}
 		}
