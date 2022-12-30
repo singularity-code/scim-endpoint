@@ -91,11 +91,20 @@ public class PatchUtils {
 
 									Map<String, Object> targetRole = null;
 									for (Map<String, Object> role : existRoles) {
-										String primaryValue = (String) role.get("primary");
-										if (primaryValue != null && primaryValue.equalsIgnoreCase("True")) {
-											targetRole = role;
-											break;
+										Object primaryValue = role.get("primary");
+										if (primaryValue != null && primaryValue instanceof String) {
+											String strPrimaryValue = (String) primaryValue;
+											if (strPrimaryValue.equalsIgnoreCase("True")) {
+												targetRole = role;
+												break;
+											}
+										} else {
+											if (Boolean.valueOf((Boolean) role.get("primary")) == true) {
+												targetRole = role;
+												break;
+											}
 										}
+
 									}
 									if (targetRole == null) {
 										putConditionsInMap( m, conditions);
