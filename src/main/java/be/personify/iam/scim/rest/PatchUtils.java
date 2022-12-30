@@ -307,7 +307,7 @@ public class PatchUtils {
 			String[] keyValue = conditions.split(EQ);
 			if ( keyValue.length == 2 ) {
 				String replaced = keyValue[1].replaceAll("\"", StringUtils.EMPTY_STRING);
-				if (replaced.equalsIgnoreCase(TRUE) || replaced.equalsIgnoreCase(FALSE) ) {
+				if (!(replaced instanceof String) && (replaced.equalsIgnoreCase(TRUE) || replaced.equalsIgnoreCase(FALSE))) {
 					m.put(keyValue[0], Boolean.valueOf(replaced));
 				}
 				else {
