@@ -252,9 +252,15 @@ public class Controller {
 				patchUtils.patchEntity( existingEntity, opType, path, value, mainSchema);
 
 			}
-
+			Map <String, Object> extensions = (Map <String, Object>) existingEntity.get("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User");
+			if (!extensions.containsKey("manager")) {
+				Map<String, Object> manager = new HashMap<>();
+				manager.put("value", "");
+				extensions.put("manager", manager);
+			}
 			createMeta(new Date(), id, existingEntity, mainSchema.getName(), location);
 			storageImplementationFactory.getStorageImplementation(mainSchema).update(id, existingEntity, CurrentConsumer.getCurrent());
+
 
 			logger.info("resource of type {} with id {} patched in {} ms", mainSchema.getName(), id,(System.currentTimeMillis() - start));
 			return new ResponseEntity<>( filterAttributes(mainSchema, existingEntity, getListFromString(attributes), excludedAttributes), HttpStatus.OK);
