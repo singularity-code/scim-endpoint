@@ -85,9 +85,30 @@ public class PatchUtils {
 						if (!alreadyContains ) {
 							String conditions =  (String)pathResult.get("conditions");
 							if (!StringUtils.isEmpty(conditions)) {
-								putConditionsInMap( m, conditions);
+								// handle roles with primary condition
+								if (path.contains("roles")) {
+									List<Map<String, Object>> existRoles = (List<Map<String, Object>>) existingEntity.get("roles");
+
+									Map<String, Object> targetRole = null;
+									for (Map<String, Object> role : existRoles) {
+										String primaryValue = (String) role.get("primary");
+										if (primaryValue != null && primaryValue.equalsIgnoreCase("True")) {
+											targetRole = role;
+											break;
+										}
+									}
+									if (targetRole == null) {
+										putConditionsInMap( m, conditions);
+										eList.add(m);
+									} else {
+										targetRole.put(attrname, value);
+										putConditionsInMap(targetRole, conditions);
+									}
+								} else {
+									putConditionsInMap( m, conditions);
+									eList.add(m);
+								}
 							}
-							eList.add(m);
 						}
 						logger.info("eList {}", eList);
 					}
