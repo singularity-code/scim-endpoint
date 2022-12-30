@@ -291,7 +291,7 @@ public class PatchUtils {
 	private String getSchemaFormPath(String path) {
 		for ( String schemaId : schemaReader.getSchemaIds()) {
 			logger.info("schema id {} path {}", schemaId, path);
-			if ( path.startsWith(schemaId)) {
+			if (path != null && path.startsWith(schemaId)) {
 				return schemaId;
 			}
 		}
