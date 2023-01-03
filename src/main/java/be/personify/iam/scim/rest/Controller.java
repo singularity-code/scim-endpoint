@@ -575,6 +575,28 @@ public class Controller {
 		Map<String, Object> copy = new HashMap<>();
 		copy.putAll(entity);
 		List<String> excludeList = getListFromString(excludedAttributes);
+		if (excludeList == null) {
+			excludeList = new ArrayList<>();
+		}
+		excludeList.add("emails");
+		excludeList.add("externalId");
+		excludeList.add("groups");
+		excludeList.add("addresses");
+		excludeList.add("preferredLanguage");
+		excludeList.add("displayName");
+		excludeList.add("timezone");
+		excludeList.add("roles");
+		excludeList.add("ims");
+		excludeList.add("nickName");
+		excludeList.add("userType");
+		excludeList.add("phoneNumbers");
+		excludeList.add("name.honorificPrefix");
+		excludeList.add("name.honorificSuffix");
+		excludeList.add("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:division");
+		excludeList.add("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:organization");
+		excludeList.add("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:costCenter");
+		excludeList.add("urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department");
+		excludeList.add("locale");
 		for (SchemaAttribute attribute : schema.getAttributes()) {
 			if (attribute.getReturned().equalsIgnoreCase(Constants.RETURNED_NEVER)) {
 				copy.remove(attribute.getName());

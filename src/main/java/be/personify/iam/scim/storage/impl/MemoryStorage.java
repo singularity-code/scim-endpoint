@@ -66,37 +66,6 @@ public class MemoryStorage implements Storage {
 	public Map<String, Object> get(String id, Consumer consumer) {
 		Map<String, Object> object = storage.get(id);
 		if ( object != null ) {
-
-			List<String> imsListKeys = new ArrayList<>();
-			imsListKeys.add("aim");
-			imsListKeys.add("gtalk");
-			imsListKeys.add("icq");
-			imsListKeys.add("xmpp");
-			imsListKeys.add("msn");
-			imsListKeys.add("skype");
-			imsListKeys.add("qq");
-			imsListKeys.add("yahoo");
-
-			ArrayList<Map<String, Object>> ims = new ArrayList<>();
-
-			for (String key : imsListKeys) {
-				Map<String, Object> imTemp = new HashMap<>();
-				imTemp.put("type", key);
-				imTemp.put("value", "");
-				ims.add(imTemp);
-			}
-			object.put("ims", ims);
-
-			ArrayList<Map<String, Object>> roles = new ArrayList<>();
-			Map<String, Object> role = new HashMap<>();
-			role.put("primary", "True");
-			role.put("country", "");
-			role.put("display", "");
-			role.put("type", "");
-			roles.add(role);
-
-			object.put("roles", roles);
-
 			if ( StringUtils.isEmpty(consumer.getTenant())) {
 				return object;
 			}
