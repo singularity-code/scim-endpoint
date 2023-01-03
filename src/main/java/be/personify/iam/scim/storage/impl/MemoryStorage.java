@@ -191,6 +191,10 @@ public class MemoryStorage implements Storage {
 		
 		List<Map> sublist = result.subList(newStart, newEnd);
 
+		for (Map obj : sublist) {
+			System.out.println("FOUND: " + obj.toString());
+		}
+
 		return sublist;
 	}
 
