@@ -388,6 +388,8 @@ public class Controller {
 			}
 
 			List<Map> dataFetched = storage.search(searchCriteria, startIndex, count, sortBy, sortOrder, includeList, CurrentConsumer.getCurrent());
+			System.out.println("dataFetched size: " + dataFetched.size());
+			System.out.println("dataFetched: " + dataFetched.toString());
 			List<Map<String, Object>> data = new ArrayList<>();
 			
 			if (dataFetched != null) {
