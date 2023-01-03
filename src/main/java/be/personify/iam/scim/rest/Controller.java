@@ -395,6 +395,8 @@ public class Controller {
 					if ( haveToIncludeGroups(schema, includeList, excludedAttributes, Constants.SEARCH)) {
 						includeGroups( (String)entity.get("id"), entity );
 					}
+					System.out.println("--entity: " + entity.toString());
+					System.out.println("--filterAttributes: " + filterAttributes(schema, entity, includeList, excludedAttributes).toString());
 					data.add(filterAttributes(schema, entity, includeList, excludedAttributes));
 				}
 
