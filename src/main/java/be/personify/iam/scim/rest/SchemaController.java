@@ -17,6 +17,8 @@
 */
 package be.personify.iam.scim.rest;
 
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,6 +74,11 @@ public class SchemaController extends Controller {
 			@RequestParam(required = false, name = "excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response) {
 		try {
+			String url = request.getRequestURL().toString();
+			String queryString = request.getQueryString();
+			System.out.println("url: " + url);
+			System.out.println("queryString: " + queryString);
+
 			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint);
 			Schema schema = resourceType.getSchemaObject();
 			if (schema != null) { 
@@ -113,6 +120,11 @@ public class SchemaController extends Controller {
 			@RequestParam(required = false, name = "excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response) {
 		try {
+			String url = request.getRequestURL().toString();
+			String queryString = request.getQueryString();
+			System.out.println("url: " + url);
+			System.out.println("queryString: " + queryString);
+
 			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint); 
 			Schema schema = resourceType.getSchemaObject();
 			if (schema != null) {
@@ -154,6 +166,12 @@ public class SchemaController extends Controller {
 			@RequestParam(required = false, name = "excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response) {
 		try {
+			String url = request.getRequestURL().toString();
+			String queryString = request.getQueryString();
+			System.out.println("url: " + url);
+			System.out.println("queryString: " + queryString);
+			System.out.println("patch entity: " + entity.toString());
+
 			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint); 
 			Schema schema = resourceType.getSchemaObject();
 			if (schema != null) {
@@ -187,6 +205,11 @@ public class SchemaController extends Controller {
 			@RequestParam(required = false, name = "excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response) {
 		try {
+			String url = request.getRequestURL().toString();
+			String queryString = request.getQueryString();
+			System.out.println("url: " + url);
+			System.out.println("queryString: " + queryString);
+
 			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint); 
 			Schema schema = resourceType.getSchemaObject();
 			if (schema != null) {
@@ -225,6 +248,11 @@ public class SchemaController extends Controller {
 			@RequestParam(required = false, name = "excludedAttributes") String excludedAttributes,
 			HttpServletRequest request, HttpServletResponse response) {
 		try {
+			String url = request.getRequestURL().toString();
+			String queryString = request.getQueryString();
+			System.out.println("url: " + url);
+			System.out.println("queryString: " + queryString);
+
 			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint); 
 			Schema schema = resourceType.getSchemaObject();
 			if (schema != null) {
@@ -247,7 +275,7 @@ public class SchemaController extends Controller {
 	@DeleteMapping(path = "/scim/v2/{endpoint}/{id}")
 	public ResponseEntity<?> delete(@PathVariable String endpoint, @PathVariable String id) {
 		try {
-			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint); 
+			SchemaResourceType resourceType = schemaReader.getSchemaResourceTypeByEndpoint(endpoint);
 			Schema schema = resourceType.getSchemaObject();
 			if (schema != null) { 
 				return delete(id, schema);
