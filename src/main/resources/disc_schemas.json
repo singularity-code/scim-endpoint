@@ -214,6 +214,17 @@
         "uniqueness" : "none"
       },
       {
+        "name" : "email",
+        "type" : "string",
+        "multiValued" : false,
+        "description" : "Email addresses for the user.",
+        "required" : false,
+        "caseExact" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+      {
         "name" : "emails",
         "type" : "complex",
         "multiValued" : true,
