@@ -582,7 +582,7 @@
             "description" : "The identifier of the User's group.",
             "required" : false,
             "caseExact" : false,
-            "mutability" : "readOnly",
+            "mutability" : "readWrite",
             "returned" : "default",
             "uniqueness" : "none"
           },
@@ -597,7 +597,7 @@
             "description" : "The URI of the corresponding 'Group' resource to which the user belongs.",
             "required" : false,
             "caseExact" : false,
-            "mutability" : "readOnly",
+            "mutability" : "readWrite",
             "returned" : "default",
             "uniqueness" : "none"
           },
@@ -608,7 +608,7 @@
             "description" : "A human-readable name, primarily used for display purposes.  READ-ONLY.",
             "required" : false,
             "caseExact" : false,
-            "mutability" : "readOnly",
+            "mutability" : "readWrite",
             "returned" : "default",
             "uniqueness" : "none"
           },
@@ -623,12 +623,12 @@
               "direct",
               "indirect"
             ],
-            "mutability" : "readOnly",
+            "mutability" : "readWrite",
             "returned" : "default",
             "uniqueness" : "none"
           }
         ],
-        "mutability" : "readOnly",
+        "mutability" : "readWrite",
         "returned" : "default"
       },
       {
