@@ -118,7 +118,8 @@ public class Controller {
 	protected ResponseEntity<Map<String, Object>> post(Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, SchemaResourceType resourceType, String attributes, String excludedAttributes) {
 		long start = System.currentTimeMillis();
 		try {
-			
+			System.out.println("POST: " + request.getRequestURI());
+			System.out.println("POST: " + entity.toString());
 			Schema schema = resourceType.getSchemaObject();
 			// validate
 			schemaReader.validate(resourceType, entity, true, request.getMethod());
@@ -158,6 +159,9 @@ public class Controller {
 	protected ResponseEntity<Map<String, Object>> put(String id, Map<String, Object> entity, HttpServletRequest request, HttpServletResponse response, SchemaResourceType resourceType, String attributes, String excludedAttributes) {
 		long start = System.currentTimeMillis();
 		try {
+			System.out.println("put: " + request.getRequestURI());
+			System.out.println("put: " + id);
+			System.out.println("put: " + entity.toString());
 			Schema mainSchema = resourceType.getSchemaObject();
 			// validate
 			logger.debug("schema {} ", mainSchema);
@@ -207,6 +211,8 @@ public class Controller {
 
 		long start = System.currentTimeMillis();
 		try {
+			System.out.println("patch: " + request.getRequestURI());
+			System.out.println("patch: " + id);
 			Schema mainSchema = resourceType.getSchemaObject();
 			
 			// validate
@@ -287,6 +293,10 @@ public class Controller {
 	protected ResponseEntity<Map<String, Object>> get(String id, HttpServletRequest request, HttpServletResponse response, Schema schema, String attributes, String excludedAttributes) {
 		long start = System.currentTimeMillis();
 		try {
+			System.out.println("patch: " + request.getRequestURI());
+			System.out.println("patch: " + request.getParameterNames());
+			System.out.println("patch: " + id);
+
 			Map<String, Object> object = storageImplementationFactory.getStorageImplementation(schema).get(id, CurrentConsumer.getCurrent());
 
 			ResponseEntity<Map<String, Object>> result = null;
@@ -369,6 +379,7 @@ public class Controller {
 		long start = System.currentTimeMillis();
 
 		try {
+			System.out.println("SEARCH: " + filter);
 			SearchCriteria searchCriteria = searchCriteriaUtil.composeSearchCriteriaFromSCIMFilter(filter);
 			for (SearchCriterium criterium : searchCriteria.getCriteria()) {
 				criterium.setValue(criterium.getValue().toString().toLowerCase());
